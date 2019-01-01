@@ -57,7 +57,7 @@ sudo apt-get update
 sudo apt-get install cryptsetup lvm2 busybox dropbear curl
 
 # Append /boot/config.txt
-cat << EOF >> "/boot/config.txt
+cat << EOF >> /boot/config.txt
 initramfs initramfs.gz followkernel
 EOF
 
