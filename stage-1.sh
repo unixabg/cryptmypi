@@ -61,8 +61,8 @@ cat << EOF >> /boot/config.txt
 initramfs initramfs.gz followkernel
 EOF
 
-# Update /boot/cmdline to boot crypt
-sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt cryptdevice=/dev/mmcblk0p2:crypt#g' "/boot/cmdline"
+# Update /boot/cmdline.txt to boot crypt
+sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt cryptdevice=/dev/mmcblk0p2:crypt#g' "/boot/cmdline.txt"
 
 # Update /etc/fstab to mount crypt
 sed -i 's#/dev/mmcblk0p2#/dev/mapper/crypt#g' "/etc/fstab"
