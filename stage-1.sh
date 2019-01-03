@@ -7,8 +7,6 @@
 ## This is free software, and you are welcome to redistribute it
 ## under certain conditions; see COPYING for details.
 
-set -e
-
 # Start with pristine install of kali for raspberry pi
 
 # Dependencies
@@ -102,12 +100,17 @@ _ID_RSA=$(curl $_ID_RSA_URL)
 #echo ${_ID_RSA}
 
 # Create /etc/dropbear-initramfs/authorized_keys
-cat << EOF > /etc/dropbear-initramfs/authorized_keys
-command="export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'; /scripts/local-top/cryptroot && kill -9 `ps | grep -m 1 'cryptroot' | cut -d ' ' -f 3` && exit" ${_ID_RSA}
+cat << "EOF" > /etc/dropbear-initramfs/authorized_keys.tmp
+command="export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'; /scripts/local-top/cryptroot && kill -9 `ps | grep -m 1 'cryptroot' | cut -d ' ' -f 3` && exit"
 EOF
 
-# Update dropbear for some sleep in initramfs then rebuild initramfs
-sed -i 's/run_dropbear &/sleep 5\nrun_dropbear &/g' "/usr/share/initramfs-tools/scripts/init-premount/dropbear"
+cat << EOF >> /etc/dropbear-initramfs/authorized_keys.tmp
+ ${_ID_RSA}
+EOF
+
+# Drop all line feeds and clean tmp file
+tr -d '\n' < /etc/dropbear-initramfs/authorized_keys.tmp > /etc/dropbear-initramfs/authorized_keys
+rm -f /etc/dropbear-initramfs/authorized_keys.tmp
 
 # Create new initramfs and check inclusion
 mkinitramfs -o /boot/initramfs.gz
