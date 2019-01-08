@@ -51,8 +51,8 @@ esac
 
 
 # Install luks and dropbear dependencies
-sudo apt-get update
-sudo apt-get install cryptsetup lvm2 busybox dropbear curl
+apt-get update
+apt-get install cryptsetup lvm2 busybox dropbear curl
 
 # Append /boot/config.txt
 cat << EOF >> /boot/config.txt
@@ -71,11 +71,10 @@ cat << EOF > /etc/crypttab
 crypt /dev/mmcblk0p2 none luks
 EOF
 
-# Create fake luks filesystem to include cryptsetup into initramsfs
-dd if=/dev/zero of=/tmp/fakeroot.img bs=1M count=20
-cryptsetup luksFormat /tmp/fakeroot.img
-cryptsetup luksOpen /tmp/fakeroot.img crypt
-mkfs.ext4 /dev/mapper/crypt
+# Enable cryptsetup when building initramfs
+cat << EOF >> /etc/cryptsetup-initramfs/conf-hook
+CRYPTSETUP=y
+EOF
 
 # Download the public rsa key for dropbear inclusion
 cat << EOF
@@ -100,22 +99,27 @@ _ID_RSA=$(curl $_ID_RSA_URL)
 #echo ${_ID_RSA}
 
 # Create /etc/dropbear-initramfs/authorized_keys
-cat << "EOF" > /etc/dropbear-initramfs/authorized_keys.tmp
-command="export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'; /scripts/local-top/cryptroot && kill -9 `ps | grep -m 1 'cryptroot' | cut -d ' ' -f 3` && exit"
+cat << "EOF" > /etc/dropbear-initramfs/authorized_keys
+command="/scripts/local-top/cryptroot && kill -9 `ps | grep -m 1 'cryptroot' | cut -d ' ' -f 3` && exit"
+${_ID_RSA}
 EOF
 
-cat << EOF >> /etc/dropbear-initramfs/authorized_keys.tmp
- ${_ID_RSA}
-EOF
+# Update dropbear for some sleep in initramfs
+sed -i 's/run_dropbear &/sleep 10\nrun_dropbear &/g' "/usr/share/initramfs-tools/scripts/init-premount/dropbear"
 
-# Drop all line feeds and clean tmp file
-tr -d '\n' < /etc/dropbear-initramfs/authorized_keys.tmp > /etc/dropbear-initramfs/authorized_keys
-rm -f /etc/dropbear-initramfs/authorized_keys.tmp
+# Create fake luks filesystem to include crypt into initramsfs
+dd if=/dev/zero of=/tmp/fakeroot.img bs=1M count=20
+cryptsetup luksFormat /tmp/fakeroot.img
+cryptsetup luksOpen /tmp/fakeroot.img crypt
+mkfs.ext4 /dev/mapper/crypt
 
 # Create new initramfs and check inclusion
 mkinitramfs -o /boot/initramfs.gz
 lsinitramfs /boot/initramfs.gz | grep cryptsetup
 lsinitramfs /boot/initramfs.gz | grep authorized
+
+# Clean apt
+apt clean
 
 # Ready for shutdown and copy of sdcard from another device
 cat << EOF
@@ -123,6 +127,6 @@ We are ready to shutdown the raspberry pi and FIXME perform stage-2
 on the sd card from a linux PC.
 EOF
 
-read -p "Press enter to continue"
+read -p "Press enter to halt the system."
 
 halt
