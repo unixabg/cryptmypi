@@ -101,6 +101,10 @@ _ID_RSA=$(curl $_ID_RSA_URL)
 # Create /etc/dropbear-initramfs/authorized_keys
 cat << "EOF" > /etc/dropbear-initramfs/authorized_keys
 command="/scripts/local-top/cryptroot && kill -9 `ps | grep -m 1 'cryptroot' | cut -d ' ' -f 3` && exit"
+EOF
+
+# Add public key to /etc/dropbear-initramfs/authorized_keys
+cat << EOF >> /etc/dropbear-initramfs/authorized_keys
 ${_ID_RSA}
 EOF
 
