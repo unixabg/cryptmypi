@@ -20,14 +20,15 @@ fi
 cat << EOF
 
 ##################### W A R N I N G #####################
-	This is stage-1 script of cryptmypi.
-#########################################################
+	This is stage-3 script of cryptmypi.
+** stage-1 and stage-2 required before running stage-3 **
+##################### W A R N I N G #####################
+
 This process was designed to be ran with kali on a
 raspberry pi. This process will alter the local
 installation. To undo these changes you will need to
 reimage the sdcard.
 
-##################### W A R N I N G #####################
 You are about to do something potentially harmful to
 your installation.
 
@@ -50,30 +51,44 @@ case "${_CONTINUE}" in
 esac
 
 
-# Install luks
+# Install luks and dropbear dependencies
 apt-get update
-apt-get install cryptsetup lvm2 busybox
+apt-get install dropbear curl
 
-# Append /boot/config.txt
-cat << EOF >> /boot/config.txt
-initramfs initramfs.gz followkernel
+# Download the public rsa key for dropbear inclusion
+cat << EOF
+######################################################
+	cryptmypi - stage-3
+######################################################
+stage-1 script is asking for the public rsa key
+for inclusion with dropbear ssh authorizad_key.
+Please paste the url to a copy of client id_rsa.pub
+file and press enter. Hint: make sure you are getting
+plain text.
 EOF
 
-# Update /boot/cmdline.txt to boot crypt
-sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt cryptdevice=/dev/mmcblk0p2:crypt#g' "/boot/cmdline.txt"
+# Ask for _ID_RSA_URL
+echo -n ": "
+read _READ
 
-# Update /etc/fstab to mount crypt
-sed -i 's#/dev/mmcblk0p2#/dev/mapper/crypt#g' "/etc/fstab"
+_ID_RSA_URL=${_READ:-${_ID_RSA_URL}}
+#echo ${_ID_RSA_URL}
 
-# Create /etc/crypttab
-cat << EOF > /etc/crypttab
-crypt /dev/mmcblk0p2 none luks
+_ID_RSA=$(curl $_ID_RSA_URL)
+#echo ${_ID_RSA}
+
+# Create /etc/dropbear-initramfs/authorized_keys
+cat << "EOF" > /etc/dropbear-initramfs/authorized_keys
+command="/scripts/local-top/cryptroot && kill -9 `ps | grep -m 1 'cryptroot' | cut -d ' ' -f 3` && exit"
 EOF
 
-# Enable cryptsetup when building initramfs
-cat << EOF >> /etc/cryptsetup-initramfs/conf-hook
-CRYPTSETUP=y
+# Add public key to /etc/dropbear-initramfs/authorized_keys
+cat << EOF >> /etc/dropbear-initramfs/authorized_keys
+${_ID_RSA}
 EOF
+
+# Update dropbear for some sleep in initramfs
+sed -i 's/run_dropbear &/sleep 5\nrun_dropbear &/g' "/usr/share/initramfs-tools/scripts/init-premount/dropbear"
 
 # Create fake luks filesystem to include crypt into initramsfs
 dd if=/dev/zero of=/tmp/fakeroot.img bs=1M count=20
@@ -91,10 +106,10 @@ apt clean
 
 # Ready for shutdown and copy of sdcard from another device
 cat << EOF
-We are ready to shutdown the raspberry pi and FIXME perform stage-2
-on the sd card from a linux PC.
+We are ready to reboot the raspberry pi and ssh to unlock
+the sd card for booting.
 EOF
 
-read -p "Press enter to halt the system."
+read -p "Press enter to reboot the system."
 
-halt
+reboot
