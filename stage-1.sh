@@ -84,7 +84,6 @@ mkfs.ext4 /dev/mapper/crypt
 # Create new initramfs and check inclusion
 mkinitramfs -o /boot/initramfs.gz
 lsinitramfs /boot/initramfs.gz | grep cryptsetup
-lsinitramfs /boot/initramfs.gz | grep authorized
 
 # Clean apt
 apt clean
