@@ -60,11 +60,12 @@ cat << EOF
 ######################################################
 	cryptmypi - stage-3
 ######################################################
-stage-1 script is asking for the public rsa key
-for inclusion with dropbear ssh authorizad_key.
-Please paste the url to a copy of client id_rsa.pub
-file and press enter. Hint: make sure you are getting
-plain text.
+The script is asking for the public rsa key for
+inclusion with dropbear ssh authorizad_key. Please
+paste the url to a copy of client id_rsa.pub file you
+want included and press enter.
+
+**   Hint: make sure you are getting plain text.   **
 EOF
 
 # Ask for _ID_RSA_URL
