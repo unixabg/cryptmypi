@@ -110,6 +110,9 @@ chmod 755 /usr/share/initramfs-tools/hooks/zz-crypttab
 mkinitramfs -o /boot/initramfs.gz
 lsinitramfs /boot/initramfs.gz | grep cryptsetup
 
+# Drop /usr/share/initramfs-tools/hooks/zz-crypttab since only needed for inital stage
+rm -f /usr/share/initramfs-tools/hooks/zz-crypttab
+
 # Clean apt
 apt clean
 
