@@ -90,12 +90,6 @@ EOF
 # Update dropbear for some sleep in initramfs
 sed -i 's/run_dropbear &/sleep 5\nrun_dropbear &/g' "/usr/share/initramfs-tools/scripts/init-premount/dropbear"
 
-# Create fake luks filesystem to include crypt into initramsfs
-dd if=/dev/zero of=/tmp/fakeroot.img bs=1M count=20
-cryptsetup luksFormat /tmp/fakeroot.img
-cryptsetup luksOpen /tmp/fakeroot.img crypt
-mkfs.ext4 /dev/mapper/crypt
-
 # Create new initramfs and check inclusion
 mkinitramfs -o /boot/initramfs.gz
 lsinitramfs /boot/initramfs.gz | grep cryptsetup
