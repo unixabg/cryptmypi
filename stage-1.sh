@@ -75,11 +75,36 @@ cat << EOF >> /etc/cryptsetup-initramfs/conf-hook
 CRYPTSETUP=y
 EOF
 
-# Create fake luks filesystem to include crypt into initramsfs
-dd if=/dev/zero of=/tmp/fakeroot.img bs=1M count=20
-cryptsetup luksFormat /tmp/fakeroot.img
-cryptsetup luksOpen /tmp/fakeroot.img crypt
-mkfs.ext4 /dev/mapper/crypt
+# Create a hook to include our crypttab in the initramfs
+cat << "EOF" > /usr/share/initramfs-tools/hooks/zz-crypttab
+#!/bin/sh
+
+PREREQ=""
+
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+echo "Running zz-crypttab hook."
+set -x
+mkdir -p ${DESTDIR}/cryptroot || true
+cat /etc/crypttab >> ${DESTDIR}/cryptroot/crypttab
+chmod 644 ${DESTDIR}/cryptroot/crypttab
+set +x
+EOF
+
+# Make the hook executable
+chmod 755 /usr/share/initramfs-tools/hooks/zz-crypttab
 
 # Create new initramfs and check inclusion
 mkinitramfs -o /boot/initramfs.gz
