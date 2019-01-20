@@ -79,13 +79,20 @@ _ID_RSA=$(curl $_ID_RSA_URL)
 #echo ${_ID_RSA}
 
 # Create /etc/dropbear-initramfs/authorized_keys
-cat << "EOF" > /etc/dropbear-initramfs/authorized_keys
-command="/scripts/local-top/cryptroot && kill -9 `ps | grep -m 1 'cryptroot' | cut -d ' ' -f 3` && exit"
+cat << "EOF" > /etc/dropbear-initramfs/authorized_keys.tmp
+command="export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'; /scripts/local-top/cryptroot && kill -9 `ps | grep -m 1 'cryptroot' | cut -d ' ' -f 3` && exit"
 EOF
+
+# In order to make dropbear unlock on ssh login we need to have the public key
+# on the same line as the command
+tr -d '\n' < /etc/dropbear-initramfs/authorized_keys.tmp > /etc/dropbear-initramfs/authorized_keys
+
+# Clean up temp file
+rm -f /etc/dropbear-initramfs/authorized_keys.tmp
 
 # Add public key to /etc/dropbear-initramfs/authorized_keys
 cat << EOF >> /etc/dropbear-initramfs/authorized_keys
-${_ID_RSA}
+ ${_ID_RSA}
 EOF
 
 # Update dropbear for some sleep in initramfs
