@@ -10,6 +10,8 @@ for encrypted boot and gets sdcard ready for **stage-2.sh**.
 2. The creation of the encrypted partition on the sdcard.
 3. The restore of data to the encrypted partition on the sdcard.
 
+**stage-3.sh** - Script to be ran from the pi which will install and configure dropbear for remote unlock with a specified ssh key.
+
 ### Reference links
 + https://github.com/NicoHood/NicoHood.github.io/wiki/Raspberry-Pi-Encrypt-Root-Partition-Tutorial
 + https://www.kali.org/tutorials/secure-kali-pi-2018/
