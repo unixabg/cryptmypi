@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## cryptmypi
-## Copyright (C) 2018 Richard Nelson <unixabg@gmail.com>
+## Copyright (C) 2018-2019 Richard Nelson <unixabg@gmail.com>
 ##
 ## This program comes with ABSOLUTELY NO WARRANTY; for details see COPYING.
 ## This is free software, and you are welcome to redistribute it
