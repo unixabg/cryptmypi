@@ -2,8 +2,11 @@
 Project to assist users in building an encrypted raspberry pi
 
 ## Stages
-**stage-1.sh** - Script to be ran from a pristine install of kali on your raspberry pi. It performs the basic setup
-for encrypted boot and gets sdcard ready for **stage-2.sh**.
+**stage-1.sh**
+ * Stage-1 was designed to be ran with Kali Linux on a raspberry pi.
+ * Stage-1 will alter the local installation for booting encrypted root partition.
+ * Stage-1 will make the sdcard unbootable until stage-2 is completed.
+ * To undo these changes you will need to reimage the sdcard.
 
 **stage-2.sh**
  * Stage-2 was designed to be ran from Linux.
