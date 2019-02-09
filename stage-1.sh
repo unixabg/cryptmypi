@@ -118,8 +118,8 @@ apt clean
 
 # Ready for shutdown and copy of sdcard from another device
 cat << EOF
-We are ready to shutdown the raspberry pi and FIXME perform stage-2
-on the sd card from a linux PC.
+We are ready to shutdown the raspberry pi and perform stage-2
+on the sd card from a Linux PC.
 EOF
 
 read -p "Press enter to halt the system."
