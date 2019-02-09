@@ -30,7 +30,7 @@ the wrong partition and block device for your system. **P l e a s e** check that
     1. Install dropbear.
     2. Configure dropbear for remote unlocking with custom key you provide.
 
- * To undo these changes you will have to reimage the sdcard.
+ * To undo these changes you will need to reimage the sdcard.
 
 ### Reference links
 + https://github.com/NicoHood/NicoHood.github.io/wiki/Raspberry-Pi-Encrypt-Root-Partition-Tutorial

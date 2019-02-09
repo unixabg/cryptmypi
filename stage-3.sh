@@ -34,7 +34,7 @@ Stage-3 information:
     1. Install dropbear.
     2. Configure dropbear for remote unlocking with
        custom key you provide.
- * To undo these changes you will have to reimage the
+ * To undo these changes you will need to reimage the
    sdcard.
 
 ##################### W A R N I N G #####################
