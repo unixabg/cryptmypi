@@ -5,10 +5,19 @@ Project to assist users in building an encrypted raspberry pi
 **stage-1.sh** - Script to be ran from a pristine install of kali on your raspberry pi. It performs the basic setup
 for encrypted boot and gets sdcard ready for **stage-2.sh**.
 
-**stage-2.sh** - Script to be ran from a Linux OS to perform:
-1. The backup of data from the unencrypted sdcard.
-2. The creation of the encrypted partition on the sdcard.
-3. The restore of data to the encrypted partition on the sdcard.
+**stage-2.sh**
+ * Stage-2 was designed to be ran from Linux.
+ * Stage-2 requires a stage-1 prepared Kali Linux sdcard.
+ * Stage-2 attempts to perform the following operations
+   on the sdcard:
+     1. Backup the root files.
+     2. Drop the root files partition.
+     3. Create a LUKS encrypted partition.
+     4. Format the LUKS encrypted partition to be ext4.
+     5. Restore the root files to the the LUKS enctyped partition.
+
+ * **W A R N I N G** This process will damage your local install if the script has
+the wrong partition and block device for your system. **P l e a s e** check that the partition and block device match for your sdcard.
 
 **stage-3.sh** - Script to be ran from the pi which will install and configure dropbear for remote unlock with a specified ssh key.
 

@@ -39,8 +39,10 @@ Stage-2 information:
      4. Format the LUKS encrypted partition to be ext4.
      5. Restore the root files to the the LUKS enctyped partition.
 
-This process will damage your local install if the script has
-the wrong partition and block device for your system.
+**W A R N I N G** This process will damage your local
+install if the script has the wrong partition and block
+device for your system. **P l e a s e** check that the
+partition and block device match for your sdcard.
 
 ##################### W A R N I N G #####################
 ** ** ** There is no undoing these actions! ** ** **
