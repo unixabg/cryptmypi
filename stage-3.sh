@@ -24,11 +24,20 @@ cat << EOF
 ** stage-1 and stage-2 required before running stage-3 **
 ##################### W A R N I N G #####################
 
-This process was designed to be ran with kali on a
-raspberry pi. This process will alter the local
-installation. To undo these changes you will need to
-reimage the sdcard.
+Stage-3 information:
+ * Stage-3 was designed to be ran with Kali Linux on a
+   raspberry pi.
+ * Stage-3 requires a stage-1 and stage-2 prepared Kali
+   Linux sdcard.
+ * Stage-3 attempts to perform the following operations
+   on the sdcard:
+    1. Install dropbear.
+    2. Configure dropbear for remote unlocking with
+       custom key you provide.
+ * To undo these changes you will have to reimage the
+   sdcard.
 
+##################### W A R N I N G #####################
 You are about to do something potentially harmful to
 your installation.
 

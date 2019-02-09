@@ -19,7 +19,15 @@ for encrypted boot and gets sdcard ready for **stage-2.sh**.
  * **W A R N I N G** This process will damage your local install if the script has
 the wrong partition and block device for your system. **P l e a s e** check that the partition and block device match for your sdcard.
 
-**stage-3.sh** - Script to be ran from the pi which will install and configure dropbear for remote unlock with a specified ssh key.
+**stage-3.sh**
+ * Stage-3 was designed to be ran with Kali Linux on a raspberry pi.
+ * Stage-3 requires a stage-1 and stage-2 prepared Kali Linux sdcard.
+ * Stage-3 attempts to perform the following operations
+   on the sdcard:
+    1. Install dropbear.
+    2. Configure dropbear for remote unlocking with custom key you provide.
+
+ * To undo these changes you will have to reimage the sdcard.
 
 ### Reference links
 + https://github.com/NicoHood/NicoHood.github.io/wiki/Raspberry-Pi-Encrypt-Root-Partition-Tutorial
