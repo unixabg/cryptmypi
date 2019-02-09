@@ -22,10 +22,16 @@ cat << EOF
 ##################### W A R N I N G #####################
 	This is stage-1 script of cryptmypi.
 #########################################################
-This process was designed to be ran with kali on a
-raspberry pi. This process will alter the local
-installation. To undo these changes you will need to
-reimage the sdcard.
+
+Stage-1 information:
+ * Stage-1 was designed to be ran with Kali Linux on a
+   raspberry pi.
+ * Stage-1 will alter the local installation for booting
+   encrypted root partition.
+ * Stage-1 will make the sdcard unbootable until stage-2
+   is completed.
+ * To undo these changes you will need to reimage the
+   sdcard.
 
 ##################### W A R N I N G #####################
 You are about to do something potentially harmful to
