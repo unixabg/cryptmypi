@@ -1,5 +1,5 @@
 # cryptmypi
-Project to assist users in building an encrypted raspberry pi
+Project to assist users in building an encrypted raspberry pi and more.
 
 ## Stages
 **stage-1.sh**
