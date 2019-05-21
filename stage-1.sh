@@ -233,7 +233,7 @@ show_menus() {
 	echo "#################################"
 	echo "1. Encrypt pi"
 	echo "2. Encrypt pi + dropbear"
-	echo "3. Encrypt pi + dropbear + iodyne"
+	echo "3. Encrypt pi + dropbear + iodine"
 	echo "4. Exit"
 }
 
