@@ -7,52 +7,29 @@
 ## This is free software, and you are welcome to redistribute it
 ## under certain conditions; see COPYING for details.
 
-# Start with pristine install of kali for raspberry pi
-
-# Dependencies
-if [ "$(id -u)" -ne "0" ]
-then
-	echo "E: You need to be the root user to run this script.";
-
-	exit 1
-fi
+#FIXME: it complains that something isn't lined up properly on the parted commands
+#FIXME: make it look nice like it did before
 
 # FIXME - allow override from cmdline input
 _BLKDEV="/dev/mmcblk0"
-_PARTITION="/dev/mmcblk0p2"
+
+
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root"
+   exit 1
+fi
+
+basedir=`pwd`/cryptmypi-build
+if [ ! -d "${basedir}/root" ];then
+   echo "cryptmypi build missing. Exiting ..."
+   exit 1
+fi
+
 
 cat << EOF
-
-##################### W A R N I N G #####################
-	This is stage-2 script of cryptmypi.
-** stage-1 prepared Kali Linux sdcard is required **
-##################### W A R N I N G #####################
-
-Stage-2 information:
- * Stage-2 was designed to be ran from Linux.
- * Stage-2 requires a stage-1 prepared Kali Linux sdcard.
- * Stage-2 attempts to perform the following operations
-   on the sdcard:
-     1. Backup the root files.
-     2. Drop the root files partition.
-     3. Create a LUKS encrypted partition.
-     4. Format the LUKS encrypted partition to be ext4.
-     5. Restore the root files to the the LUKS enctyped partition.
-
-**W A R N I N G** This process will damage your local
-install if the script has the wrong partition and block
-device for your system. **P l e a s e** check that the
-partition and block device match for your sdcard.
-
-##################### W A R N I N G #####################
-** ** ** There is no undoing these actions! ** ** **
-** ** **  If you are unsure DO NOT proceed. ** ** **
-##################### W A R N I N G #####################
-
 Device information to be used with the script:
 
-block device:  $_BLKDEV
-partition:  $_PARTITION
+block device:  ${_BLKDEV}
 
 To continue type in the phrase 'Yes, do as I say!'
 EOF
@@ -62,146 +39,91 @@ read _CONTINUE
 
 case "${_CONTINUE}" in
 	'Yes, do as I say!')
-
 		;;
-
 	*)
 		echo "Abort."
-
 		exit 1
 		;;
 esac
 
-# Clean old work area
-echo "Removing /mnt/cryptmypi/{chroot,backup,encrypted} ..."
-rm -rfv /mnt/cryptmypi/{chroot,backup,encrypted}
-echo "Done removing old work area."
-echo
-echo "Making folders for new work area mkdir -p /mnt/cryptmypi/{chroot,backup,encrypted} ..."
-mkdir -pv /mnt/cryptmypi/{chroot,backup,encrypted}
-echo "Done making new work area."
-echo
+# Attempt to unmount just to be safe
+umount ${_BLKDEV}p1
+umount ${_BLKDEV}p2
+umount ${_BLKDEV}p3
+umount ${_BLKDEV}p4
+umount /mnt/cryptmypi
+[ -d /mnt/cryptmypi ] && rm -r /mnt/cryptmypi
 
-# See if the partition is mounted and attempt to unmount.
-if mount | grep -qs $_PARTITION
-then
-	echo "$_PARTITION appears to be mounted ..."
-	echo "Attempting to unmount $_PARTITION ..."
-	if umount -lv $_PARTITION
-	then
-		echo "It appears that we were able to unmount $_PARTITION ."
-	else
-		echo "Appears $_PARTITION is still mounted ..."
-		mount | grep $_PARTITION
-		echo "Aborting since we were unable to unmount $_PARTITION !"
-		exit 1
-	fi
-else
-	echo "It appears that $_PARTITION is not mounted."
-fi
-echo
 
-# Attempt to mount the partition to chroot
-echo "Attempting to mount $_PARTITION ..."
-if mount $_PARTITION /mnt/cryptmypi/chroot
-then
-	echo "We were able to mount $_PARTITION to /mnt/cryptmypi/chroot."
-else
-	echo "Aborting since we failed to mount $_PARTITION !"
-	exit 1
-fi
-echo
+# Format SD Card
+echo "Partitioning SD Card"
+parted ${_BLKDEV} --script -- mklabel msdos
+parted ${_BLKDEV} --script -- mkpart primary fat32 0 64
+parted ${_BLKDEV} --script -- mkpart primary 64 -1
+echo "Formatting Boot Partition"
+mkfs.vfat ${_BLKDEV}p1
 
-# Attempt to backup files from the chroot mount to the backup folder
-echo "Attempting to backup /mnt/cryptmypi/chroot to /mnt/cryptmypi/backup/ ..."
-rsync -avh /mnt/cryptmypi/chroot/* /mnt/cryptmypi/backup/
-echo
-
-# Attempt to unmount the chroot mount
-echo "Attempting to unmount /mnt/cryptmypi/chroot ..."
-if umount -lv /mnt/cryptmypi/chroot
-then
-	echo "It appears that we were able to unmount /mnt/cryptmypi/chroot ."
-else
-	echo "Aborting since we failed to unmount  /mnt/cryptmypi/chroot !"
-	exit 1
-fi
-echo
-
-# Attempt to do partition operations
-# First attempt to drop partition
-echo "Attempting to drop second partition on $_BLKDEV ..."
-if echo -e "d\n2\nw" | fdisk $_BLKDEV
-then
-	echo "It appears that we were able to drop the partition on $_BLKDEV ."
-	echo "Below is the output of lsblk."
-	lsblk
-else
-	echo "Aborting since we failed to drop the partition on $_BLKDEV !"
-	exit 1
-fi
-echo
-
-# Second attempt to create new partition
-echo "Attempting to create new partition on $_BLKDEV ..."
-if echo -e "n\np\n2\n\n\nw" | fdisk $_BLKDEV
-then
-	echo "It appears that we were able to create the new partition on $_BLKDEV ."
-	echo "Below is the output of lsblk."
-	lsblk
-else
-	echo "Aborting since we failed to create the partition on $_BLKDEV !"
-	exit 1
-fi
-echo
 
 # Create LUKS
-echo "Attempting to create LUKS $_PARTITION ..."
-if cryptsetup -v -y --cipher aes-cbc-essiv:sha256 --key-size 256 luksFormat $_PARTITION
+echo "Attempting to create LUKS ${_BLKDEV}p2 ..."
+if cryptsetup -v -y --cipher aes-cbc-essiv:sha256 --key-size 256 luksFormat ${_BLKDEV}p2
 then
 	echo "LUKS created."
 else
-	echo "Aborting since we failed to create LUKS on $_PARTITION !"
+	echo "Aborting since we failed to create LUKS on ${_BLKDEV}p2 !"
 	exit 1
 fi
 echo
 
 # Open LUKS
-echo "Attempting to open LUKS $_PARTITION ..."
-if cryptsetup -v luksOpen $_PARTITION crypt
+echo "Attempting to open LUKS ${_BLKDEV}p2 ..."
+if cryptsetup -v luksOpen ${_BLKDEV}p2 cryptmypi_root
 then
 	echo "LUKS opened."
 else
-	echo "Aborting since we failed to open LUKS on $_PARTITION !"
+	echo "Aborting since we failed to open LUKS on ${_BLKDEV}p2 !"
 	exit 1
 fi
 echo
 
 # Format LUKS
-echo "Attempting to format LUKS on /dev/mapper/crypt ..."
-if mkfs.ext4 /dev/mapper/crypt
+echo "Attempting to format LUKS on /dev/mapper/cryptmypi_root ..."
+if mkfs.ext4 /dev/mapper/cryptmypi_root
 then
 	echo "LUKS formatted to ext4."
 else
-	echo "Aborting since we failed to format /dev/mapper/crypt to ext4 !"
+	echo "Aborting since we failed to format /dev/mapper/cryptmypi_root to ext4 !"
 	exit 1
 fi
 echo
 
 # Mount ext4 formatted LUKS
-echo "Attempting to mount /dev/mapper/crypt to /mnt/cryptmypi/encrypted/ ..."
-if mount /dev/mapper/crypt /mnt/cryptmypi/encrypted/
+echo "Attempting to mount /dev/mapper/cryptmypi_root to /mnt/cryptmypi ..."
+mkdir /mnt/cryptmypi
+if mount /dev/mapper/cryptmypi_root /mnt/cryptmypi
 then
-	echo "Mounted /dev/mapper/crypt to /mnt/cryptmypi/encrypted ."
+	echo "Mounted /dev/mapper/cryptmypi_root to /mnt/cryptmypi ."
 else
-	echo "Aborting since we failed to mount /dev/mapper/crypt to /mnt/cryptmypi/encrypted !"
+	echo "Aborting since we failed to mount /dev/mapper/crypt to /mnt/cryptmypi !"
 	exit 1
 fi
 echo
 
-# Attempt to restore files from the chroot backup to the mounted encrypted folder
-echo "Attempting to restore /mnt/cryptmypi/backup to /mnt/cryptmypi/encrypted/ ..."
-rsync -avh /mnt/cryptmypi/backup/* /mnt/cryptmypi/encrypted/
+# Mount boot partition
+echo "Attempting to mount ${_BLKDEV}p1 to /mnt/cryptmypi/boot ..."
+mkdir /mnt/cryptmypi/boot
+if mount ${_BLKDEV}p1 /mnt/cryptmypi/boot
+then
+	echo "Mounted ${_BLKDEV}p1 to /mnt/cryptmypi/boot."
+else
+	echo "Aborting since we failed to mount ${_BLKDEV}p1 to /mnt/cryptmypi/boot !"
+	exit 1
+fi
+echo
+
+# Attempt to sync files from build to mounted device
+echo "Attempting to sync from ${basedir}/root to /mnt/cryptmypi ..."
+rsync -HPavz -q "${basedir}"/root/ /mnt/cryptmypi/
 echo
 
 # Sync file system
@@ -211,28 +133,43 @@ sync
 echo "Done syncing the filesystems."
 echo
 
-# Unmount ext4 formatted LUKS
-echo "Attempting to unmount /mnt/cryptmypi/encrypted/ ..."
-if umount /mnt/cryptmypi/encrypted/
+# Unmount boot partition
+echo "Attempting to unmount ${_BLKDEV}p1 ..."
+if umount ${_BLKDEV}p1
 then
-	echo "Unmounted /mnt/cryptmypi/encrypted ."
+	echo "Unmounted ${_BLKDEV}p1 ."
 else
-	echo "Aborting since we failed to unmount /mnt/cryptmypi/encrypted !"
+	echo "Aborting since we failed to unmount ${_BLKDEV}p1 !"
+	exit 1
+fi
+echo
+
+# Unmount root partition
+echo "Attempting to unmount /dev/mapper/cryptmypi_root ..."
+if umount /dev/mapper/cryptmypi_root
+then
+	echo "Unmounted /dev/mapper/cryptmypi_root ."
+else
+	echo "Aborting since we failed to unmount /dev/mapper/cryptmypi_root !"
 	exit 1
 fi
 echo
 
 
 # Close LUKS
-echo "Attempting to close open LUKS $_PARTITION ..."
-if cryptsetup -v luksClose /dev/mapper/crypt
+echo "Attempting to close open LUKS ${_BLKDEV}p2 ..."
+if cryptsetup -v luksClose /dev/mapper/cryptmypi_root
 then
 	echo "LUKS closed."
 else
-	echo "Aborting since we failed to open LUKS on $_PARTITION !"
+	echo "Aborting since we failed to close LUKS /dev/mapper/cryptmypi_root !"
 	exit 1
 fi
 echo
+
+rm -r /mnt/cryptmypi
+sync
+sync
 
 echo "Stage-2 appears completed!"
 
