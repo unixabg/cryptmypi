@@ -7,127 +7,262 @@
 ## This is free software, and you are welcome to redistribute it
 ## under certain conditions; see COPYING for details.
 
-# Start with pristine install of kali for raspberry pi
+#FIXME: Change default root:toor password
+#FIXME: Make a config file that populates the _IODINE_* variables
 
-# Dependencies
-if [ "$(id -u)" -ne "0" ]
-then
-	echo "E: You need to be the root user to run this script.";
 
-	exit 1
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root"
+   exit 1
 fi
 
-cat << EOF
+finalstuff(){
+	##########
+	# Finally, Create the initramfs
+	echo "Starting finalstuff..."
+	chroot $_BASEDIR/root mkinitramfs -o /boot/initramfs.gz -v `ls root/lib/modules/ | grep 'v8+' | head -n 1`
 
-##################### W A R N I N G #####################
-	This is stage-1 script of cryptmypi.
-#########################################################
-
-Stage-1 information:
- * Stage-1 was designed to be ran with Kali Linux on a
-   raspberry pi.
- * Stage-1 will alter the local installation for booting
-   encrypted root partition.
- * Stage-1 will make the sdcard unbootable until stage-2
-   is completed.
- * To undo these changes you will need to reimage the
-   sdcard.
-
-##################### W A R N I N G #####################
-You are about to do something potentially harmful to
-your installation.
-
-To continue type in the phrase 'Yes, do as I say!'
-EOF
-
-echo -n ": "
-read _CONTINUE
-
-case "${_CONTINUE}" in
-	'Yes, do as I say!')
-
-		;;
-
-	*)
-		echo "Abort."
-
-		exit 1
-		;;
-esac
-
-
-# Install luks
-apt-get update
-apt-get install cryptsetup lvm2 busybox
-
-# Append /boot/config.txt
-cat << EOF >> /boot/config.txt
-initramfs initramfs.gz followkernel
-EOF
-
-# Update /boot/cmdline.txt to boot crypt
-sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt cryptdevice=/dev/mmcblk0p2:crypt#g' "/boot/cmdline.txt"
-
-# Update /etc/fstab to mount crypt
-sed -i 's#/dev/mmcblk0p2#/dev/mapper/crypt#g' "/etc/fstab"
-
-# Create /etc/crypttab
-cat << EOF > /etc/crypttab
-crypt /dev/mmcblk0p2 none luks
-EOF
-
-# Enable cryptsetup when building initramfs
-cat << EOF >> /etc/cryptsetup-initramfs/conf-hook
-CRYPTSETUP=y
-EOF
-
-# Create a hook to include our crypttab in the initramfs
-cat << "EOF" > /usr/share/initramfs-tools/hooks/zz-crypttab
-#!/bin/sh
-
-PREREQ=""
-
-prereqs()
-{
-	echo "$PREREQ"
+	echo "...finalstuff call completed!"
 }
 
-case $1 in
-# get pre-requisites
-prereqs)
-	prereqs
-	exit 0
-	;;
-esac
 
+encryptpi(){
+	##########
+	# Setup working area
+	echo "Attempting encryptpi..."
+	_BASEDIR=`pwd`/cryptmypi-build
+		if [ -d ${_BASEDIR} ];then
+		echo "Working directory already exists: ${_BASEDIR}"
+		echo "Exiting ..."
+		exit 1
+	fi
+	mkdir -p "${_BASEDIR}"
+	cd "${_BASEDIR}"
+
+	# Test for qemu
+	if [ ! -f "/usr/bin/qemu-aarch64-static" ]; then
+		echo "Can't find arm emulator. Attempting Install"
+		apt-get -y install qemu-user-static binfmt-support
+		if [ ! -f "/usr/bin/qemu-aarch64-static" ]; then
+			echo "Still can't find arm emulator. Exiting ..."
+			exit 1
+		fi
+	fi
+
+	# Download arm image if we don't already have it
+	_IMAGE=https://images.offensive-security.com/arm-images/kali-linux-2019.1-rpi3-nexmon-64.img.xz
+	_IMAGENAME=`basename ${_IMAGE}`
+	if [ -f ../${_IMAGENAME} ]; then
+		echo "Awesome, ARM image already exists. Skipping Download"
+	else
+		echo "Downloading ARM image from $image"
+		wget ${_IMAGE} -O ../${_IMAGENAME}
+	fi
+
+	# Extract files from image
+	mkdir root
+	mkdir mount
+	echo "Extracting Image"
+	xz --decompress --stdout ../${_IMAGENAME} > kali.img
+	echo "Mounting loopback"
+	loopdev=`losetup -f --show kali.img`
+	partprobe ${loopdev}
+	# Extract root partition
+	mount ${loopdev}p2 mount
+	echo "Syncing /root"
+	rsync -HPavz -q mount/ root/
+	umount mount
+	# Extract boot partition
+	mount ${loopdev}p1 mount/
+	echo "Syncing /root/boot"
+	rsync -HPavz -q mount/ root/boot/
+	umount mount
+	# Clear loopback
+	rmdir mount
+	echo "Cleaning loopback"
+	losetup -d ${loopdev}
+	rm kali.img
+
+	# Setup qemu emulator for aarch64
+	echo "Copying qemu emulator to chroot"
+	cp /usr/bin/qemu-aarch64-static root/usr/bin/
+
+	# Install some extra stuff
+	chroot $_BASEDIR/root apt-get -y purge manpages man-db
+	chroot $_BASEDIR/root apt-get update
+	chroot $_BASEDIR/root apt-get -y install cryptsetup lvm2 busybox iodine dropbear iodine telnet dsniff bettercap
+	chroot $_BASEDIR/root apt-get clean
+
+	# Disable lightdm
+	chroot $_BASEDIR/root systemctl disable lightdm
+
+	# Tell pi to use initramfs
+	echo "initramfs initramfs.gz followkernel" >> root/boot/config.txt
+
+	##########
+	# Begin cryptsetup
+	echo "The encryptpi stage completed!"
+	# Update /boot/cmdline.txt to boot crypt
+	sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt cryptdevice=/dev/mmcblk0p2:crypt#g' root/boot/cmdline.txt
+	# Enable cryptsetup when building initramfs
+	echo "CRYPTSETUP=y" >> root/etc/cryptsetup-initramfs/conf-hook
+	# Update /etc/fstab
+	sed -i 's#/dev/mmcblk0p2#/dev/mapper/crypt#g' root/etc/fstab
+	# Update /etc/crypttab
+	echo "crypt /dev/mmcblk0p2 none luks" >> root/etc/crypttab
+	# Create a hook to include our crypttab in the initramfs
+	cat << "EOF" > root/etc/initramfs-tools/hooks/zz-cryptsetup
+#!/bin/sh
+if [ "$1" = "prereqs" ]; then exit 0; fi
 . /usr/share/initramfs-tools/hook-functions
-echo "Running zz-crypttab hook."
-set -x
 mkdir -p ${DESTDIR}/cryptroot || true
 cat /etc/crypttab >> ${DESTDIR}/cryptroot/crypttab
-chmod 644 ${DESTDIR}/cryptroot/crypttab
-set +x
 EOF
+	chmod 755 root/etc/initramfs-tools/hooks/zz-cryptsetup
+	# Disable autoresize
+	chroot $_BASEDIR/root systemctl disable rpiwiggle
+	rm root/root/scripts/rpi-wiggle.sh
 
-# Make the hook executable
-chmod 755 /usr/share/initramfs-tools/hooks/zz-crypttab
+	finalstuff
+	echo "...encryptpi call completed!"
+}
 
-# Create new initramfs and check inclusion
-mkinitramfs -o /boot/initramfs.gz
-lsinitramfs /boot/initramfs.gz | grep cryptsetup
+dropbearpi(){
+	##########
+	# Begin Dropbear
+	# Put authorized keys where they go
+	echo "Attempting dropbearpi..."
 
-# Drop /usr/share/initramfs-tools/hooks/zz-crypttab since only needed for inital stage
-rm -f /usr/share/initramfs-tools/hooks/zz-crypttab
+	# Test for authorized_keys file
+	if [ ! -f ../authorized_keys ]; then
+		echo "Dropbear authorized_keys file missing. Exiting..."
+		exit 1
+	fi
 
-# Clean apt
-apt clean
+	mkdir -p root/root/.ssh/
+	cat ../authorized_keys > root/etc/dropbear-initramfs/authorized_keys
+	cat ../authorized_keys > root/root/.ssh/authorized_keys
+	# Update dropbear for some sleep in initramfs
+	sed -i 's/run_dropbear &/sleep 5\nrun_dropbear &/g' root/usr/share/initramfs-tools/scripts/init-premount/dropbear
+	# Change the port that dropbear runs on to make our lives easier
+	sed -i 's/#DROPBEAR_OPTIONS=/DROPBEAR_OPTIONS="-p 2222"/g' root/etc/dropbear-initramfs/config
 
-# Ready for shutdown and copy of sdcard from another device
-cat << EOF
-We are ready to shutdown the raspberry pi and perform stage-2
-on the sd card from a Linux PC.
+	finalstuff
+	echo "...dropbearpi call completed!"
+}
+
+iodinepi(){
+	##########
+	# Begin Iodine
+	echo "Attempting iodinepi..."
+	_IODINE_PASSWORD="your iodine password goes here"
+	_IODINE_DOMAIN="your iodine domain goes here"
+
+	# Create initramfs hook file for iodine
+	cat << 'EOF2' > root/etc/initramfs-tools/hooks/zz-iodine
+#!/bin/sh
+if [ "$1" = "prereqs" ]; then exit 0; fi
+. /usr/share/initramfs-tools/hook-functions
+copy_exec "/usr/sbin/iodine"
+#we need a tun device for iodine
+manual_add_modules tun
+#Generate Script that runs in initramfs
+cat > ${DESTDIR}/start_iodine << 'EOF'
+#!/bin/sh
+echo "Starting Iodine"
+busybox modprobe tun
+counter=1
+while true; do
+	echo Try $counter: `date`
+	#exit if we are no longer in the initramfs
+	[ ! -f /start_iodine ] && exit
+	#put this here in case it dies, it will restart. If it is running it will just fail
+	/usr/sbin/iodine -d dns0 -r -I1 -L0 -P IODINE_PASSWORD $(grep IPV4DNS0 /run/net-eth0.conf | cut -d"'" -f 2) IODINE_DOMAIN
+	[ $counter -gt 10 ] && reboot -f
+	counter=$((counter+1))
+	sleep 60
+done;
 EOF
+chmod 755 ${DESTDIR}/start_iodine
+exit 0
+EOF2
+	chmod 755 root/etc/initramfs-tools/hooks/zz-iodine
+	# Replace variables in iodine hook file
+	sed -i "s#IODINE_PASSWORD#${_IODINE_PASSWORD}#g" root/etc/initramfs-tools/hooks/zz-iodine
+	sed -i "s#IODINE_DOMAIN#${_IODINE_DOMAIN}#g" root/etc/initramfs-tools/hooks/zz-iodine
 
-read -p "Press enter to halt the system."
+	# Create initramfs script file for iodine
+	cat << 'EOF' > root/etc/initramfs-tools/scripts/init-premount/iodine
+#!/bin/sh
+if [ "$1" = "prereqs" ]; then exit 0; fi
+startIodine(){
+    exec /start_iodine
+}
+startIodine &
+exit 0
+EOF
+	chmod 755 root/etc/initramfs-tools/scripts/init-premount/iodine
 
-halt
+	# Create iodine startup script (not initramfs)
+	cat << EOF > root/opt/iodine
+#!/bin/bash
+while true;do
+	iodine -f -r -I1 -L0 -P IODINE_PASSWORD IODINE_DOMAIN
+	sleep 60
+done
+EOF
+	chmod 755 root/opt/iodine
+	sed -i "s#IODINE_PASSWORD#${_IODINE_PASSWORD}#g" root/opt/iodine
+	sed -i "s#IODINE_DOMAIN#${_IODINE_DOMAIN}#g" root/opt/iodine
+	cat << EOF > root/crontab_setup
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+@reboot /opt/iodine
+EOF
+	chroot $_BASEDIR/root crontab /crontab_setup
+	rm root/crontab_setup
+
+	finalstuff
+	echo "...iodinepi call completed!"
+}
+
+show_menus() {
+	clear
+	echo "#################################"
+	echo "         C R Y P T M Y P I"
+	echo "             Stage-1"
+	echo "#################################"
+	echo "1. Encrypt pi"
+	echo "2. Encrypt pi + dropbear"
+	echo "3. Encrypt pi + dropbear + iodyne"
+	echo "4. Exit"
+}
+
+# Trap CTRL+C, CTRL+Z and quit singles
+trap '' SIGINT SIGQUIT SIGTSTP
+
+# Main logic - infinite loop
+while true
+do
+	show_menus
+	read -p "Enter choice [1 - 4] " _SELECTION
+	case $_SELECTION in
+		1)	encryptpi
+			break
+			;;
+		2)	encryptpi
+			dropbearpi
+			break
+			;;
+		3)	encryptpi
+			dropbearpi
+			iodinepi
+			break
+			;;
+		4)	break
+			;;
+		*)	echo -e "Invalid selection error..." && sleep 2
+	esac
+done
+
+echo "Goodbye from cryptmypi."
+exit 0
