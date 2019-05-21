@@ -53,7 +53,7 @@ encryptpi(){
 	_IMAGE=https://images.offensive-security.com/arm-images/kali-linux-2019.1-rpi3-nexmon-64.img.xz
 	_IMAGENAME=`basename ${_IMAGE}`
 	if [ -f ../${_IMAGENAME} ]; then
-		echo "Awesome, ARM image already exists. Skipping Download"
+		echo "Awesome, ARM image ${_IMAGENAME} already exists. Skipping Download"
 	else
 		echo "Downloading ARM image from $image"
 		wget ${_IMAGE} -O ../${_IMAGENAME}
@@ -62,7 +62,7 @@ encryptpi(){
 	# Extract files from image
 	mkdir root
 	mkdir mount
-	echo "Extracting Image"
+	echo "Extracting image: ${_IMAGENAME}"
 	xz --decompress --stdout ../${_IMAGENAME} > kali.img
 	echo "Mounting loopback"
 	loopdev=`losetup -f --show kali.img`
