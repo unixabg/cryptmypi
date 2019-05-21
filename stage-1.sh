@@ -8,8 +8,6 @@
 ## under certain conditions; see COPYING for details.
 
 #FIXME: Change default root:toor password
-#FIXME: Make a config file that populates the _IODINE_* variables
-
 
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root"
@@ -155,8 +153,6 @@ iodinepi(){
 	##########
 	# Begin Iodine
 	echo "Attempting iodinepi..."
-	_IODINE_PASSWORD="your iodine password goes here"
-	_IODINE_DOMAIN="your iodine domain goes here"
 
 	# Create initramfs hook file for iodine
 	cat << 'EOF2' > root/etc/initramfs-tools/hooks/zz-iodine
@@ -239,6 +235,9 @@ show_menus() {
 
 # Trap CTRL+C, CTRL+Z and quit singles
 trap '' SIGINT SIGQUIT SIGTSTP
+
+# Source in config
+. cryptmypi.conf
 
 # Main logic - infinite loop
 while true
