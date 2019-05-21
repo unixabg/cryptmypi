@@ -246,14 +246,17 @@ do
 	show_menus
 	read -p "Enter choice [1 - 4] " _SELECTION
 	case $_SELECTION in
-		1)	encryptpi
+		1)	echo "Encrypt pi selected!"
+			encryptpi
 			break
 			;;
-		2)	encryptpi
+		2)	echo "Encrypt pi + dropbear selected!"
+			encryptpi
 			dropbearpi
 			break
 			;;
-		3)	encryptpi
+		3)	echo "Encrypt pi + dropbear + iodine selected!"
+			encryptpi
 			dropbearpi
 			iodinepi
 			break
