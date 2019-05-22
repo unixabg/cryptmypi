@@ -20,14 +20,43 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+_VER="2.0-beta"
+
 _BASEDIR=`pwd`/cryptmypi-build
 if [ ! -d "${_BASEDIR}/root" ];then
    echo "cryptmypi build missing. Exiting ..."
    exit 1
 fi
 
-
+clear
 cat << EOF
+#########################################################
+		   C R Y P T M Y P I
+
+		  Stage-2   (${_VER})
+#########################################################
+
+##################### W A R N I N G #####################
+Stage-1 prepared Kali Linux root folder is required!
+Stage-2 will attempt to perform the following operations
+on the sdcard:
+     1. Partition and format the sdcard.
+     2. Create bootable sdcard with LUKS encrypted root
+        partition.
+
+******************** W A R N I N G **********************
+This process can damage your local install if the script
+has the wrong block device for your system.
+
+******************** P l e a s e ************************
+Double check and know you have the correct block device
+that matches your sdcard.
+
+##################### W A R N I N G #####################
+  ** ** ** There is no undoing these actions! ** ** **
+  ** ** **  If you are unsure DO NOT proceed. ** ** **
+
+-------------------Sanity Check Prompt ------------------
 Device information to be used with the script:
 
 block device:  ${_BLKDEV}
@@ -174,5 +203,5 @@ rm -r /mnt/cryptmypi
 sync
 sync
 
-echo "Goodbye from cryptmypi stage-2."
+echo "Goodbye from cryptmypi stage-2 (${_VER})."
 exit 0
