@@ -7,11 +7,12 @@
 ## This is free software, and you are welcome to redistribute it
 ## under certain conditions; see COPYING for details.
 
-#FIXME: it complains that something isn't lined up properly on the parted commands
-#FIXME: make it look nice like it did before
-
+# FIXME: it complains that something isn't lined up properly on the parted commands
 # FIXME - allow override from cmdline input
-_BLKDEV="/dev/mmcblk0"
+
+# Source in config
+#  - Important setting here is _BLKDEV
+. cryptmypi.conf
 
 
 if [[ $EUID -ne 0 ]]; then
@@ -19,8 +20,8 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-basedir=`pwd`/cryptmypi-build
-if [ ! -d "${basedir}/root" ];then
+_BASEDIR=`pwd`/cryptmypi-build
+if [ ! -d "${_BASEDIR}/root" ];then
    echo "cryptmypi build missing. Exiting ..."
    exit 1
 fi
@@ -60,6 +61,8 @@ echo "Partitioning SD Card"
 parted ${_BLKDEV} --script -- mklabel msdos
 parted ${_BLKDEV} --script -- mkpart primary fat32 0 64
 parted ${_BLKDEV} --script -- mkpart primary 64 -1
+sync
+sync
 echo "Formatting Boot Partition"
 mkfs.vfat ${_BLKDEV}p1
 
@@ -122,8 +125,8 @@ fi
 echo
 
 # Attempt to sync files from build to mounted device
-echo "Attempting to sync from ${basedir}/root to /mnt/cryptmypi ..."
-rsync -HPavz -q "${basedir}"/root/ /mnt/cryptmypi/
+echo "Attempting to sync from ${_BASEDIR}/root to /mnt/cryptmypi ..."
+rsync -HPavz -q "${_BASEDIR}"/root/ /mnt/cryptmypi/
 echo
 
 # Sync file system
@@ -171,5 +174,5 @@ rm -r /mnt/cryptmypi
 sync
 sync
 
-echo "Stage-2 appears completed!"
-
+echo "Goodbye from cryptmypi stage-2."
+exit 0
