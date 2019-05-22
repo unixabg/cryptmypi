@@ -266,5 +266,5 @@ do
 	esac
 done
 
-echo "Goodbye from cryptmypi."
+echo "Goodbye from cryptmypi stage-1."
 exit 0
