@@ -14,6 +14,8 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+_VER="2.0-beta"
+
 finalstuff(){
 	##########
 	# Finally, Create the initramfs
@@ -225,7 +227,8 @@ show_menus() {
 	clear
 	echo "#################################"
 	echo "         C R Y P T M Y P I"
-	echo "             Stage-1"
+	echo ""
+	echo "        Stage-1   (${_VER})"
 	echo "#################################"
 	echo "1. Encrypt pi"
 	echo "2. Encrypt pi + dropbear"
@@ -266,5 +269,5 @@ do
 	esac
 done
 
-echo "Goodbye from cryptmypi stage-1."
+echo "Goodbye from cryptmypi stage-1 (${_VER})."
 exit 0
