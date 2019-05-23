@@ -240,8 +240,6 @@ trap '' SIGINT SIGQUIT SIGTSTP
 . cryptmypi.conf
 
 #we need this to exist before anything that follows
-_BASEDIR=`pwd`
-_BUILDDIR=${_BASEDIR}/cryptmypi-build
 if [ -d ${_BUILDDIR} ];then
 	echo "Working directory already exists: ${_BUILDDIR}"
 	echo "Exiting ..."
