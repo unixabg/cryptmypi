@@ -239,7 +239,7 @@ trap '' SIGINT SIGQUIT SIGTSTP
 # Source in config
 . cryptmypi.conf
 
-#we need this to exist before anything that follows
+# Setup build structure before anything that follows
 if [ -d ${_BUILDDIR} ];then
 	echo "Working directory already exists: ${_BUILDDIR}"
 	echo "Exiting ..."
