@@ -22,8 +22,9 @@ fi
 
 _VER="2.0-beta"
 
-_BASEDIR=`pwd`/cryptmypi-build
-if [ ! -d "${_BASEDIR}/root" ];then
+_BASEDIR=`pwd`
+_BUILDDIR=${_BASEDIR}/cryptmypi-build
+if [ ! -d "${_BUILDDIR}/root" ];then
    echo "cryptmypi build missing. Exiting ..."
    exit 1
 fi
@@ -154,8 +155,8 @@ fi
 echo
 
 # Attempt to sync files from build to mounted device
-echo "Attempting to sync from ${_BASEDIR}/root to /mnt/cryptmypi ..."
-rsync -HPavz -q "${_BASEDIR}"/root/ /mnt/cryptmypi/
+echo "Attempting to sync from ${_BUILDDIR}/root to /mnt/cryptmypi ..."
+rsync -HPavz -q "${_BUILDDIR}"/root/ /mnt/cryptmypi/
 echo
 
 # Sync file system
