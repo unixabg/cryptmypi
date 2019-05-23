@@ -16,23 +16,31 @@ fi
 
 _VER="2.0-beta"
 
-finalstuff(){
-	echo "Starting finalstuff..."
+dropbearpi_check(){
+	# Test for authorized_keys file
+	if [ ! -f ${_BASEDIR}/../authorized_keys ]; then
+		echo "Dropbear authorized_keys file missing. Exiting..."
+		exit 1
+	fi
+}
 
-	# Disable lightdm
-	chroot ${_BASEDIR}/root systemctl disable lightdm
+dropbearpi(){
+	##########
+	# Begin Dropbear
+	# Put authorized keys where they go
+	echo "Attempting dropbearpi..."
 
-	# Install other handy tools
-	chroot ${_BASEDIR}/root apt-get -y install telnet dsniff bettercap
+	chroot ${_BASEDIR}/root apt-get -y install dropbear
 
-	# Clean apt
-	#chroot ${_BASEDIR}/root apt-get -y purge manpages man-db
-	chroot ${_BASEDIR}/root apt-get clean
+	mkdir -p ${_BASEDIR}/root/root/.ssh/
+	cat ${_BASEDIR}/../authorized_keys > ${_BASEDIR}/root/etc/dropbear-initramfs/authorized_keys
+	cat ${_BASEDIR}/../authorized_keys > ${_BASEDIR}/root/root/.ssh/authorized_keys
+	# Update dropbear for some sleep in initramfs
+	sed -i 's/run_dropbear &/sleep 5\nrun_dropbear &/g' ${_BASEDIR}/root/usr/share/initramfs-tools/scripts/init-premount/dropbear
+	# Change the port that dropbear runs on to make our lives easier
+	sed -i 's/#DROPBEAR_OPTIONS=/DROPBEAR_OPTIONS="-p 2222"/g' ${_BASEDIR}/root/etc/dropbear-initramfs/config
 
-	# Finally, Create the initramfs
-	chroot ${_BASEDIR}/root mkinitramfs -o /boot/initramfs.gz -v `ls ${_BASEDIR}/root/lib/modules/ | grep 'v8+' | head -n 1`
-
-	echo "...finalstuff call completed!"
+	echo "...dropbearpi call completed!"
 }
 
 encryptpi(){
@@ -122,31 +130,23 @@ EOF
 	echo "...encryptpi call completed!"
 }
 
-dropbearpi_check(){
-	# Test for authorized_keys file
-	if [ ! -f ${_BASEDIR}/../authorized_keys ]; then
-		echo "Dropbear authorized_keys file missing. Exiting..."
-		exit 1
-	fi
-}
+finalstuff(){
+	echo "Starting finalstuff..."
 
-dropbearpi(){
-	##########
-	# Begin Dropbear
-	# Put authorized keys where they go
-	echo "Attempting dropbearpi..."
+	# Disable lightdm
+	chroot ${_BASEDIR}/root systemctl disable lightdm
 
-	chroot ${_BASEDIR}/root apt-get -y install dropbear
+	# Install other handy tools
+	chroot ${_BASEDIR}/root apt-get -y install telnet dsniff bettercap
 
-	mkdir -p ${_BASEDIR}/root/root/.ssh/
-	cat ${_BASEDIR}/../authorized_keys > ${_BASEDIR}/root/etc/dropbear-initramfs/authorized_keys
-	cat ${_BASEDIR}/../authorized_keys > ${_BASEDIR}/root/root/.ssh/authorized_keys
-	# Update dropbear for some sleep in initramfs
-	sed -i 's/run_dropbear &/sleep 5\nrun_dropbear &/g' ${_BASEDIR}/root/usr/share/initramfs-tools/scripts/init-premount/dropbear
-	# Change the port that dropbear runs on to make our lives easier
-	sed -i 's/#DROPBEAR_OPTIONS=/DROPBEAR_OPTIONS="-p 2222"/g' ${_BASEDIR}/root/etc/dropbear-initramfs/config
+	# Clean apt
+	#chroot ${_BASEDIR}/root apt-get -y purge manpages man-db
+	chroot ${_BASEDIR}/root apt-get clean
 
-	echo "...dropbearpi call completed!"
+	# Finally, Create the initramfs
+	chroot ${_BASEDIR}/root mkinitramfs -o /boot/initramfs.gz -v `ls ${_BASEDIR}/root/lib/modules/ | grep 'v8+' | head -n 1`
+
+	echo "...finalstuff call completed!"
 }
 
 iodinepi(){
