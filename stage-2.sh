@@ -20,10 +20,8 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-_BASEDIR=`pwd`
-_BUILDDIR=${_BASEDIR}/cryptmypi-build
 if [ ! -d "${_BUILDDIR}/root" ];then
-   echo "cryptmypi build missing. Exiting ..."
+   echo "cryptmypi build missing root folder. Exiting ..."
    exit 1
 fi
 
