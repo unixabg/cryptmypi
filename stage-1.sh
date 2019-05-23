@@ -70,7 +70,7 @@ encryptpi(){
 	mkdir ${_BUILDDIR}/root
 	mkdir ${_BUILDDIR}/mount
 	echo "Extracting image: ${_IMAGENAME}"
-	xz --decompress --stdout${_BASEDIR}/${_IMAGENAME} > ${_BUILDDIR}/kali.img
+	xz --decompress --stdout ${_BASEDIR}/${_IMAGENAME} > ${_BUILDDIR}/kali.img
 	echo "Mounting loopback"
 	loopdev=`losetup -f --show ${_BUILDDIR}/kali.img`
 	partprobe ${loopdev}
