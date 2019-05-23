@@ -14,8 +14,6 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-_VER="2.0-beta"
-
 dropbearpi_check(){
 	# Test for authorized_keys file
 	if [ ! -f ${_BASEDIR}/authorized_keys ]; then

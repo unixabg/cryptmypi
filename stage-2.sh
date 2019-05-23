@@ -20,8 +20,6 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-_VER="2.0-beta"
-
 _BASEDIR=`pwd`
 _BUILDDIR=${_BASEDIR}/cryptmypi-build
 if [ ! -d "${_BUILDDIR}/root" ];then
