@@ -15,7 +15,6 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 _VER="2.0-beta"
-_BASEDIR=`pwd`/cryptmypi-build
 
 finalstuff(){
 	echo "Starting finalstuff..."
@@ -42,13 +41,6 @@ encryptpi(){
 	##########
 	# Setup working area
 	echo "Attempting encryptpi..."
-	if [ -d ${_BASEDIR} ];then
-		echo "Working directory already exists: ${_BASEDIR}"
-		echo "Exiting ..."
-		exit 1
-	fi
-	mkdir -p ${_BASEDIR}
-	cd ${_BASEDIR}
 
 	# Test for qemu
 	if [ ! -f "/usr/bin/qemu-aarch64-static" ]; then
@@ -134,7 +126,7 @@ EOF
 
 dropbearpi_check(){
 	# Test for authorized_keys file
-	if [ ! -f ../authorized_keys ]; then
+	if [ ! -f ${_BASEDIR}/../authorized_keys ]; then
 		echo "Dropbear authorized_keys file missing. Exiting..."
 		exit 1
 	fi
@@ -149,8 +141,8 @@ dropbearpi(){
 	chroot ${_BASEDIR}/root apt-get -y install dropbear
 
 	mkdir -p ${_BASEDIR}/root/root/.ssh/
-	cat ../authorized_keys > ${_BASEDIR}/root/etc/dropbear-initramfs/authorized_keys
-	cat ../authorized_keys > ${_BASEDIR}/root/root/.ssh/authorized_keys
+	cat ${_BASEDIR}/../authorized_keys > ${_BASEDIR}/root/etc/dropbear-initramfs/authorized_keys
+	cat ${_BASEDIR}/../authorized_keys > ${_BASEDIR}/root/root/.ssh/authorized_keys
 	# Update dropbear for some sleep in initramfs
 	sed -i 's/run_dropbear &/sleep 5\nrun_dropbear &/g' ${_BASEDIR}/root/usr/share/initramfs-tools/scripts/init-premount/dropbear
 	# Change the port that dropbear runs on to make our lives easier
@@ -250,6 +242,16 @@ trap '' SIGINT SIGQUIT SIGTSTP
 
 # Source in config
 . cryptmypi.conf
+
+#we need this to exist before anything that follows
+_BASEDIR=`pwd`/cryptmypi-build
+if [ -d ${_BASEDIR} ];then
+	echo "Working directory already exists: ${_BASEDIR}"
+	echo "Exiting ..."
+	exit 1
+fi
+mkdir -p ${_BASEDIR}
+cd ${_BASEDIR}
 
 # Main logic - infinite loop
 while true
