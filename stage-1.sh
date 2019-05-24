@@ -17,7 +17,7 @@ fi
 dropbearpi_check(){
 	# Test for authorized_keys file
 	if [ ! -f ${_BASEDIR}/authorized_keys ]; then
-		echo "Dropbear authorized_keys file missing. Exiting..."
+		echo "Dropbear authorized_keys file missing. Exiting ..."
 		exit 1
 	fi
 }
@@ -26,7 +26,7 @@ dropbearpi(){
 	##########
 	# Begin Dropbear
 	# Put authorized keys where they go
-	echo "Attempting dropbearpi..."
+	echo "Attempting dropbearpi ..."
 
 	chroot ${_BUILDDIR}/root apt-get -y install dropbear
 
@@ -38,13 +38,13 @@ dropbearpi(){
 	# Change the port that dropbear runs on to make our lives easier
 	sed -i 's/#DROPBEAR_OPTIONS=/DROPBEAR_OPTIONS="-p 2222"/g' ${_BUILDDIR}/root/etc/dropbear-initramfs/config
 
-	echo "...dropbearpi call completed!"
+	echo "... dropbearpi call completed!"
 }
 
 encryptpi(){
 	##########
 	# Setup working area
-	echo "Attempting encryptpi..."
+	echo "Attempting encryptpi ..."
 
 	# Test for qemu
 	if [ ! -f "/usr/bin/qemu-aarch64-static" ]; then
@@ -95,6 +95,7 @@ encryptpi(){
 	cp /usr/bin/qemu-aarch64-static ${_BUILDDIR}/root/usr/bin/
 
 	# Install some extra stuff
+	chroot ${_BUILDDIR}/root apt-get -y purge manpages man-db
 	chroot ${_BUILDDIR}/root apt-get update
 	chroot ${_BUILDDIR}/root apt-get -y install cryptsetup busybox
 
@@ -125,12 +126,13 @@ EOF
 	chroot ${_BUILDDIR}/root systemctl disable rpiwiggle
 	rm ${_BUILDDIR}/root/root/scripts/rpi-wiggle.sh
 
-	echo "...encryptpi call completed!"
+	echo "... encryptpi call completed!"
 }
 
 finalstuff(){
-	echo "Starting finalstuff..."
+	echo "Starting finalstuff ..."
 
+	# FIXME - disable things
 	# Disable lightdm
 	chroot ${_BUILDDIR}/root systemctl disable lightdm
 
@@ -138,19 +140,18 @@ finalstuff(){
 	chroot ${_BUILDDIR}/root apt-get -y install telnet dsniff bettercap
 
 	# Clean apt
-	#chroot ${_BUILDDIR}/root apt-get -y purge manpages man-db
 	chroot ${_BUILDDIR}/root apt-get clean
 
 	# Finally, Create the initramfs
 	chroot ${_BUILDDIR}/root mkinitramfs -o /boot/initramfs.gz -v `ls ${_BUILDDIR}/root/lib/modules/ | grep 'v8+' | head -n 1`
 
-	echo "...finalstuff call completed!"
+	echo "... finalstuff call completed!"
 }
 
 iodinepi(){
 	##########
 	# Begin Iodine
-	echo "Attempting iodinepi..."
+	echo "Attempting iodinepi ..."
 
 	chroot ${_BUILDDIR}/root apt-get -y install iodine
 
@@ -217,7 +218,7 @@ EOF
 	chroot ${_BUILDDIR}/root crontab /crontab_setup
 	rm ${_BUILDDIR}/root/crontab_setup
 
-	echo "...iodinepi call completed!"
+	echo "... iodinepi call completed!"
 }
 
 show_menus() {
@@ -276,7 +277,7 @@ do
 			;;
 		4)	break
 			;;
-		*)	echo -e "Invalid selection error..." && sleep 2
+		*)	echo -e "Invalid selection error ..." && sleep 2
 	esac
 done
 
