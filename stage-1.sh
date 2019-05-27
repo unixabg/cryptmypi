@@ -94,10 +94,15 @@ encryptpi(){
 	echo "Copying qemu emulator to chroot"
 	cp /usr/bin/qemu-aarch64-static ${_BUILDDIR}/root/usr/bin/
 
-	# Install some extra stuff
-	chroot ${_BUILDDIR}/root apt-get -y purge manpages man-db
+	# Compose package actions
+	if [ ! -z "${_PKGSPURGE}" ]; then
+		chroot ${_BUILDDIR}/root apt-get -y purge ${_PKGSPURGE}
+		chroot ${_BUILDDIR}/root apt-get -y autoremove
+	fi
 	chroot ${_BUILDDIR}/root apt-get update
-	chroot ${_BUILDDIR}/root apt-get -y install cryptsetup busybox
+	if [ ! -z "${_PKGSINSTALL}" ]; then
+		chroot ${_BUILDDIR}/root apt-get -y install ${_PKGSINSTALL}
+	fi
 
 	# Tell pi to use initramfs
 	echo "initramfs initramfs.gz followkernel" >> ${_BUILDDIR}/root/boot/config.txt
@@ -136,10 +141,12 @@ finalstuff(){
 	# Disable lightdm
 	chroot ${_BUILDDIR}/root systemctl disable lightdm
 
-	# Install other handy tools
-	chroot ${_BUILDDIR}/root apt-get -y install telnet dsniff bettercap
-
-	# Clean apt
+	# Final package action to install other handy tools
+	if [ ! -z "${_FINALPKGSPURGE}" ]; then
+		chroot ${_BUILDDIR}/root apt-get -y purge ${_FINALPKGSPURGE}
+		chroot ${_BUILDDIR}/root apt-get -y autoremove
+	fi
+	chroot ${_BUILDDIR}/root apt-get -y install ${_FINALPKGINSTALL}
 	chroot ${_BUILDDIR}/root apt-get clean
 
 	# Finally, Create the initramfs
