@@ -28,6 +28,9 @@ dropbearpi(){
 	# Put authorized keys where they go
 	echo "Attempting dropbearpi ..."
 
+	# Call for hook
+	myhooks dropbear.hook
+
 	chroot ${_BUILDDIR}/root apt-get -y install dropbear
 
 	mkdir -p ${_BUILDDIR}/root/root/.ssh/
@@ -94,15 +97,10 @@ encryptpi(){
 	echo "Copying qemu emulator to chroot"
 	cp /usr/bin/qemu-aarch64-static ${_BUILDDIR}/root/usr/bin/
 
-	# Compose package actions
-	if [ ! -z "${_PKGSPURGE}" ]; then
-		chroot ${_BUILDDIR}/root apt-get -y purge ${_PKGSPURGE}
-		chroot ${_BUILDDIR}/root apt-get -y autoremove
-	fi
-	chroot ${_BUILDDIR}/root apt-get update
-	if [ ! -z "${_PKGSINSTALL}" ]; then
-		chroot ${_BUILDDIR}/root apt-get -y install ${_PKGSINSTALL}
-	fi
+	# Call for hook
+	myhooks encryptpi.hook
+
+	chroot ${_BUILDDIR}/root apt-get -y install cryptsetup busybox
 
 	# Tell pi to use initramfs
 	echo "initramfs initramfs.gz followkernel" >> ${_BUILDDIR}/root/boot/config.txt
@@ -137,17 +135,8 @@ EOF
 finalstuff(){
 	echo "Starting finalstuff ..."
 
-	# FIXME - disable things
-	# Disable lightdm
-	chroot ${_BUILDDIR}/root systemctl disable lightdm
-
-	# Final package action to install other handy tools
-	if [ ! -z "${_FINALPKGSPURGE}" ]; then
-		chroot ${_BUILDDIR}/root apt-get -y purge ${_FINALPKGSPURGE}
-		chroot ${_BUILDDIR}/root apt-get -y autoremove
-	fi
-	chroot ${_BUILDDIR}/root apt-get -y install ${_FINALPKGINSTALL}
-	chroot ${_BUILDDIR}/root apt-get clean
+	# Call for hook
+	myhooks finalstuff.hook
 
 	# Finally, Create the initramfs
 	chroot ${_BUILDDIR}/root mkinitramfs -o /boot/initramfs.gz -v `ls ${_BUILDDIR}/root/lib/modules/ | grep 'v8+' | head -n 1`
@@ -155,10 +144,40 @@ finalstuff(){
 	echo "... finalstuff call completed!"
 }
 
+myhooks(){
+	##########
+	# Hook operations
+	#
+	## Operational hooks:
+	## .hook - file to manipulate build operations
+	##
+	### dropbearpi.hook - early chroot and other calls in dropbearpi
+	### encryptpi.hook  - early chroot and other calls before any other chroot calls as soon chroot ready in encryptpi
+	### finalstuff.hook - early chroot and other calls in finalstuff
+	### iodinepi.hook   - early chroot and other calls in iodinepi
+	###
+	if [ ! -z "${1}" ]; then
+		_HOOKOP="${1}"
+		echo "Attempting to run hook ${_HOOKOP} ..."
+		for _HOOK in ${_BASEDIR}/hooks/${_HOOKOP}
+		do
+			if [ -e ${_HOOK} ]; then
+				${_HOOK}
+			fi
+		done
+	else
+		echo "Hook operations not specified! Stopping here."
+		exit 1
+	fi
+}
+
 iodinepi(){
 	##########
 	# Begin Iodine
 	echo "Attempting iodinepi ..."
+
+	# Call for hook
+	myhooks iodinepi.hook
 
 	chroot ${_BUILDDIR}/root apt-get -y install iodine
 
