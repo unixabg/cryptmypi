@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# iodinepi hook call
+# Place your commands below
+
+echo "Hello from iodinepi.hook!."
+
