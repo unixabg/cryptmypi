@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# finalstuff hook call
+# Place your command below
+echo "Final package action to remove, install other handy tools, and clean."
+if [ ! -z "${_FINALPKGSPURGE}" ]; then
+	chroot ${_BUILDDIR}/root apt-get -y purge ${_FINALPKGSPURGE}
+	chroot ${_BUILDDIR}/root apt-get -y autoremove
+fi
+chroot ${_BUILDDIR}/root apt-get -y install ${_FINALPKGINSTALL}
+chroot ${_BUILDDIR}/root apt-get clean
+

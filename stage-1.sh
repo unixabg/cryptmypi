@@ -28,8 +28,8 @@ dropbearpi(){
 	# Put authorized keys where they go
 	echo "Attempting dropbearpi ..."
 
-	# Call for hook
-	myhooks dropbear.hook
+	# Call for hook dropbearpi
+	myhooks dropbearpi
 
 	chroot ${_BUILDDIR}/root apt-get -y install dropbear
 
@@ -97,8 +97,8 @@ encryptpi(){
 	echo "Copying qemu emulator to chroot"
 	cp /usr/bin/qemu-aarch64-static ${_BUILDDIR}/root/usr/bin/
 
-	# Call for hook
-	myhooks encryptpi.hook
+	# Call for hook encryptpi
+	myhooks encryptpi
 
 	chroot ${_BUILDDIR}/root apt-get -y install cryptsetup busybox
 
@@ -135,8 +135,8 @@ EOF
 finalstuff(){
 	echo "Starting finalstuff ..."
 
-	# Call for hook
-	myhooks finalstuff.hook
+	# Call for hook finalstuff
+	myhooks finalstuff
 
 	# Finally, Create the initramfs
 	chroot ${_BUILDDIR}/root mkinitramfs -o /boot/initramfs.gz -v `ls ${_BUILDDIR}/root/lib/modules/ | grep 'v8+' | head -n 1`
@@ -151,15 +151,15 @@ myhooks(){
 	## Operational hooks:
 	## .hook - file to manipulate build operations
 	##
-	### dropbearpi.hook - early chroot and other calls in dropbearpi
 	### encryptpi.hook  - early chroot and other calls before any other chroot calls as soon chroot ready in encryptpi
+	### dropbearpi.hook - early chroot and other calls in dropbearpi
 	### finalstuff.hook - early chroot and other calls in finalstuff
 	### iodinepi.hook   - early chroot and other calls in iodinepi
 	###
 	if [ ! -z "${1}" ]; then
 		_HOOKOP="${1}"
 		echo "Attempting to run ${_HOOKOP} ..."
-		for _HOOK in ${_BASEDIR}/hooks/${_HOOKOP}
+		for _HOOK in ${_BASEDIR}/hooks/????-${_HOOKOP}-*.hook
 		do
 			if [ -e ${_HOOK} ]; then
 				${_HOOK}
@@ -176,8 +176,8 @@ iodinepi(){
 	# Begin Iodine
 	echo "Attempting iodinepi ..."
 
-	# Call for hook
-	myhooks iodinepi.hook
+	# Call for hook iodinepi
+	myhooks iodinepi
 
 	chroot ${_BUILDDIR}/root apt-get -y install iodine
 
