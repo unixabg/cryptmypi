@@ -162,6 +162,20 @@ sync
 echo "Done syncing the filesystems."
 echo
 
+##########
+# Stage-2 hook operations
+#
+## .hook - file to manipulate build operations
+##
+_HOOKOP="stage-2"
+echo "Attempting to run ${_HOOKOP} hooks ..."
+for _HOOK in ${_BASEDIR}/hooks/????-${_HOOKOP}-*.hook
+do
+	if [ -e ${_HOOK} ]; then
+		${_HOOK}
+	fi
+done
+
 # Unmount boot partition
 echo "Attempting to unmount ${_BLKDEV}p1 ..."
 if umount ${_BLKDEV}p1
