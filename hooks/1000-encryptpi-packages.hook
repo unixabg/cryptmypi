@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# encryptpi hook call
+# Place your command below
+
+echo "Starting compose package actions ..."
+# Compose package actions
+if [ ! -z "${_PKGSPURGE}" ]; then
+	chroot ${_BUILDDIR}/root apt-get -y purge ${_PKGSPURGE}
+	chroot ${_BUILDDIR}/root apt-get -y autoremove
+fi
+chroot ${_BUILDDIR}/root apt-get update
+if [ ! -z "${_PKGSINSTALL}" ]; then
+	chroot ${_BUILDDIR}/root apt-get -y install ${_PKGSINSTALL}
+fi
+
