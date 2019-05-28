@@ -158,7 +158,7 @@ myhooks(){
 	###
 	if [ ! -z "${1}" ]; then
 		_HOOKOP="${1}"
-		echo "Attempting to run hook ${_HOOKOP} ..."
+		echo "Attempting to run ${_HOOKOP} ..."
 		for _HOOK in ${_BASEDIR}/hooks/${_HOOKOP}
 		do
 			if [ -e ${_HOOK} ]; then
