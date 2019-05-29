@@ -7,8 +7,6 @@
 ## This is free software, and you are welcome to redistribute it
 ## under certain conditions; see COPYING for details.
 
-#FIXME: Change default root:toor password
-
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root"
    exit 1
