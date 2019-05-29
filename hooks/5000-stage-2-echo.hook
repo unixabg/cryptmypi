@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # stage-2 hook call
 # Place your command below
