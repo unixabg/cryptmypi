@@ -150,8 +150,8 @@ else
 fi
 echo
 
-# Attempt to sync files from build to mounted device
-echo "Attempting to sync from ${_BUILDDIR}/root to /mnt/cryptmypi ..."
+# Attempt to rsync files from build to mounted device
+echo "Attempting to rsync ${_BUILDDIR}/root/ to /mnt/cryptmypi/ ..."
 rsync -HPavz -q "${_BUILDDIR}"/root/ /mnt/cryptmypi/
 echo
 
@@ -172,6 +172,7 @@ echo "Attempting to run ${_HOOKOP} hooks ..."
 for _HOOK in ${_BASEDIR}/hooks/????-${_HOOKOP}-*.hook
 do
 	if [ -e ${_HOOK} ]; then
+		echo "Calling $(basename ${_HOOK}) ..."
 		${_HOOK}
 	fi
 done
