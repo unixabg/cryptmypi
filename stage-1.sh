@@ -160,6 +160,7 @@ myhooks(){
 		for _HOOK in ${_BASEDIR}/hooks/????-${_HOOKOP}-*.hook
 		do
 			if [ -e ${_HOOK} ]; then
+				echo "Calling $(basename ${_HOOK}) ..."
 				${_HOOK}
 			fi
 		done
