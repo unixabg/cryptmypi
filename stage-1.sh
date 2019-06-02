@@ -58,13 +58,12 @@ encryptpi(){
 	fi
 
 	# Download arm image if we don't already have it
-	_IMAGE=https://images.offensive-security.com/arm-images/kali-linux-2019.1-rpi3-nexmon-64.img.xz
-	_IMAGENAME=$(basename ${_IMAGE})
+	_IMAGENAME=$(basename ${_IMAGEURL})
 	if [ -f ${_BASEDIR}/${_IMAGENAME} ]; then
 		echo "Awesome, ARM image ${_IMAGENAME} already exists. Skipping Download"
 	else
 		echo "Downloading ARM image from $image"
-		wget ${_IMAGE} -O ${_BASEDIR}/${_IMAGENAME}
+		wget ${_IMAGEURL} -O ${_BASEDIR}/${_IMAGENAME}
 	fi
 
 	# Extract files from image
