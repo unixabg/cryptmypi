@@ -14,6 +14,14 @@
 #  - Important setting here is _BLKDEV
 . cryptmypi.conf
 
+# Simple check for type of sdcard block device
+if echo ${_BLKDEV} | grep -qs "mmcblk"
+then
+	__PARTITIONPREFIX=p
+else
+	__PARTITIONPREFIX=""
+fi
+
 
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root"
@@ -29,19 +37,28 @@ clear
 cat << EOF
 #########################################################
 		   C R Y P T M Y P I
-
 		  Stage-2   (${_VER})
 #########################################################
+Cryptmypi stage-2 requires a stage-1 prepared Kali Linux
+root folder!
 
-##################### W A R N I N G #####################
-Stage-1 prepared Kali Linux root folder is required!
-Stage-2 will attempt to perform the following operations
-on the sdcard:
+Cryptmypi stage-2 will attempt to perform the following
+operations on the sdcard:
      1. Partition and format the sdcard.
      2. Create bootable sdcard with LUKS encrypted root
         partition.
 
-******************** W A R N I N G **********************
+The following screen will display a sanity check to
+verify we are working with the correct block device.
+
+EOF
+
+read -p "Press enter to continue."
+
+clear
+cat << EOF
+
+##################### W A R N I N G #####################
 This process can damage your local install if the script
 has the wrong block device for your system.
 
@@ -54,9 +71,18 @@ that matches your sdcard.
   ** ** **  If you are unsure DO NOT proceed. ** ** **
 
 -------------------Sanity Check Prompt ------------------
-Device information to be used with the script:
+This is a listing of your system block devices:
+
+$(lsblk)
+
+And below is the block device to be used with the script:
 
 block device:  ${_BLKDEV}
+
+If the block device is wrong DO NOT continue. Adjust the
+block device in the cryptmypi.conf file located in your
+cloned directory. After adjusting the block device run
+the stage-2.sh script again.
 
 To continue type in the phrase 'Yes, do as I say!'
 EOF
@@ -74,10 +100,10 @@ case "${_CONTINUE}" in
 esac
 
 # Attempt to unmount just to be safe
-umount ${_BLKDEV}p1
-umount ${_BLKDEV}p2
-umount ${_BLKDEV}p3
-umount ${_BLKDEV}p4
+umount ${_BLKDEV}${__PARTITIONPREFIX}1
+umount ${_BLKDEV}${__PARTITIONPREFIX}2
+umount ${_BLKDEV}${__PARTITIONPREFIX}3
+umount ${_BLKDEV}${__PARTITIONPREFIX}4
 umount /mnt/cryptmypi
 [ -d /mnt/cryptmypi ] && rm -r /mnt/cryptmypi
 
@@ -90,27 +116,27 @@ parted ${_BLKDEV} --script -- mkpart primary 64 -1
 sync
 sync
 echo "Formatting Boot Partition"
-mkfs.vfat ${_BLKDEV}p1
+mkfs.vfat ${_BLKDEV}${__PARTITIONPREFIX}1
 
 
 # Create LUKS
-echo "Attempting to create LUKS ${_BLKDEV}p2 ..."
-if cryptsetup -v -y --cipher aes-cbc-essiv:sha256 --key-size 256 luksFormat ${_BLKDEV}p2
+echo "Attempting to create LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
+if cryptsetup -v -y --cipher aes-cbc-essiv:sha256 --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
 then
 	echo "LUKS created."
 else
-	echo "Aborting since we failed to create LUKS on ${_BLKDEV}p2 !"
+	echo "Aborting since we failed to create LUKS on ${_BLKDEV}${__PARTITIONPREFIX}2 !"
 	exit 1
 fi
 echo
 
 # Open LUKS
-echo "Attempting to open LUKS ${_BLKDEV}p2 ..."
-if cryptsetup -v luksOpen ${_BLKDEV}p2 cryptmypi_root
+echo "Attempting to open LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
+if cryptsetup -v luksOpen ${_BLKDEV}${__PARTITIONPREFIX}2 cryptmypi_root
 then
 	echo "LUKS opened."
 else
-	echo "Aborting since we failed to open LUKS on ${_BLKDEV}p2 !"
+	echo "Aborting since we failed to open LUKS on ${_BLKDEV}${__PARTITIONPREFIX}2 !"
 	exit 1
 fi
 echo
@@ -139,13 +165,13 @@ fi
 echo
 
 # Mount boot partition
-echo "Attempting to mount ${_BLKDEV}p1 to /mnt/cryptmypi/boot ..."
+echo "Attempting to mount ${_BLKDEV}${__PARTITIONPREFIX}1 to /mnt/cryptmypi/boot ..."
 mkdir /mnt/cryptmypi/boot
-if mount ${_BLKDEV}p1 /mnt/cryptmypi/boot
+if mount ${_BLKDEV}${__PARTITIONPREFIX}1 /mnt/cryptmypi/boot
 then
-	echo "Mounted ${_BLKDEV}p1 to /mnt/cryptmypi/boot."
+	echo "Mounted ${_BLKDEV}${__PARTITIONPREFIX}1 to /mnt/cryptmypi/boot."
 else
-	echo "Aborting since we failed to mount ${_BLKDEV}p1 to /mnt/cryptmypi/boot !"
+	echo "Aborting since we failed to mount ${_BLKDEV}${__PARTITIONPREFIX}1 to /mnt/cryptmypi/boot !"
 	exit 1
 fi
 echo
@@ -178,12 +204,12 @@ do
 done
 
 # Unmount boot partition
-echo "Attempting to unmount ${_BLKDEV}p1 ..."
-if umount ${_BLKDEV}p1
+echo "Attempting to unmount ${_BLKDEV}${__PARTITIONPREFIX}1 ..."
+if umount ${_BLKDEV}${__PARTITIONPREFIX}1
 then
-	echo "Unmounted ${_BLKDEV}p1 ."
+	echo "Unmounted ${_BLKDEV}${__PARTITIONPREFIX}1 ."
 else
-	echo "Aborting since we failed to unmount ${_BLKDEV}p1 !"
+	echo "Aborting since we failed to unmount ${_BLKDEV}${__PARTITIONPREFIX}1 !"
 	exit 1
 fi
 echo
@@ -201,7 +227,7 @@ echo
 
 
 # Close LUKS
-echo "Attempting to close open LUKS ${_BLKDEV}p2 ..."
+echo "Attempting to close open LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
 if cryptsetup -v luksClose /dev/mapper/cryptmypi_root
 then
 	echo "LUKS closed."
