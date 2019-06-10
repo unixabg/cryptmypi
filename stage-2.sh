@@ -121,7 +121,7 @@ mkfs.vfat ${_BLKDEV}${__PARTITIONPREFIX}1
 
 # Create LUKS
 echo "Attempting to create LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
-if cryptsetup -v -y --cipher aes-cbc-essiv:sha256 --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+if cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
 then
 	echo "LUKS created."
 else
