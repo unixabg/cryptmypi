@@ -4,7 +4,8 @@ Project to assist users in building an encrypted raspberry pi and more.
 ## Generic steps to prep a sdcard for an encrypted raspberry pi setup.
  * Clone repository
  * Change directory to cloned respository
- * Adjust settings in cryptmypi.conf to your needs
+ * Copy cryptmypi.conf to config folder
+ * Adjust settings in config/cryptmypi.conf to your needs
  * Run ./stage-1.sh to build encrypted image
  * Insert sdcard and **P L E A S E** ensure the block device matches your sdcard for stage-2.sh
  * Run ./stage-2.sh
