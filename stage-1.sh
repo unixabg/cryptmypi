@@ -258,9 +258,6 @@ show_menus() {
 	echo "4. Exit"
 }
 
-# Trap CTRL+C, CTRL+Z and quit singles
-trap '' SIGINT SIGQUIT SIGTSTP
-
 # Source in config
 if [ ! -f config/cryptmypi.conf ]; then
 	echo "cryptmypi.conf file missing in config folder."
