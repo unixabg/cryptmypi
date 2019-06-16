@@ -86,7 +86,7 @@ And below is the block device to be used with the script:
 block device:  ${_BLKDEV}
 
 If the block device is wrong DO NOT continue. Adjust the
-block device in the cryptmypi.conf file located in they
+block device in the cryptmypi.conf file located in the
 config directory. After adjusting the block device run
 the stage-2.sh script again.
 
