@@ -86,8 +86,8 @@ And below is the block device to be used with the script:
 block device:  ${_BLKDEV}
 
 If the block device is wrong DO NOT continue. Adjust the
-block device in the cryptmypi.conf file located in your
-cloned directory. After adjusting the block device run
+block device in the cryptmypi.conf file located in they
+config directory. After adjusting the block device run
 the stage-2.sh script again.
 
 To continue type in the phrase 'Yes, do as I say!'
@@ -106,13 +106,10 @@ case "${_CONTINUE}" in
 esac
 
 # Attempt to unmount just to be safe
-umount ${_BLKDEV}${__PARTITIONPREFIX}1
-umount ${_BLKDEV}${__PARTITIONPREFIX}2
-umount ${_BLKDEV}${__PARTITIONPREFIX}3
-umount ${_BLKDEV}${__PARTITIONPREFIX}4
+umount ${_BLKDEV}*
 umount /mnt/cryptmypi
 [ -d /mnt/cryptmypi ] && rm -r /mnt/cryptmypi
-
+cryptsetup luksClose cryptmypi_root
 
 # Format SD Card
 echo "Partitioning SD Card"
@@ -127,8 +124,12 @@ mkfs.vfat ${_BLKDEV}${__PARTITIONPREFIX}1
 
 # Create LUKS
 echo "Attempting to create LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
-if cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
-then
+if [ "${_LUKSPASSWD}" ]; then
+	echo "${_LUKSPASSWD}" | cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+else
+	cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+fi
+if [ $? -eq 0 ]; then
 	echo "LUKS created."
 else
 	echo "Aborting since we failed to create LUKS on ${_BLKDEV}${__PARTITIONPREFIX}2 !"
@@ -138,8 +139,12 @@ echo
 
 # Open LUKS
 echo "Attempting to open LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
-if cryptsetup -v luksOpen ${_BLKDEV}${__PARTITIONPREFIX}2 cryptmypi_root
-then
+if [ "${_LUKSPASSWD}" ]; then
+	echo "${_LUKSPASSWD}" | cryptsetup -v luksOpen ${_BLKDEV}${__PARTITIONPREFIX}2 cryptmypi_root
+else
+	cryptsetup -v luksOpen ${_BLKDEV}${__PARTITIONPREFIX}2 cryptmypi_root
+fi
+if [ $? -eq 0 ]; then
 	echo "LUKS opened."
 else
 	echo "Aborting since we failed to open LUKS on ${_BLKDEV}${__PARTITIONPREFIX}2 !"
