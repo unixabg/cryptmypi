@@ -49,7 +49,7 @@ encryptpi(){
 
 	# Test for qemu
 	if [ ! -f "/usr/bin/qemu-aarch64-static" ]; then
-		echo "Can't find arm emulator. Attempting Install"
+		echo "Can't find arm emulator. Attempting to install ..."
 		apt-get -y install qemu-user-static binfmt-support
 		if [ ! -f "/usr/bin/qemu-aarch64-static" ]; then
 			echo "Still can't find arm emulator. Exiting ..."
@@ -60,38 +60,38 @@ encryptpi(){
 	# Download arm image if we don't already have it
 	_IMAGENAME=$(basename ${_IMAGEURL})
 	if [ -f ${_BASEDIR}/config/${_IMAGENAME} ]; then
-		echo "Awesome, ARM image ${_IMAGENAME} already exists. Skipping Download"
+		echo "Awesome, ARM image ${_IMAGENAME} already exists. Skipping download!"
 	else
-		echo "Downloading ARM image from ${_IMAGEURL}"
+		echo "Downloading ARM image from ${_IMAGEURL} ..."
 		wget ${_IMAGEURL} -O ${_BASEDIR}/config/${_IMAGENAME}
 	fi
 
 	# Extract files from image
 	mkdir ${_BUILDDIR}/root
 	mkdir ${_BUILDDIR}/mount
-	echo "Extracting image: ${_IMAGENAME}"
+	echo "Extracting image: ${_IMAGENAME} ..."
 	xz --decompress --stdout ${_BASEDIR}/config/${_IMAGENAME} > ${_BUILDDIR}/kali.img
-	echo "Mounting loopback"
+	echo "Mounting loopback ..."
 	loopdev=$(losetup -f --show ${_BUILDDIR}/kali.img)
 	partprobe ${loopdev}
 	# Extract root partition
 	mount ${loopdev}p2 ${_BUILDDIR}/mount
-	echo "Syncing /root"
+	echo "Syncing image/root to ${_BUILDDIR}/root ..."
 	rsync -HPavz -q ${_BUILDDIR}/mount/ ${_BUILDDIR}/root/
 	umount ${_BUILDDIR}/mount
 	# Extract boot partition
 	mount ${loopdev}p1 ${_BUILDDIR}/mount/
-	echo "Syncing /root/boot"
+	echo "Syncing image/root/boot to ${_BUILDDIR}/root/boot ..."
 	rsync -HPavz -q ${_BUILDDIR}/mount/ ${_BUILDDIR}/root/boot/
 	umount ${_BUILDDIR}/mount
 	# Clear loopback
 	rmdir ${_BUILDDIR}/mount
-	echo "Cleaning loopback"
+	echo "Cleaning loopback ..."
 	losetup -d ${loopdev}
 	rm ${_BUILDDIR}/kali.img
 
 	# Setup qemu emulator for aarch64
-	echo "Copying qemu emulator to chroot"
+	echo "Copying qemu emulator to chroot ..."
 	cp /usr/bin/qemu-aarch64-static ${_BUILDDIR}/root/usr/bin/
 
 	# Call for hook encryptpi
