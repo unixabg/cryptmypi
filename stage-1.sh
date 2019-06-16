@@ -14,8 +14,8 @@ fi
 
 dropbearpi_check(){
 	# Test for authorized_keys file
-	if [ ! -f ${_BASEDIR}/authorized_keys ]; then
-		echo "Dropbear authorized_keys file missing. Exiting ..."
+	if [ ! -f ${_BASEDIR}/config/authorized_keys ]; then
+		echo "Dropbear authorized_keys file missing in config folder. Exiting ..."
 		exit 1
 	fi
 }
@@ -32,8 +32,8 @@ dropbearpi(){
 	chroot ${_BUILDDIR}/root apt-get -y install dropbear
 
 	mkdir -p ${_BUILDDIR}/root/root/.ssh/
-	cat ${_BASEDIR}/authorized_keys > ${_BUILDDIR}/root/etc/dropbear-initramfs/authorized_keys
-	cat ${_BASEDIR}/authorized_keys > ${_BUILDDIR}/root/root/.ssh/authorized_keys
+	cat ${_BASEDIR}/config/authorized_keys > ${_BUILDDIR}/root/etc/dropbear-initramfs/authorized_keys
+	cat ${_BASEDIR}/config/authorized_keys > ${_BUILDDIR}/root/root/.ssh/authorized_keys
 	# Update dropbear for some sleep in initramfs
 	sed -i 's/run_dropbear &/sleep 5\nrun_dropbear &/g' ${_BUILDDIR}/root/usr/share/initramfs-tools/scripts/init-premount/dropbear
 	# Change the port that dropbear runs on to make our lives easier
@@ -59,18 +59,18 @@ encryptpi(){
 
 	# Download arm image if we don't already have it
 	_IMAGENAME=$(basename ${_IMAGEURL})
-	if [ -f ${_BASEDIR}/${_IMAGENAME} ]; then
+	if [ -f ${_BASEDIR}/config/${_IMAGENAME} ]; then
 		echo "Awesome, ARM image ${_IMAGENAME} already exists. Skipping Download"
 	else
-		echo "Downloading ARM image from $image"
-		wget ${_IMAGEURL} -O ${_BASEDIR}/${_IMAGENAME}
+		echo "Downloading ARM image from ${_IMAGEURL}"
+		wget ${_IMAGEURL} -O ${_BASEDIR}/config/${_IMAGENAME}
 	fi
 
 	# Extract files from image
 	mkdir ${_BUILDDIR}/root
 	mkdir ${_BUILDDIR}/mount
 	echo "Extracting image: ${_IMAGENAME}"
-	xz --decompress --stdout ${_BASEDIR}/${_IMAGENAME} > ${_BUILDDIR}/kali.img
+	xz --decompress --stdout ${_BASEDIR}/config/${_IMAGENAME} > ${_BUILDDIR}/kali.img
 	echo "Mounting loopback"
 	loopdev=$(losetup -f --show ${_BUILDDIR}/kali.img)
 	partprobe ${loopdev}
@@ -262,7 +262,15 @@ show_menus() {
 trap '' SIGINT SIGQUIT SIGTSTP
 
 # Source in config
-. cryptmypi.conf
+if [ ! -f config/cryptmypi.conf ]; then
+	echo "cryptmypi.conf file missing in config folder."
+	echo "To continue: "
+	echo "cp ./cryptmypi.conf config/"
+	echo "nano config/cryptmypi.conf"
+	echo "sudo ./stage-1"
+	exit 1
+fi
+. config/cryptmypi.conf
 
 # Setup build structure before anything that follows
 if [ -d ${_BUILDDIR} ];then

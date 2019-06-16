@@ -12,7 +12,13 @@
 
 # Source in config
 #  - Important setting here is _BLKDEV
-. cryptmypi.conf
+# Source in config
+if [ ! -f config/cryptmypi.conf ]; then
+        echo "cryptmypi.conf file missing in config folder."
+        echo "This should have been done prior to running stage 1"
+        exit 1
+fi
+. config/cryptmypi.conf
 
 # Simple check for type of sdcard block device
 if echo ${_BLKDEV} | grep -qs "mmcblk"
