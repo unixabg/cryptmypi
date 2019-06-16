@@ -1,7 +1,7 @@
 # cryptmypi 2.x
 Project to assist users in building an encrypted raspberry pi and more.
 
-## Generic steps to prep a sdcard for an ecrypted raspberry pi setup.
+## Generic steps to prep a sdcard for an encrypted raspberry pi setup.
  * Clone repository
  * Change directory to cloned respository
  * Adjust settings in cryptmypi.conf to your needs
