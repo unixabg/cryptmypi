@@ -260,11 +260,10 @@ show_menus() {
 
 # Source in config
 if [ ! -f config/cryptmypi.conf ]; then
-	echo "cryptmypi.conf file missing in config folder."
-	echo "To continue: "
-	echo "cp ./cryptmypi.conf config/"
-	echo "nano config/cryptmypi.conf"
-	echo "sudo ./stage-1"
+	echo "No cryptmypi.conf file found in the config folder!"
+	echo "Exiting ..."
+	echo "You might try copying the default ./cryptmypi.conf file to the config/ directory, then attempt to run again."
+	echo "Remember to edit the config/cryptmypi.conf with your desired settings."
 	exit 1
 fi
 . config/cryptmypi.conf
