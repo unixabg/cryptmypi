@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# finalstuff hook call
+echo "Checking for OpenVPN client config"
+if [ -f ${_BASEDIR}/config/openvpn.conf ]; then
+	echo "Copying config and enabling serive"
+	cp ${_BASEDIR}/config/openvpn.conf ${_BUILDDIR}/root/etc/openvpn/client.conf
+	chroot ${_BUILDDIR}/root systemctl enable openvpn@client
+else
+	echo "No config file found"
+fi
+
