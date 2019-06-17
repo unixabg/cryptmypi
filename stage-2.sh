@@ -14,8 +14,9 @@
 #  - Important setting here is _BLKDEV
 # Source in config
 if [ ! -f config/cryptmypi.conf ]; then
-	echo "cryptmypi.conf file missing in config folder."
-	echo "This should have been done prior to running stage 1"
+	echo "No cryptmypi.conf file found in the config folder!"
+	echo "This should have been done prior to running stage 1."
+	echo "Exiting ..."
 	exit 1
 fi
 . config/cryptmypi.conf
@@ -180,7 +181,7 @@ echo "Attempting to mount ${_BLKDEV}${__PARTITIONPREFIX}1 to /mnt/cryptmypi/boot
 mkdir /mnt/cryptmypi/boot
 if mount ${_BLKDEV}${__PARTITIONPREFIX}1 /mnt/cryptmypi/boot
 then
-	echo "Mounted ${_BLKDEV}${__PARTITIONPREFIX}1 to /mnt/cryptmypi/boot."
+	echo "Mounted ${_BLKDEV}${__PARTITIONPREFIX}1 to /mnt/cryptmypi/boot ."
 else
 	echo "Aborting since we failed to mount ${_BLKDEV}${__PARTITIONPREFIX}1 to /mnt/cryptmypi/boot !"
 	exit 1
