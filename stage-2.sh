@@ -122,11 +122,10 @@ sync
 echo "Formatting Boot Partition"
 mkfs.vfat ${_BLKDEV}${__PARTITIONPREFIX}1
 
-
 # Create LUKS
 echo "Attempting to create LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
-if [ "${_LUKSPASSWD}" ]; then
-	echo "${_LUKSPASSWD}" | cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+if [ ! -z "${_LUKSPASSWD}" ]; then
+	echo "${_LUKSPASSWD}" | cryptsetup -v --cipher ${_LUKSCIPHER} --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
 else
 	cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
 fi
@@ -140,7 +139,7 @@ echo
 
 # Open LUKS
 echo "Attempting to open LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
-if [ "${_LUKSPASSWD}" ]; then
+if [ ! -z "${_LUKSPASSWD}" ]; then
 	echo "${_LUKSPASSWD}" | cryptsetup -v luksOpen ${_BLKDEV}${__PARTITIONPREFIX}2 cryptmypi_root
 else
 	cryptsetup -v luksOpen ${_BLKDEV}${__PARTITIONPREFIX}2 cryptmypi_root
