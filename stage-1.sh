@@ -141,34 +141,6 @@ finalstuff(){
 	echo "... finalstuff call completed!"
 }
 
-myhooks(){
-	##########
-	# Hook operations
-	#
-	## Operational hooks:
-	## .hook - file to manipulate build operations
-	##
-	### encryptpi.hook  - early chroot and other calls before any other chroot calls as soon chroot ready in encryptpi
-	### dropbearpi.hook - early chroot and other calls in dropbearpi
-	### finalstuff.hook - early chroot and other calls in finalstuff
-	### iodinepi.hook   - early chroot and other calls in iodinepi
-	###
-	if [ ! -z "${1}" ]; then
-		_HOOKOP="${1}"
-		echo "Attempting to run ${_HOOKOP} hooks ..."
-		for _HOOK in ${_BASEDIR}/hooks/????-${_HOOKOP}-*.hook
-		do
-			if [ -e ${_HOOK} ]; then
-				echo "Calling $(basename ${_HOOK}) ..."
-				${_HOOK}
-			fi
-		done
-	else
-		echo "Hook operations not specified! Stopping here."
-		exit 1
-	fi
-}
-
 iodinepi(){
 	##########
 	# Begin Iodine
@@ -243,6 +215,34 @@ EOF
 	rm ${_BUILDDIR}/root/crontab_setup
 
 	echo "... iodinepi call completed!"
+}
+
+myhooks(){
+	##########
+	# Hook operations
+	#
+	## Operational hooks:
+	## .hook - file to manipulate build operations
+	##
+	### encryptpi.hook  - early chroot and other calls before any other chroot calls as soon chroot ready in encryptpi
+	### dropbearpi.hook - early chroot and other calls in dropbearpi
+	### finalstuff.hook - early chroot and other calls in finalstuff
+	### iodinepi.hook   - early chroot and other calls in iodinepi
+	###
+	if [ ! -z "${1}" ]; then
+		_HOOKOP="${1}"
+		echo "Attempting to run ${_HOOKOP} hooks ..."
+		for _HOOK in ${_BASEDIR}/hooks/????-${_HOOKOP}-*.hook
+		do
+			if [ -e ${_HOOK} ]; then
+				echo "Calling $(basename ${_HOOK}) ..."
+				${_HOOK}
+			fi
+		done
+	else
+		echo "Hook operations not specified! Stopping here."
+		exit 1
+	fi
 }
 
 show_menus() {
