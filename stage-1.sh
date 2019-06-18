@@ -264,6 +264,15 @@ if [[ $EUID -ne 0 ]]; then
 	exit 1
 fi
 
+if [ ! -e /usr/bin/rsync ]; then
+	echo "No /usr/bin/rsync file found!"
+	echo "Exiting ..."
+	echo "On Debian based systems, rsync can be installed with:"
+	echo "  apt install rsync"
+	exit 1
+fi
+
+
 # Source in config
 if [ ! -f config/cryptmypi.conf ]; then
 	echo "No cryptmypi.conf file found in the config folder!"
