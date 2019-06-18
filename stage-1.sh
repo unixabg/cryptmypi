@@ -8,8 +8,8 @@
 ## under certain conditions; see COPYING for details.
 
 if [[ $EUID -ne 0 ]]; then
-   echo "This script must be run as root"
-   exit 1
+	echo "This script must be run as root"
+	exit 1
 fi
 
 dropbearpi_check(){
@@ -269,7 +269,7 @@ fi
 . config/cryptmypi.conf
 
 # Setup build structure before anything that follows
-if [ -d ${_BUILDDIR} ];then
+if [ -d ${_BUILDDIR} ]; then
 	echo "Working directory already exists: ${_BUILDDIR}"
 	echo "Exiting ..."
 	exit 1
