@@ -7,11 +7,9 @@
 ## This is free software, and you are welcome to redistribute it
 ## under certain conditions; see COPYING for details.
 
-if [[ $EUID -ne 0 ]]; then
-	echo "This script must be run as root"
-	exit 1
-fi
-
+############################
+# Functions
+############################
 dropbearpi_check(){
 	# Test for authorized_keys file
 	if [ ! -f ${_BASEDIR}/config/authorized_keys ]; then
@@ -258,6 +256,14 @@ show_menus() {
 	echo "4. Exit"
 }
 
+############################
+# Dependencies
+############################
+if [[ $EUID -ne 0 ]]; then
+	echo "This script must be run as root"
+	exit 1
+fi
+
 # Source in config
 if [ ! -f config/cryptmypi.conf ]; then
 	echo "No cryptmypi.conf file found in the config folder!"
@@ -277,7 +283,9 @@ fi
 mkdir -p ${_BUILDDIR}
 cd ${_BUILDDIR}
 
+############################
 # Main logic - infinite loop
+############################
 while true
 do
 	show_menus
