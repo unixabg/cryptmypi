@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# finalstuff hook call
-# Place your command below
-echo "Attempting to disable lightdm."
-chroot ${_BUILDDIR}/root systemctl disable lightdm
-
