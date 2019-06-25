@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# finalstuff hook call
+# Place your command below
+echo "Attempting to disable the display manager."
+chroot ${_BUILDDIR}/root systemctl set-default multi-user
+
