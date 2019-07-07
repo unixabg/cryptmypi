@@ -6,16 +6,6 @@
 # Setup working area
 echo "Attempting encryptpi operations ..."
 
-# Test for qemu
-if [ ! -f "/usr/bin/qemu-aarch64-static" ]; then
-	echo "Can't find arm emulator. Attempting to install ..."
-	apt-get -y install qemu-user-static binfmt-support
-	if [ ! -f "/usr/bin/qemu-aarch64-static" ]; then
-		echo "Still can't find arm emulator. Exiting ..."
-		exit 1
-	fi
-fi
-
 # Download arm image if we don't already have it
 _IMAGENAME=$(basename ${_IMAGEURL})
 if [ -f ${_BASEDIR}/config/${_IMAGENAME} ]; then
