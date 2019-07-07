@@ -1,4 +1,4 @@
-# cryptmypi 2.x
+# cryptmypi 3.x
 Project to assist users in building an encrypted raspberry pi and more.
 
 ## Generic steps to prep a sdcard for an encrypted raspberry pi setup.
