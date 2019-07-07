@@ -1,13 +1,6 @@
 #!/bin/bash
 
 # dropbearpi main hook call
-# Place your commands below
-
-# Test for authorized_keys file
-if [ ! -f ${_BASEDIR}/config/authorized_keys ]; then
-	echo "Dropbear authorized_keys file missing in config folder. Exiting ..."
-	exit 1
-fi
 
 ##########
 # Begin Dropbear
