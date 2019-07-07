@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# stage-2 hook to set cryptsetup nuke
+
+# Install nuke package
+chroot /mnt/cryptmypi apt-get -y install cryptsetup-nuke-password
+
+if [ ! -z "${_LUKSNUKEPASSWD}" ]; then
+	echo "Attempting to set encrypted pi cryptsetup nuke password."
+	chroot /mnt/cryptmypi /bin/bash -c "debconf-set-selections <<END
+cryptsetup-nuke-password cryptsetup-nuke-password/password string ${_LUKSNUKEPASSWD}
+cryptsetup-nuke-password cryptsetup-nuke-password/password-again string ${_LUKSNUKEPASSWD}
+END"
+	chroot /mnt/cryptmypi /bin/bash -c "dpkg-reconfigure -f noninteractive cryptsetup-nuke-password"
+	chroot /mnt/cryptmypi /bin/bash -c "mkinitramfs -o /boot/initramfs.gz -v $(ls /lib/modules/ | grep 'v8+' | head -n 1)"
+elif [ -z "${_LUKSNUKEPASSWD}" ]; then
+	while true
+	do
+		read -r -p "Would you like to set a cryptsetup nuke password on your encrypted pi? (y/n) " _NUKEPASSWDRESPONSE
+		case ${_NUKEPASSWDRESPONSE} in
+			y|Y)	_NUKEPASSWORD1="0"
+				_NUKEPASSWORD2="1"
+				read -r -s -p "Please enter a new cryptsetup nuke password: " _NUKEPASSWORD1
+				echo
+				read -r -s -p "Please enter the new cryptsetup nuke password again: " _NUKEPASSWORD2
+				echo
+				while [ ${_NUKEPASSWORD1} != ${_NUKEPASSWORD2} ]
+				do
+					echo "Password mismatch please try again."
+					read -r -s -p "Please enter a new cryptsetup nuke password: " _NUKEPASSWORD1
+					echo
+					read -r -s -p "Please enter the new cryptsetup nuke password again: " _NUKEPASSWORD2
+					echo
+				done
+				echo "Attempting to set encrypted pi cryptsetup nuke password."
+				chroot /mnt/cryptmypi /bin/bash -c "debconf-set-selections <<END
+cryptsetup-nuke-password cryptsetup-nuke-password/password string ${_NUKEPASSWORD1}
+cryptsetup-nuke-password cryptsetup-nuke-password/password-again string ${_NUKEPASSWORD1}
+END"
+				chroot /mnt/cryptmypi /bin/bash -c "dpkg-reconfigure -f noninteractive cryptsetup-nuke-password"
+				chroot /mnt/cryptmypi /bin/bash -c "mkinitramfs -o /boot/initramfs.gz -v $(ls /lib/modules/ | grep 'v8+' | head -n 1)"
+				break
+				;;
+			n|N)	echo "Leaving without setting a cryptsetup nuke password!"
+				break
+				;;
+			*)	echo "Invalid selection ... please enter: y or n "
+		esac
+	done
+fi
