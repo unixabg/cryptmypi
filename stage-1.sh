@@ -96,23 +96,21 @@ do
 	read -p "Enter choice [1 - 4] " _SELECTION
 	case $_SELECTION in
 		1)	echo "Encrypt pi selected!"
-			encryptpi
-			finalstuff
+			myhooks encryptpi
+			myhooks finalstuff
 			break
 			;;
 		2)	echo "Encrypt pi + dropbear selected!"
-			dropbearpi_check
-			encryptpi
-			dropbearpi
-			finalstuff
+			myhooks encryptpi
+			myhooks dropbearpi
+			myhooks finalstuff
 			break
 			;;
 		3)	echo "Encrypt pi + dropbear + iodine selected!"
-			dropbearpi_check
-			encryptpi
-			dropbearpi
-			iodinepi
-			finalstuff
+			myhooks encryptpi
+			myhooks dropbearpi
+			myhooks iodinepi
+			myhooks finalstuff
 			break
 			;;
 		4)	break
