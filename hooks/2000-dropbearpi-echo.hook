@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# dropbearpi hook call
-# Place your commands below
-
-echo "Hello from dropbearpi.hook!."
-
