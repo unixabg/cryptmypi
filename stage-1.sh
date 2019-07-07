@@ -25,7 +25,7 @@ myhooks(){
 	if [ ! -z "${1}" ]; then
 		_HOOKOP="${1}"
 		echo "Attempting to run ${_HOOKOP} hooks ..."
-		for _HOOK in ${_BASEDIR}/hooks/????-${_HOOKOP}-*.hook
+		for _HOOK in ${_BASEDIR}/hooks/????-${_HOOKOP}*.hook
 		do
 			if [ -e ${_HOOK} ]; then
 				echo "Calling $(basename ${_HOOK}) ..."
