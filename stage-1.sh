@@ -101,12 +101,14 @@ do
 			break
 			;;
 		2)	echo "Encrypt pi + dropbear selected!"
+			myhooks sanity-dropbear
 			myhooks encryptpi
 			myhooks dropbearpi
 			myhooks finalstuff
 			break
 			;;
 		3)	echo "Encrypt pi + dropbear + iodine selected!"
+			myhooks sanity-dropbear
 			myhooks encryptpi
 			myhooks dropbearpi
 			myhooks iodinepi
