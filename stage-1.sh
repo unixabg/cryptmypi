@@ -97,11 +97,13 @@ do
 	read -p "Enter choice [1 - 4] " _SELECTION
 	case $_SELECTION in
 		1)	echo "Encrypt pi selected!"
+			myhooks sanity-qemu
 			myhooks encryptpi
 			myhooks finalstuff
 			break
 			;;
 		2)	echo "Encrypt pi + dropbear selected!"
+			myhooks sanity-qemu
 			myhooks sanity-dropbear
 			myhooks encryptpi
 			myhooks dropbearpi
@@ -109,6 +111,7 @@ do
 			break
 			;;
 		3)	echo "Encrypt pi + dropbear + iodine selected!"
+			myhooks sanity-qemu
 			myhooks sanity-dropbear
 			myhooks encryptpi
 			myhooks dropbearpi
