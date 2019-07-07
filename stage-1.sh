@@ -10,18 +10,6 @@
 ############################
 # Functions
 ############################
-finalstuff(){
-	echo "Starting finalstuff ..."
-
-	# Call for hook finalstuff
-	myhooks finalstuff
-
-	# Finally, Create the initramfs
-	chroot ${_BUILDDIR}/root mkinitramfs -o /boot/initramfs.gz -v $(ls ${_BUILDDIR}/root/lib/modules/ | grep 'v8+' | head -n 1)
-
-	echo "... finalstuff call completed!"
-}
-
 myhooks(){
 	##########
 	# Hook operations

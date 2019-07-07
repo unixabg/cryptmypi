@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# finalstuff hook call
-# Place your command below
-echo "Hello from finalstuff.hook!"
-
