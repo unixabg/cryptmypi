@@ -53,6 +53,7 @@ rm ${_BUILDDIR}/kali.img
 echo "Copying qemu emulator to chroot ..."
 cp /usr/bin/qemu-aarch64-static ${_BUILDDIR}/root/usr/bin/
 
+chroot ${_BUILDDIR}/root apt-get update
 chroot ${_BUILDDIR}/root apt-get -y install cryptsetup busybox
 
 # Tell pi to use initramfs
