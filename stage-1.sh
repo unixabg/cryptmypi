@@ -30,6 +30,7 @@ myhooks(){
 			if [ -e ${_HOOK} ]; then
 				echo "Calling $(basename ${_HOOK}) ..."
 				${_HOOK}
+				echo "... $(basename ${_HOOK}) completed!"
 			fi
 		done
 	else

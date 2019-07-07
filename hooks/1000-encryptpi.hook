@@ -4,7 +4,7 @@
 
 ##########
 # Setup working area
-echo "Attempting to run encryptpi ..."
+echo "Attempting encryptpi operations ..."
 
 # Test for qemu
 if [ ! -f "/usr/bin/qemu-aarch64-static" ]; then
@@ -61,7 +61,7 @@ echo "initramfs initramfs.gz followkernel" >> ${_BUILDDIR}/root/boot/config.txt
 
 ##########
 # Begin cryptsetup
-echo "The encryptpi stage completed!"
+echo "Making the cryptsetup settings ..."
 # Update /boot/cmdline.txt to boot crypt
 sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt cryptdevice=/dev/mmcblk0p2:crypt#g' ${_BUILDDIR}/root/boot/cmdline.txt
 # Enable cryptsetup when building initramfs
@@ -82,6 +82,4 @@ chmod 755 ${_BUILDDIR}/root/etc/initramfs-tools/hooks/zz-cryptsetup
 # Disable autoresize
 chroot ${_BUILDDIR}/root systemctl disable rpiwiggle
 rm ${_BUILDDIR}/root/root/scripts/rpi-wiggle.sh
-
-echo "... encryptpi call completed!"
 
