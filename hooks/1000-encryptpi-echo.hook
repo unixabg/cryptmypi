@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# encryptpi hook call
-# Place your command below
-
-echo "Hello from encryptpi.hook!."
-
