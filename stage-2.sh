@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ## cryptmypi
 ## Copyright (C) 2018-2019 Richard Nelson <unixabg@gmail.com>
 ##
@@ -107,10 +109,10 @@ case "${_CONTINUE}" in
 esac
 
 # Attempt to unmount just to be safe
-umount ${_BLKDEV}*
-umount /mnt/cryptmypi
-[ -d /mnt/cryptmypi ] && rm -r /mnt/cryptmypi
-cryptsetup luksClose cryptmypi_root
+umount ${_BLKDEV}* || true
+umount /mnt/cryptmypi || true
+[ -d /mnt/cryptmypi ] && rm -r /mnt/cryptmypi || true
+cryptsetup luksClose cryptmypi_root || true
 
 # Format SD Card
 echo "Partitioning SD Card"
