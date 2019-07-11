@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ## cryptmypi
 ## Copyright (C) 2018-2019 Richard Nelson <unixabg@gmail.com>
 ##
