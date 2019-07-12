@@ -117,8 +117,8 @@ cryptsetup luksClose cryptmypi_root || true
 # Format SD Card
 echo "Partitioning SD Card"
 parted ${_BLKDEV} --script -- mklabel msdos
-parted ${_BLKDEV} --script -- mkpart primary fat32 0 64
-parted ${_BLKDEV} --script -- mkpart primary 64 -1
+parted ${_BLKDEV} --script -- mkpart primary fat32 0 128
+parted ${_BLKDEV} --script -- mkpart primary 128 -1
 sync
 sync
 echo "Formatting Boot Partition"
