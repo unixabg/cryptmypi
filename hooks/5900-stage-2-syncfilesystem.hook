@@ -2,9 +2,9 @@
 
 # stage-2 hook call
 # Place your command below
-echo "Stage-2 hook syncing filesystem."
+echo "Stage-2 hook syncing filesystem ..."
 sync
 sync
-echo "Done syncing the filesystems."
+echo "... done syncing the filesystems."
 echo
 
