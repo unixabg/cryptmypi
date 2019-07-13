@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # stage-2 hook call
 # Place your command below
 echo "Stage-2 hook syncing filesystem ..."

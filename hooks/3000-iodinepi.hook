@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # iodinepi main hook call
 
 ##########
