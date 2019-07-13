@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # finalstuff hook call
 # Place your command below
 echo "Final package action to remove, install other handy tools, and clean."

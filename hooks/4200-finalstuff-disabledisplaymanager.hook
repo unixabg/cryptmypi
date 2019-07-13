@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # finalstuff hook call
 # Place your command below
 echo "Attempting to disable the display manager."

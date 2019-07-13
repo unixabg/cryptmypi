@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # cleanup things from build or other
 
 echo "Cleaning up etc/initramfs-tools/hooks/zz-cryptsetup hook ..."

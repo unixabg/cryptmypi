@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # finalstuff initramfs hook call
 
 echo "Building new initramfs ..."

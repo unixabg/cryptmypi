@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # sanity check for encryptpi things
 
 # Test for qemu

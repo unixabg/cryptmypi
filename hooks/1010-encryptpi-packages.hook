@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # encryptpi hook call
 # Place your command below
 

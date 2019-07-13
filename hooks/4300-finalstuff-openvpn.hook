@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # finalstuff hook call
 echo "Checking for OpenVPN client config"
 if [ -f ${_BASEDIR}/config/openvpn.conf ]; then
