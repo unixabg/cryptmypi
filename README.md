@@ -10,7 +10,7 @@ Project to assist users in building an encrypted raspberry pi and more.
  * Insert sdcard and **P L E A S E** ensure the block device matches your sdcard for stage-2.sh
  * Run ./stage-2.sh
 
-### Note: Scripts stage-1.sh and stage-2.sh only tested on kali-rolling host.
+### Note: Scripts stage-1.sh and stage-2.sh only tested on kali-rolling host. Target tested only with Kali Linux RaspberryPi 2 and 3 64 bit image.
 
 ### Reference links and other
 + https://github.com/NicoHood/NicoHood.github.io/wiki/Raspberry-Pi-Encrypt-Root-Partition-Tutorial
