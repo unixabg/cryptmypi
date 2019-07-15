@@ -9,7 +9,7 @@ set -e
 # Put authorized keys where they go
 echo "Attempting dropbearpi ..."
 
-chroot ${_BUILDDIR}/root apt-get -y install dropbear
+chroot ${_BUILDDIR}/root apt-get -y install dropbear dropbear-initramfs
 
 # Create the target /etc/dropbear-initramfs/authorized_keys
 cat << "EOF" > ${_BUILDDIR}/root/etc/dropbear-initramfs/authorized_keys.tmp
