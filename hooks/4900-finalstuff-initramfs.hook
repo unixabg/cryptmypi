@@ -6,6 +6,22 @@ set -e
 
 echo "Building new initramfs ..."
 
+case $_IMAGEURL in
+	*rpi3-nexmon-64.img*)
+		echo "... configuring rpi3 64bit initramfs ..."
+		__KERNELFLAVOR=$(ls ${_BUILDDIR}/root/lib/modules/ | grep 'v8+' | head -n 1)
+		;;
+	*rpi3-nexmon.img*)
+		echo "... configuring rpi3 32bit initramfs ..."
+		__KERNELFLAVOR=$(ls ${_BUILDDIR}/root/lib/modules/ | grep 'v7+' | head -n 1)
+		;;
+	*rpi0-nexmon.img*)
+		echo "... configuring rpi0 32bit initramfs ..."
+		__KERNELFLAVOR=$(ls ${_BUILDDIR}/root/lib/modules/ | grep 'Re4son+' | head -n 1)
+		;;
+	*)
+		echo "Unable to determine the initramfs build type! Exiting ..."
+esac
 # Finally, Create the initramfs
-chroot ${_BUILDDIR}/root mkinitramfs -o /boot/initramfs.gz -v $(ls ${_BUILDDIR}/root/lib/modules/ | grep 'v8+' | head -n 1)
+chroot ${_BUILDDIR}/root mkinitramfs -o /boot/initramfs.gz -v $__KERNELFLAVOR
 
