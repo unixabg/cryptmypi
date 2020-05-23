@@ -1,0 +1,18 @@
+function_exists(){
+    declare -f -F $1 > /dev/null
+    return $?
+}
+
+
+function_summary(){
+    type $1 | sed '1,3d;$d'
+}
+
+
+is_build_encrypted(){
+    if grep -q "CRYPTSETUP=y" ${_BUILDDIR}/root/etc/cryptsetup-initramfs/conf-hook; then
+        return 0;
+    else
+        return 1;
+    fi
+}

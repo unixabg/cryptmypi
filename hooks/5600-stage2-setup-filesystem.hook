@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+
+# Attempt to rsync files from build to mounted device
+echo_debug "Attempting to rsync ${_BUILDDIR}/root/ to /mnt/cryptmypi/ ..."
+rsync -HPavz -q "${_BUILDDIR}"/root/ /mnt/cryptmypi/
+echo
+
+
+# Sync file system
+echo_debug "Syncing the filesystems ...."
+sync
+sync
+echo_debug "- Done syncing the filesystems."
+echo

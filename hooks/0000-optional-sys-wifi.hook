@@ -1,0 +1,72 @@
+#!/bin/bash
+set -e
+
+
+echo_debug 'Setting WIFI up ...'
+
+
+# Checking if WIFI interface was provided
+if [ -z "${_WIFI_INTERFACE}" ]; then
+    _WIFI_INTERFACE='wlan0'
+    echo_warn "_WIFI_INTERFACE is not set on config: Setting default value ${_WIFI_INTERFACE}"
+fi
+
+
+echo_debug "Generating PSK for '${_WIFI_SSID}' '${_WIFI_PASS}'"
+_WIFI_PSK=$(wpa_passphrase "${_WIFI_SSID}" "${_WIFI_PASS}" | grep "psk=" | grep -v "#psk")
+
+
+echo_debug "Creating wpa_supplicant file"
+cat <<EOT > ${CHROOTDIR}/etc/wpa_supplicant.conf
+ctrl_interface=/var/run/wpa_supplicant
+network={
+       ssid="${_WIFI_SSID}"
+       scan_ssid=1
+       proto=WPA RSN
+       key_mgmt=WPA-PSK
+       pairwise=CCMP TKIP
+       group=CCMP TKIP
+${_WIFI_PSK}
+}
+EOT
+
+
+echo_debug "Uptading /etc/network/interfaces file"
+cat <<EOT >> ${CHROOTDIR}/etc/network/interfaces
+
+# The buildin wireless interface
+auto ${_WIFI_INTERFACE}
+allow-hotplug ${_WIFI_INTERFACE}
+iface ${_WIFI_INTERFACE} inet dhcp
+wpa-conf /etc/wpa_supplicant.conf
+# pre-up wpa_supplicant -B -Dwext -i${_WIFI_INTERFACE} -c/etc/wpa_supplicant.conf
+# post-down killall -q wpa_supplicant
+
+EOT
+
+
+echo_debug "Create connection script /root/sys-wifi-connect.sh"
+cat <<EOT >> ${CHROOTDIR}/root/sys-wifi-connect.sh
+#!/bin/bash
+
+# Remove file if exists
+test -e /var/run/wpa_supplicant/wlan0 && rm -f /var/run/wpa_supplicant/wlan0
+
+# Power interface up
+ip link set ${_WIFI_INTERFACE} down
+ip link set ${_WIFI_INTERFACE} up
+
+# Connect to WPA WiFi network
+wpa_supplicant -B -Dwext -i ${_WIFI_INTERFACE} -c /etc/wpa_supplicant.conf
+
+# Get IP from dhcp
+# dhclient ${_WIFI_INTERFACE}
+EOT
+chmod +x ${CHROOTDIR}/root/sys-wifi-connect.sh
+
+
+#echo_debug "Add to cron to start at boot (before login)"
+#echo_debug "@reboot /root/sys-wifi-connect.sh" > ${CHROOTDIR}/etc/cron.d/sys-wifi
+
+
+echo_debug " ... done!"

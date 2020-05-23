@@ -1,1 +1,2 @@
-cryptmypi-build
+build/
+*build*/

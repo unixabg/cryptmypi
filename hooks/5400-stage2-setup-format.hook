@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+
+
+is_build_encrypted && {
+    # Format LUKS
+    echo_debug "Attempting to format LUKS on /dev/mapper/cryptmypi_root ..."
+    if mkfs.ext4 /dev/mapper/cryptmypi_root
+    then
+        echo_debug "- LUKS formatted to ext4."
+    else
+        echo_error "- Aborting since we failed to format /dev/mapper/cryptmypi_root to ext4"
+        exit 1
+    fi
+    echo
+} || {
+    # Format ROOT partition
+    echo_debug "Attempting to format root partition ..."
+    if mkfs.ext4 ${_BLKDEV}${__PARTITIONPREFIX}2
+    then
+        echo_debug "- Root partition formatted to ext4."
+    else
+        echo_error "- Aborting since we failed to format root partition to ext4"
+        exit 1
+    fi
+    echo
+}
+
+
+# Format boot partition
+echo_debug "Formatting Boot Partition"
+mkfs.vfat ${_BLKDEV}${__PARTITIONPREFIX}1
+echo

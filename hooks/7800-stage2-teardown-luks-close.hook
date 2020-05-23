@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+
+is_build_encrypted && {
+    # Close LUKS
+    echo_debug "Attempting to close open LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
+    if cryptsetup -v luksClose /dev/mapper/cryptmypi_root
+    then
+        echo_debug "- LUKS closed."
+    else
+        echo_error "- Aborting since we failed to close LUKS /dev/mapper/cryptmypi_root"
+        exit 1
+    fi
+    echo
+}

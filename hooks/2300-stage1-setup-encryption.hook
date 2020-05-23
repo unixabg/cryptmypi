@@ -1,0 +1,48 @@
+#!/bin/bash
+set -e
+
+
+# Setup qemu emulator for aarch64
+echo_debug "- Copying qemu emulator to chroot ..."
+cp /usr/bin/qemu-aarch64-static ${_BUILDDIR}/root/usr/bin/
+chroot_pkginstall cryptsetup busybox
+
+# Creating symbolic link to e2fsck
+chroot ${_BUILDDIR}/root /bin/bash -c "test -L /sbin/fsck.luks || ln -s /sbin/e2fsck /sbin/fsck.luks"
+
+# Indicate kernel to use initramfs (facilitates loading drivers)
+echo "initramfs initramfs.gz followkernel" >> ${_BUILDDIR}/root/boot/config.txt
+
+# Begin cryptsetup
+echo_debug "Making the cryptsetup settings ..."
+
+# Update /boot/cmdline.txt to boot crypt
+sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt cryptdevice=/dev/mmcblk0p2:crypt#g' ${_BUILDDIR}/root/boot/cmdline.txt
+
+# Enable cryptsetup when building initramfs
+echo "CRYPTSETUP=y" >> ${_BUILDDIR}/root/etc/cryptsetup-initramfs/conf-hook
+
+# Update /etc/fstab
+sed -i 's#/dev/mmcblk0p2#/dev/mapper/crypt#g' ${_BUILDDIR}/root/etc/fstab
+
+# Update /etc/crypttab
+echo "crypt    /dev/mmcblk0p2    none    luks" >> ${_BUILDDIR}/root/etc/crypttab
+
+# Create a hook to include our crypttab in the initramfs
+cat << EOF > ${_BUILDDIR}/root/etc/initramfs-tools/hooks/zz-cryptsetup
+#!/bin/sh
+if [ "\$1" = "prereqs" ]; then exit 0; fi
+
+. /usr/share/initramfs-tools/hook-functions
+
+mkdir -p \${DESTDIR}/cryptroot || true
+cat /etc/crypttab >> \${DESTDIR}/cryptroot/crypttab
+EOF
+chmod 755 ${_BUILDDIR}/root/etc/initramfs-tools/hooks/zz-cryptsetup
+
+# Adding dm_mod to initramfs modules
+echo 'dm_crypt' >> ${_BUILDDIR}/root/etc/initramfs-tools/modules
+
+# Disable autoresize
+chroot_execute systemctl disable rpiwiggle
+rm ${_BUILDDIR}/root/root/scripts/rpi-wiggle.sh

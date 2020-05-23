@@ -1,9 +1,0 @@
-#!/bin/bash
-
-set -e
-
-# stage-2 hook call
-# Place your command below
-
-echo "Hello stage-2-echo.hook!."
-
