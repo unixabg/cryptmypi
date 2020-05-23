@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+
+is_build_encrypted && {
+    # Create LUKS
+    echo_debug "Attempting to create LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
+    if [ ! -z "${_LUKSPASSWD}" ]; then
+        echo "${_LUKSPASSWD}" | cryptsetup -v --cipher ${_LUKSCIPHER} --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+    else
+        cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+    fi
+    if [ $? -eq 0 ]; then
+        echo_debug "- LUKS created."
+    else
+        echo_error "- Aborting since we failed to create LUKS on ${_BLKDEV}${__PARTITIONPREFIX}2"
+        exit 1
+    fi
+    echo
+}

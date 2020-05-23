@@ -1,0 +1,127 @@
+#!/bin/bash
+set -e
+
+
+echo_debug "Attempting to set sshhub.de channel..."
+
+
+if [ -z "${_SSHHUB_USERNAME}" ]; then
+    echo_warn "SKIPPING sshhub setup: '_SSHHUB_USERNAME' variable was not set."
+else
+    if [ -z "${_SSHHUB_SSH_PORT}" ]; then
+        _SSHHUB_SSH_PORT=22
+         echo_warn "_SSHHUB_SSH_PORT is not set on config: Setting default value ${_SSHHUB_SSH_PORT}"
+   fi
+
+    if [ -z "${_SSHHUB_COMPUTER}" ]; then
+        _SSHHUB_REFERENCE=${_HOSTNAME}
+        echo_warn "_SSHHUB_COMPUTER is not set on config: Setting default value ${_HOSTNAME}"
+    else
+        _SSHHUB_REFERENCE=${_SSHHUB_COMPUTER}
+    fi
+    echo_debug "Computer reference name: '${_SSHHUB_REFERENCE}'"
+
+
+    echo_debug "Assuring box keyfile exists"
+    assure_box_sshkey "${_HOSTNAME}"
+
+
+    echo_debug "Registering box keyfile to sshhub"
+    if [ -z "${_SSHHUB_LOCAL_KEYFILE}" ]; then
+        ssh "${_SSHHUB_USERNAME}@sshhub.de" pubkey add $(cat "${_KEYFILE}.pub")
+    else
+        ssh -i "${_SSHHUB_LOCAL_KEYFILE}" "${_SSHHUB_USERNAME}@sshhub.de" pubkey add $(cat "${_KEYFILE}.pub")
+    fi
+
+
+    echo_debug "Adding sshhub.de pub key to known_hosts..."
+    ssh-keyscan -H sshhub.de >> ${CHROOTDIR}/root/.ssh/known_hosts
+    chmod 644 ${CHROOTDIR}/root/.ssh/known_hosts
+
+
+    echo_debug "Creating script to create and maintain sshhub channel..."
+    cat <<EOT > ${CHROOTDIR}/root/sys-sshhub-channel.sh
+#!/bin/bash
+
+while true
+do
+    sleep 30
+    ssh -i /root/.ssh/id_rsa ${_SSHHUB_USERNAME}@sshhub.de info | grep -q "^${_SSHHUB_REFERENCE}:${_SSHHUB_SSH_PORT}\$" && {
+        # sshhub's port is already being used, using another port
+        ssh -i /root/.ssh/id_rsa ${_SSHHUB_USERNAME}@sshhub.de -R ${_SSHHUB_REFERENCE}:${_SSHHUB_SSH_PORT}2:localhost:22 -N -o ServerAliveInterval=60 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+    } || {
+        # Proceding normally
+        ssh -i /root/.ssh/id_rsa ${_SSHHUB_USERNAME}@sshhub.de -R ${_SSHHUB_REFERENCE}:${_SSHHUB_SSH_PORT}:localhost:22 -N -o ServerAliveInterval=60 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+    }
+done
+EOT
+    chmod +x ${CHROOTDIR}/root/sys-sshhub-channel.sh
+
+
+    echo_debug "Creating startup service"
+    cat <<EOT > ${CHROOTDIR}/etc/systemd/system/sshhub.service
+[Unit]
+Description=sshhub
+
+[Service]
+Type=oneshot #or simple
+ExecStart=/root/sys-sshhub-channel.sh
+
+[Install]
+WantedBy=multi-user.target
+EOT
+    chroot_execute systemctl enable sshhub.service
+
+
+    echo_debug "Creating script to removes this key from SSHHUB: ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove"
+    cat <<EOT > ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove
+#!/bin/bash
+cat ${_KEYFILE}.pub | ssh ${_SSHHUB_USERNAME}@sshhub.de pubkey rm
+EOT
+    chmod +x ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove
+
+
+    test -e ~/.ssh/config && {
+        sed -i.bak '/# cryptmypi sshhub entry/d' ~/.ssh/config
+    }
+
+    echo_debug "Editing ~/.ssh/config"
+
+    echo_debug "    Verifying if sshhub hub alias exists ..."
+    if grep -q "^Host hub\s*" ~/.ssh/config
+    then
+        echo_debug "        ... sshhub host definition found."
+    else
+        echo_debug "        ... sshhub host definition not found: creating it"
+        cat <<EOT >> ~/.ssh/config
+
+Host hub    # cryptmypi sshhub entry
+    Hostname sshhub.de    # cryptmypi sshhub entry
+    User ${_SSHHUB_USERNAME}    # cryptmypi sshhub entry
+    IdentityFIle ${_SSHHUB_LOCAL_KEYFILE}    # cryptmypi sshhub entry
+EOT
+    fi
+
+    echo_debug "    Creating/Replacing ${_SSHHUB_REFERENCE}-sys host definition ..."
+    sed -i.bak "/#cryptmypi ${_SSHHUB_REFERENCE}-sys entry/d" ~/.ssh/config
+cat <<EOT >> ~/.ssh/config
+
+Host ${_SSHHUB_REFERENCE}-sys    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
+	HostName ${_SSHHUB_REFERENCE}    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
+	User root    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
+    Port ${_SSHHUB_SSH_PORT}    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
+	IdentityFile ${_SSH_LOCAL_KEYFILE}    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
+	ProxyJump hub    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
+EOT
+
+    echo_debug "    Removing unecessary empty lines"
+    sed -i 'N;/^\n$/D;P;D;' ~/.ssh/config
+
+
+    echo_debug " ... sshhub.de channel set up! To connect, use:"
+    echo_debug ""
+    echo_debug "   ssh -i \"${_SSH_LOCAL_KEYFILE}\" -J ${_SSHHUB_USERNAME}@sshhub.de root@${_SSHHUB_REFERENCE} -p ${_SSHHUB_SSH_PORT}"
+    echo_debug "   or"
+    echo_debug "   ssh ${_SSHHUB_REFERENCE}-sys"
+    echo_debug ""
+fi

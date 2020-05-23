@@ -1,0 +1,50 @@
+#!/bin/bash
+set -e
+
+
+# REFERENCE
+#   https://github.com/AIRCRACK-NG/RTL8188EUS
+
+
+echo "Attempting to install RTL8188EU (TL-WN722N) ..."
+
+
+echo "Changing directory"
+_CMD=$(pwd)
+cd ${CHROOTDIR}/root
+
+
+chroot_pkginstall bc
+
+
+echo "blacklist r8188eu" >> "${CHROOTDIR}/etc/modprobe.d/realtek.conf"
+
+
+# Load driver - add to?
+
+
+echo "Clonning the repo"
+git clone https://github.com/aircrack-ng/rtl8188eus.git
+
+
+echo "> Creating initramfs script to build the driver"
+cat <<EOT > ${CHROOTDIR}/root/compile_rtl8188eu
+cd /root/rtl8188eus
+make all
+make install
+EOT
+chmod +x ${CHROOTDIR}/root/compile_rtl8188eus
+
+
+echo "  ... done."
+cd "${_CMD}"
+
+
+
+
+
+# $ sudo airmon-ng check-kill
+# $ sudo ip link set <interface> down
+# $ sudo iw dev <interface> set type monitor
+# Frame injection test may be performed with (after kernel v5.2 scanning is slow, run a scan or simply an airodump-ng first!)
+# $ aireplay -9 <interface>

@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+
+echo_debug "Partitioning SD Card"
+parted ${_BLKDEV} --script -- mklabel msdos
+parted ${_BLKDEV} --script -- mkpart primary fat32 0 128
+parted ${_BLKDEV} --script -- mkpart primary 128 -1
+sync
+sync

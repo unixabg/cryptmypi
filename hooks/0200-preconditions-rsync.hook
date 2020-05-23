@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+# Precondition check for rsync availability
+if [ ! -e /usr/bin/rsync ]; then
+	echo_error "No /usr/bin/rsync file found!"
+	echo "Exiting ..."
+	echo "On Debian based systems, rsync can be installed with:"
+	echo "  apt install rsync"
+	exit 1
+fi

@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+
+is_build_encrypted && {
+    # Open LUKS
+    echo_debug "Attempting to open LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
+    if [ ! -z "${_LUKSPASSWD}" ]; then
+        echo "${_LUKSPASSWD}" | cryptsetup -v luksOpen ${_BLKDEV}${__PARTITIONPREFIX}2 cryptmypi_root
+    else
+        cryptsetup -v luksOpen ${_BLKDEV}${__PARTITIONPREFIX}2 cryptmypi_root
+    fi
+    if [ $? -eq 0 ]; then
+        echo_debug "- LUKS opened."
+    else
+        echo_error "- Aborting since we failed to open LUKS on ${_BLKDEV}${__PARTITIONPREFIX}2"
+        exit 1
+    fi
+    echo
+}

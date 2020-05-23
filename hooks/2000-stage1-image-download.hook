@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+# Download ARM image if we don't already have it
+if [ -f ${_IMAGEDIR}/${_IMAGENAME} ]; then
+	echo_debug "ARM image ${_IMAGENAME} already exists!"
+else
+	echo_debug "Downloading ARM image from ${_IMAGEURL} ..."
+	wget ${_IMAGEURL} -O ${_IMAGEDIR}/${_IMAGENAME}
+fi

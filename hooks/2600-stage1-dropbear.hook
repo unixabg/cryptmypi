@@ -1,0 +1,52 @@
+#!/bin/bash
+set -e
+
+
+echo_debug "Attempting to install dropbear ..."
+
+
+if [ -z "${_SSH_LOCAL_KEYFILE}" ]; then
+    echo_error "ERROR: _SSH_LOCAL_KEYFILE variable was not set. Exiting..."
+    exit 1
+else
+    test -f "${_SSH_LOCAL_KEYFILE}" || {
+        echo_error "ERROR: Obligatory SSH keyfile '${_SSH_LOCAL_KEYFILE}' could not be found. Exiting..."
+        exit 1
+    }
+fi
+
+
+# Installing packages
+chroot_pkginstall dropbear dropbear-initramfs
+
+
+# Adding command to authorized keys
+cat << "EOF" > ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys.tmp
+command="export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'; cryptsetup luksOpen /dev/mmcblk0p2 crypt && /scripts/local-top/cryptroot || reboot; killall 'cryptroot'; exit" 
+EOF
+#command="export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'; cryptsetup luksOpen /dev/mmcblk0p2 crypt && /scripts/local-top/cryptroot && kill -9 `ps | grep -m 1 'cryptroot' | cut -d ' ' -f 3` && exit" 
+
+tr -d '\n' < ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys.tmp > ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys
+rm -f ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys.tmp
+
+
+# Now append our key to dropbear authorized_keys file
+cat "${_SSH_LOCAL_KEYFILE}.pub" >> ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys
+chmod 600 ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys
+
+
+# Update dropbear for some sleep in initramfs
+sed -i 's/run_dropbear &/sleep 5\nrun_dropbear &/g' ${CHROOTDIR}/usr/share/initramfs-tools/scripts/init-premount/dropbear
+
+
+# Change the port that dropbear runs on to make our lives easier
+sed -i 's/#DROPBEAR_OPTIONS=/DROPBEAR_OPTIONS="-p 2222"/g' ${CHROOTDIR}/etc/dropbear-initramfs/config
+
+
+# Using provided dropbear keys (or backuping generating ones for later usage)
+backup_and_use_sshkey ${CHROOTDIR}/etc/dropbear-initramfs/dropbear_dss_host_key
+backup_and_use_sshkey ${CHROOTDIR}/etc/dropbear-initramfs/dropbear_ecdsa_host_key
+backup_and_use_sshkey ${CHROOTDIR}/etc/dropbear-initramfs/dropbear_rsa_host_key
+
+
+echo_debug "... dropbearpi call completed!"

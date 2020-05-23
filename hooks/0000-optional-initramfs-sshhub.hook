@@ -1,0 +1,212 @@
+#!/bin/bash
+set -e
+
+# REFERENCE:
+#   https://www.quora.com/Debian-GNU-Linux-How-can-I-add-an-SSH-active-client-in-the-initramfs-image-to-get-data-remotely
+#   https://superuser.com/questions/1289564/how-to-make-port-forwarding-in-initramfs-stage/1289835#1289835
+#   https://www.ullright.org/ullWiki/show/initramfs-tools
+#   https://github.com/ceremcem/unlock-luks-partition/blob/master/reverse-tunnel-setup.md
+
+
+echo_debug "Attempting to set sshhub.de channel to INITRAMFS..."
+
+
+if [ -z "${_SSHHUB_USERNAME}" ]; then
+    echo_warn "SKIPPING sshhub setup: '_SSHHUB_USERNAME' variable was not set."
+else
+    if [ -z "${_SSHHUB_SSHLUKS_PORT}" ]; then
+        _SSHHUB_SSHLUKS_PORT=2222
+        echo_warn "_SSHHUB_SSHLUKS_PORT is not set on config: Setting default value ${_SSHHUB_SSHLUKS_PORT}"
+    fi
+
+    if [ -z "${_SSHHUB_COMPUTER}" ]; then
+        _SSHHUB_REFERENCE=${_HOSTNAME}
+        echo_warn "_SSHHUB_COMPUTER is not set on config: Setting default value ${_HOSTNAME}"
+    else
+        _SSHHUB_REFERENCE=${_SSHHUB_COMPUTER}
+    fi
+    echo_debug "Computer reference name: '${_SSHHUB_REFERENCE}'"
+
+
+    echo_debug "Assuring box keyfile exists"
+    assure_box_sshkey "${_HOSTNAME}"
+
+
+    echo_debug "Registering box keyfile to sshhub"
+    if [ -z "${_SSHHUB_LOCAL_KEYFILE}" ]; then
+        ssh "${_SSHHUB_USERNAME}@${_SSHHUB_ADDRESS}" pubkey add $(cat "${_KEYFILE}.pub")
+    else
+        ssh -i "${_SSHHUB_LOCAL_KEYFILE}" "${_SSHHUB_USERNAME}@${_SSHHUB_ADDRESS}" pubkey add $(cat "${_KEYFILE}.pub")
+    fi
+
+
+    echo_debug "Determining sshhub.de IP..."
+    _SSHHUB_ADDRESS="sshhub.de"
+    _SSHHUB_IP=$(nslookup "${_SSHHUB_ADDRESS}" | grep Address | tail -n1 | sed 's#^\s*Address:\s*\(.*\)$#\1#')
+    if [ -z "${_SSHHUB_IP}" ]; then
+        echo_debug "    IP could not be determined. Using '${_SSHHUB_ADDRESS}'"
+    else
+        echo_debug "    IP: ${_SSHHUB_IP}"
+    fi
+
+
+    echo_debug "Creating initramfs script sshhub_tunnel"
+    cat <<EOT > ${CHROOTDIR}/etc/initramfs-tools/scripts/local-top/sshhub_tunnel
+#!/bin/sh
+
+PREREQ=""
+prereqs()
+{
+    echo "\$PREREQ"
+}
+
+case \$1 in
+prereqs)
+    prereqs
+    exit 0
+    ;;
+esac
+
+. /scripts/functions
+
+log_begin_msg "Starting SSHHUB tunnel ..."
+
+/sbin/ifconfig lo up
+/etc/ssh_tunnel.sh &
+EOT
+    chmod +x "${CHROOTDIR}/etc/initramfs-tools/scripts/local-top/sshhub_tunnel"
+
+
+    echo_debug "Creating sshhub_tunnel.sh connection loop"
+    cat <<EOT > ${CHROOTDIR}/etc/initramfs-tools/ssh_tunnel.sh
+# !/bin/sh
+
+_SSHHUB_HOST="${_SSHHUB_ADDRESS}"
+_SSHHUB_IP="${_SSHHUB_IP}"
+
+while test -f /etc/dropbear-id_rsa
+do
+    /bin/dbclient -i /etc/dropbear-id_rsa ${_SSHHUB_USERNAME}@${_SSHHUB_ADDRESS} -R ${_SSHHUB_REFERENCE}:${_SSHHUB_SSHLUKS_PORT}:127.0.0.1:2222 -N -f -y -y
+    test -f /etc/dropbear-id_rsa && /bin/dbclient -i /etc/dropbear-id_rsa ${_SSHHUB_USERNAME}@${_SSHHUB_IP} -R ${_SSHHUB_REFERENCE}:${_SSHHUB_SSHLUKS_PORT}:127.0.0.1:2222 -N -f -y -y
+    sleep 5
+done
+EOT
+    chmod +x "${CHROOTDIR}/etc/initramfs-tools/ssh_tunnel.sh"
+
+
+    echo_debug "Creating initramfs hook sshhub_tunnel"
+    cat <<EOT > ${CHROOTDIR}/etc/initramfs-tools/hooks/sshhub_tunnel
+# !/bin/sh
+set -e
+
+PREREQ=""
+prereqs()
+{
+    echo "\${PREREQ}"
+}
+
+case "\${1}" in
+    prereqs)
+        prereqs
+        exit 0
+        ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+
+copy_file config /etc/initramfs-tools/ssh_tunnel.sh /etc/ssh_tunnel.sh
+copy_file config /etc/initramfs-tools/dropbear-id_rsa /etc/dropbear-id_rsa
+copy_exec /usr/bin/dbclient /bin
+
+
+# For DNS functionality
+test -d /lib/aarch64-linux-gnu && LIB=/lib/aarch64-linux-gnu || LIB=/lib/aarch32-linux-gnu 
+mkdir -p "\$DESTDIR/\$LIB"
+cp \$LIB/libnss_dns.so.2 \$LIB/libnss_files.so.2 \$LIB/libresolv.so.2 \$LIB/libc.so.6 "\${DESTDIR}/\$LIB"
+echo nameserver ${_DNS1} >  "\${DESTDIR}/etc/resolv.conf"
+echo nameserver ${_DNS2} >> "\${DESTDIR}/etc/resolv.conf"
+EOT
+    chmod +x "${CHROOTDIR}/etc/initramfs-tools/hooks/sshhub_tunnel"
+
+    echo_debug "Converting id_rsa to a dropbear key dropbear-id_rsa"
+    cp "${_KEYFILE}" "${CHROOTDIR}/etc/initramfs-tools/id_rsa.tmp"
+    ssh-keygen -m PEM -p -f "${CHROOTDIR}/etc/initramfs-tools/id_rsa.tmp" -q -N ""
+    chroot ${CHROOTDIR} /bin/bash -c "/usr/lib/dropbear/dropbearconvert openssh dropbear /etc/initramfs-tools/id_rsa.tmp /etc/initramfs-tools/dropbear-id_rsa"
+    rm "${CHROOTDIR}/etc/initramfs-tools/id_rsa.tmp"
+
+
+    echo_debug "Creating initramfs script kill_sshhub"
+    cat <<EOT > ${CHROOTDIR}/etc/initramfs-tools/scripts/local-bottom/kill_sshhub
+#!/bin/sh
+
+PREREQ=""
+prereqs()
+{
+    echo "\$PREREQ"
+}
+
+case \$1 in
+prereqs)
+    prereqs
+    exit 0
+    ;;
+esac
+
+echo "Killing sshhub so the system takes over later."
+
+rm /etc/dropbear-id_rsa
+killall ssh_tunnel.sh
+killall dbclient
+EOT
+    chmod +x "${CHROOTDIR}/etc/initramfs-tools/scripts/local-bottom/kill_sshhub"
+
+
+    echo_debug "Creating script to removes this key from SSHHUB: ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove"
+    cat <<EOT > ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove
+#!/bin/bash
+cat ${_KEYFILE}.pub | ssh ${_SSHHUB_USERNAME}@sshhub.de pubkey rm
+EOT
+    chmod +x ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove
+
+
+    echo_debug "Editing ~/.ssh/config"
+
+    echo_debug "    Verifying if sshhub hub alias exists ..."
+    if grep -q "^Host hub\s*" ~/.ssh/config
+    then
+        echo_debug "        ... sshhub host definition found."
+    else
+        echo_debug "        ... sshhub host definition not found: creating it"
+        cat <<EOT >> ~/.ssh/config
+
+Host hub    # cryptmypi sshhub entry
+    Hostname sshhub.de    # cryptmypi sshhub entry
+    User ${_SSHHUB_USERNAME}    # cryptmypi sshhub entry
+    IdentityFIle ${_SSHHUB_LOCAL_KEYFILE}    # cryptmypi sshhub entry
+EOT
+    fi
+
+    echo_debug "    Creating/Replacing ${_SSHHUB_REFERENCE}-boot host definition ..."
+    sed -i.bak "/#cryptmypi ${_SSHHUB_REFERENCE}-boot entry/d" ~/.ssh/config
+cat <<EOT >> ~/.ssh/config
+
+Host ${_SSHHUB_REFERENCE}-boot    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
+	HostName ${_SSHHUB_REFERENCE}    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
+	User root    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
+	Port ${_SSHHUB_SSHLUKS_PORT}    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
+	IdentityFile ${_SSH_LOCAL_KEYFILE}    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
+	ProxyJump hub    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
+EOT
+
+    echo_debug "    Removing unecessary empty lines"
+    sed -i 'N;/^\n$/D;P;D;' ~/.ssh/config
+
+
+    echo_debug " ... sshhub.de INITRAMFS SSH channel set up! To connect, use:"
+    echo_debug ""
+    echo_debug "   ssh -i \"${_SSH_LOCAL_KEYFILE}\" -J ${_SSHHUB_USERNAME}@sshhub.de root@${_SSHHUB_REFERENCE} -p ${_SSHHUB_SSHLUKS_PORT}"
+    echo_debug "   or"
+    echo_debug "   ssh ${_SSHHUB_REFERENCE}-boot"
+    echo_debug ""
+fi

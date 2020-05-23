@@ -1,0 +1,35 @@
+# Basic STAGE definitions
+
+stage1profile_noencryption(){
+    myhooks "stage1-image-download"
+    myhooks "stage1-image-extract"
+    myhooks "stage1-setup-chroot"
+    myhooks "stage1-hostname"
+    myhooks "stage1-ssh"
+    myhooks "stage1-packages"
+    myhooks "stage1-runoptional"
+    myhooks "stage1-disabledisplaymanager"
+    myhooks "stage1-initramfs"
+    myhooks "stage1-teardown-chroot"
+}
+
+
+stage1profile_encryption(){
+    myhooks "stage1-sanity"
+    myhooks "stage1-image-download"
+    myhooks "stage1-image-extract"
+    myhooks "stage1-setup-chroot"
+    myhooks "stage1-setup-encryption"
+    myhooks "stage1-hostname"
+    myhooks "stage1-ssh"
+    myhooks "stage1-packages"
+    myhooks "stage1-runoptional"
+    myhooks "stage1-disabledisplaymanager"
+    myhooks "stage1-initramfs"
+    myhooks "stage1-teardown-chroot"
+}
+
+
+stage1profile_complete(){
+    myhooks "stage1"
+}
