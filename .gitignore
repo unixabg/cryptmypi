@@ -1,2 +1,7 @@
 build/
 *build*/
+
+
+hooks/0000-experimental-driver-rtl8188eu.hook
+hooks/0000-experimental-initramfs-v2wifi.hook
+
