@@ -192,11 +192,11 @@ EOT
 cat <<EOT >> ~/.ssh/config
 
 Host ${_SSHHUB_REFERENCE}-boot    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
-	HostName ${_SSHHUB_REFERENCE}    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
-	User root    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
-	Port ${_SSHHUB_SSHLUKS_PORT}    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
-	IdentityFile ${_SSH_LOCAL_KEYFILE}    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
-	ProxyJump hub    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
+    HostName ${_SSHHUB_REFERENCE}    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
+    User root    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
+    Port ${_SSHHUB_SSHLUKS_PORT}    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
+    IdentityFile ${_SSH_LOCAL_KEYFILE}    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
+    ProxyJump hub    # cryptmypi ${_SSHHUB_REFERENCE}-boot entry
 EOT
 
     echo_debug "    Removing unecessary empty lines"
