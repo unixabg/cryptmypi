@@ -81,19 +81,16 @@ EOT
     chmod +x ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove
 
 
-    test -e $HOME/.ssh/config && {
-        sed -i.bak '/# cryptmypi sshhub entry/d' $HOME/.ssh/config
-    }
-
     echo_debug "Editing ~/.ssh/config"
+    _USER_HOME=$(eval echo ~${SUDO_USER})
 
-    echo_debug "    Verifying if sshhub hub alias exists ..."
-    if grep -q "^Host hub\s*" $HOME/.ssh/config
+    echo_debug "    Verifying if sshhub hub alias exists in $_USER_HOME/.ssh/config ..."
+    if test -f $_USER_HOME/.ssh/config && grep -q "^Host hub\s*" $_USER_HOME/.ssh/config
     then
         echo_debug "        ... sshhub host definition found."
     else
         echo_debug "        ... sshhub host definition not found: creating it"
-        cat <<EOT >> $HOME/.ssh/config
+        cat <<EOT >> $_USER_HOME/.ssh/config
 
 # cryptmypi-sshhub-entry-start
 Host hub
@@ -106,9 +103,9 @@ EOT
 
     echo_debug "    Creating/Replacing ${_SSHHUB_REFERENCE}-sys host definition ..."
     _ENTRYCOMMENT="# cryptmypi-${_SSHHUB_REFERENCE}-sys-entry"
-    sed -i "/^${_ENTRYCOMMENT}-start/,/^${_ENTRYCOMMENT}-end/{/^${_ENTRYCOMMENT}-start/!{/^${_ENTRYCOMMENT}-end/!d}}" $HOME/.ssh/config
-    sed -i "/${_ENTRYCOMMENT}/d" $HOME/.ssh/config
-cat <<EOT >> $HOME/.ssh/config
+    sed -i "/^${_ENTRYCOMMENT}-start/,/^${_ENTRYCOMMENT}-end/{/^${_ENTRYCOMMENT}-start/!{/^${_ENTRYCOMMENT}-end/!d}}" $_USER_HOME/.ssh/config
+    sed -i "/${_ENTRYCOMMENT}/d" $_USER_HOME/.ssh/config
+cat <<EOT >> $_USER_HOME/.ssh/config
 
 ${_ENTRYCOMMENT}-start
 Host ${_SSHHUB_REFERENCE}-sys
@@ -121,7 +118,7 @@ ${_ENTRYCOMMENT}-end
 EOT
 
     echo_debug "    Removing unecessary empty lines"
-    sed -i 'N;/^\n$/D;P;D;' $HOME/.ssh/config
+    sed -i 'N;/^\n$/D;P;D;' $_USER_HOME/.ssh/config
 
 
     echo_debug " ... sshhub.de channel set up! To connect, use:"
