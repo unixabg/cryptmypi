@@ -1,7 +1,9 @@
+kalimypi.code-workspace
+
 build/
 *build*/
 
+personal*/
 
 hooks/0000-experimental-driver-rtl8188eu.hook
 hooks/0000-experimental-initramfs-v2wifi.hook
-
