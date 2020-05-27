@@ -9,7 +9,7 @@ if [ -z "${_SETUP_SCRIPT}" ]; then
 fi
 
 
-_SETUP_SCRIPTPATHP="${_CONFDIR}/${_SETUP_SCRIPT}"
+_SETUP_SCRIPTPATH="${_CONFDIR}/${_SETUP_SCRIPT}"
 
 
 echo_debug "Checking if setup script ${_SETUP_SCRIPTPATH} exists ..."
