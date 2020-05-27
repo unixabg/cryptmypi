@@ -3,6 +3,7 @@ kalimypi.code-workspace
 build/
 *build*/
 
+.vscode/
 personal*/
 
 hooks/0000-experimental-driver-rtl8188eu.hook
