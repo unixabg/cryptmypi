@@ -2,6 +2,10 @@
 build/
 *build*/
 
+# File caches
+files/images/
+files/cache/
+
 # IDE configuration files
 .vscode/
 *.code-workspace
