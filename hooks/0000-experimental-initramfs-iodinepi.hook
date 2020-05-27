@@ -34,13 +34,13 @@ counter=1
 
 while true; do
     echo Try $counter: $(date)
-    
+
     #exit if we are no longer in the initramfs
     [ ! -f /start_iodine ] && exit
-    
+
     #put this here in case it dies, it will restart. If it is running it will just fail
     /usr/sbin/iodine -d dns0 -r -I1 -L0 -P IODINE_PASSWORD $(grep IPV4DNS0 /run/net-eth0.conf | cut -d"'" -f 2) IODINE_DOMAIN
-    
+
     [ $counter -gt 10 ] && reboot -f
     counter=$((counter+1))
     sleep 60

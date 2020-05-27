@@ -16,8 +16,8 @@ function_exists "stage1_optional_hooks" && {
 } || {
     echo_warn "- SKIPPING: no optional hooks found for stage 1 ..."
     cat << EOF
-    
-        To define optional hooks, create a function named 
+
+        To define optional hooks, create a function named
         'stage1_optional_hooks' on the cryptmypi.conf file.
 
 EOF

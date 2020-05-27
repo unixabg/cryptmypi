@@ -100,7 +100,7 @@ EOF
 
     1. Basic          (No encryption)
     2. Encryption     (No remote unlock)
-    3. Complete       (Encryption + Dropbear) 
+    3. Complete       (Encryption + Dropbear)
     4. Exit
 
 EOF
@@ -185,7 +185,7 @@ block device:  ${_BLKDEV}
 
 If the block device is wrong DO NOT continue. Adjust the
 block device in the cryptmypi.conf file located in the
-config directory. 
+config directory.
 
 To continue type in the phrase 'Yes, do as I say!'
 EOF
