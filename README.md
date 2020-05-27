@@ -1,3 +1,7 @@
+**IMPORTANT:** This is a fork created as means to contribute to the official project: [unixabg/cryptmypi](https://github.com/unixabg/cryptmypi)
+
+-------------------------------------------------------------------------------
+
 # cryptmypi 4.x
 
 Assists in the full setup of [encrypted] Raspberry Pis. Able to maintain multiple setup configurations, for multiple usages, ofers a multitude of modular configurations hooks providing out-of-the-box optinal features for initramfs (while the system in encrypted) and the actual system (after boot).
