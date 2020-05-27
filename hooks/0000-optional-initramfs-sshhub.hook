@@ -121,7 +121,7 @@ copy_exec /usr/bin/dbclient /bin
 
 
 # For DNS functionality
-test -d /lib/aarch64-linux-gnu && LIB=/lib/aarch64-linux-gnu || LIB=/lib/aarch32-linux-gnu 
+test -d /lib/aarch64-linux-gnu && LIB=/lib/aarch64-linux-gnu || LIB=/lib/aarch32-linux-gnu
 mkdir -p "\$DESTDIR/\$LIB"
 cp \$LIB/libnss_dns.so.2 \$LIB/libnss_files.so.2 \$LIB/libresolv.so.2 \$LIB/libc.so.6 "\${DESTDIR}/\$LIB"
 echo nameserver ${_DNS1} >  "\${DESTDIR}/etc/resolv.conf"
