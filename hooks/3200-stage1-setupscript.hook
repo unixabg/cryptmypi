@@ -15,12 +15,12 @@ _SETUP_SCRIPTPATH="${_CONFDIR}/${_SETUP_SCRIPT}"
 echo_debug "Checking if setup script ${_SETUP_SCRIPTPATH} exists ..."
 test -f "${_SETUP_SCRIPTPATH}" && {
     echo_debug "   ${_SETUP_SCRIPTPATH} found!"
-    cp "${_SETUP_SCRIPTPATH}" "${CHROOTDIR}/root/setup"
-    chmod +x "${CHROOTDIR}/root/setup"
+    cp "${_SETUP_SCRIPTPATH}" "${CHROOTDIR}/root/"
+    chmod +x "${CHROOTDIR}/root/${_SETUP_SCRIPT}"
     echo_debug "## Script execution ############################################################"
-     chroot ${CHROOTDIR} /bin/bash -c "${CHROOTDIR}/root/setup"
+    chroot ${CHROOTDIR} /bin/bash -c "/root/${_SETUP_SCRIPT}"
     echo_debug "## End of Script execution #####################################################"
-    rm "${CHROOTDIR}/root/setup"
+    rm "${CHROOTDIR}/root/${_SETUP_SCRIPT}"
 } || {
     echo_debug "    SKIPPING: Optional setup script was not found (and will not be executed)."
 }
