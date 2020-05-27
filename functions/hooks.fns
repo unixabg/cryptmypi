@@ -1,20 +1,20 @@
 myhooks(){
-	local _HOOK=''
-	if [ ! -z "${1}" ]; then
-		_HOOKOP="${1}"
-		echo ""
-		echo_info "Attempting to run ${_HOOKOP} hooks ..."
-		for _HOOK in ${_BASEDIR}/hooks/????-${_HOOKOP}*.hook
-		do
-			if [ -e ${_HOOK} ]; then
-				echo_info "- Calling $(basename ${_HOOK}) ..."
-				source ${_HOOK}
-				echo_info "	... $(basename ${_HOOK}) completed!"
-				echo ""
-			fi
-		done
-	else
-		echo_error "Hook operations not specified! Stopping here."
-		exit 1
-	fi
+    local _HOOK=''
+    if [ ! -z "${1}" ]; then
+        _HOOKOP="${1}"
+        echo ""
+        echo_info "Attempting to run ${_HOOKOP} hooks ..."
+        for _HOOK in ${_BASEDIR}/hooks/????-${_HOOKOP}*.hook
+        do
+            if [ -e ${_HOOK} ]; then
+                echo_info "- Calling $(basename ${_HOOK}) ..."
+                source ${_HOOK}
+                echo_info "    ... $(basename ${_HOOK}) completed!"
+                echo ""
+            fi
+        done
+    else
+        echo_error "Hook operations not specified! Stopping here."
+        exit 1
+    fi
 }

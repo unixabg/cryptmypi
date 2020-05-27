@@ -38,11 +38,11 @@ mkdir -p "${_FILESDIR}"
 
 # Check if configuration file is present
 if [ ! -f ${_CONFDIR}/cryptmypi.conf ]; then
-	echo "No cryptmypi.conf file found in the config folder!"
-	echo "Exiting ..."
-	echo "You might try copying the default ./cryptmypi.conf file to the ${_CONFDIRNAME}/ directory, then attempt to run again."
-	echo "Remember to edit the ${_CONFDIRNAME}/cryptmypi.conf with your desired settings."
-	exit 1
+    echo "No cryptmypi.conf file found in the config folder!"
+    echo "Exiting ..."
+    echo "You might try copying the default ./cryptmypi.conf file to the ${_CONFDIRNAME}/ directory, then attempt to run again."
+    echo "Remember to edit the ${_CONFDIRNAME}/cryptmypi.conf with your desired settings."
+    exit 1
 fi
 
 
@@ -60,11 +60,11 @@ export _IMAGENAME=$(basename ${_IMAGEURL})
 echo "Loading functions..."
 for _FN in ${_BASEDIR}/functions/*.fns
 do
-	if [ -e ${_FN} ]; then
-		echo "- Loading $(basename ${_FN}) ..."
-		source ${_FN}
-		echo "  ... $(basename ${_FN}) loaded!"
-	fi
+    if [ -e ${_FN} ]; then
+        echo "- Loading $(basename ${_FN}) ..."
+        source ${_FN}
+        echo "  ... $(basename ${_FN}) loaded!"
+    fi
 done
 
 
@@ -108,21 +108,21 @@ EOF
             read -p "Enter choice [1 - 4] " _SELECTION
             echo
             case $_SELECTION in
-                1)	echo "--- Basic SELECTED: No encryption"
+                1)  echo "--- Basic SELECTED: No encryption"
                     stage1profile_noencryption
                     break
                     ;;
-                2)	echo "--- Encryption SELECTED"
+                2)  echo "--- Encryption SELECTED"
                     stage1profile_encryption
                     break
                     ;;
-                3)	echo "--- Complete SELECTED"
+                3)  echo "--- Complete SELECTED"
                     stage1profile_complete
                     break
                     ;;
-                4)	break
+                4)  break
                     ;;
-                *)	echo -e "Invalid selection error ..." && sleep 2
+                *)    echo -e "Invalid selection error ..." && sleep 2
             esac
         done
 

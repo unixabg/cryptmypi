@@ -5,6 +5,6 @@ set -e
 if [ -z "${_HOSTNAME}" ]; then
     echo_error "ERROR: '_HOSTNAME' variable was not defined!"
     echo ""
-	echo "Exiting ..."
-	exit 1
+    echo "Exiting ..."
+    exit 1
 fi

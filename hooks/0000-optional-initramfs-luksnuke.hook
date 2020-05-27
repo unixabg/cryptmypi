@@ -4,13 +4,13 @@ set -e
 
 # Install and configure cryptsetup nuke package if we were given a password
 if [ ! -z "${_LUKSNUKEPASSWD}" ]; then
-	echo_debug "Attempting to install and configure encrypted pi cryptsetup nuke password."
-	chroot_pkginstall cryptsetup-nuke-password
-	chroot ${CHROOTDIR} /bin/bash -c "debconf-set-selections <<END
+    echo_debug "Attempting to install and configure encrypted pi cryptsetup nuke password."
+    chroot_pkginstall cryptsetup-nuke-password
+    chroot ${CHROOTDIR} /bin/bash -c "debconf-set-selections <<END
 cryptsetup-nuke-password cryptsetup-nuke-password/password string ${_LUKSNUKEPASSWD}
 cryptsetup-nuke-password cryptsetup-nuke-password/password-again string ${_LUKSNUKEPASSWD}
 END"
-	chroot_execute dpkg-reconfigure -f noninteractive cryptsetup-nuke-password
+    chroot_execute dpkg-reconfigure -f noninteractive cryptsetup-nuke-password
 else
-	echo_warn "SKIPPING Cryptsetup NUKE. Nuke password _LUKSNUKEPASSWD not set."
+    echo_warn "SKIPPING Cryptsetup NUKE. Nuke password _LUKSNUKEPASSWD not set."
 fi
