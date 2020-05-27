@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+
+
+
+if [ -z "${_SETUP_SCRIPT}" ]; then
+    _SETUP_SCRIPT='setup.sh'
+        echo_warn "Setup script _SETUP_SCRIPT is not set on config: Setting default value ${_SETUP_SCRIPT}"
+fi
+
+
+_SETUP_SCRIPTPATHP="${_CONFDIR}/${_SETUP_SCRIPT}"
+
+
+echo_debug "Checking if setup script ${_SETUP_SCRIPTPATH} exists ..."
+test -f "${_SETUP_SCRIPTPATH}" && {
+    echo_debug "   ${_SETUP_SCRIPTPATH} found!"
+    cp "${_SETUP_SCRIPTPATH}" "${CHROOTDIR}/root/setup"
+    chmod +x "${CHROOTDIR}/root/setup"
+    echo_debug "## Script execution ############################################################"
+ 	chroot ${CHROOTDIR} /bin/bash -c "${CHROOTDIR}/root/setup"
+    echo_debug "## End of Script execution #####################################################"
+    rm "${CHROOTDIR}/root/setup"
+} || {
+	echo_debug "    SKIPPING: Optional setup script was not found (and will not be executed)."
+}
