@@ -18,9 +18,9 @@ test -f "${_SETUP_SCRIPTPATH}" && {
     cp "${_SETUP_SCRIPTPATH}" "${CHROOTDIR}/root/setup"
     chmod +x "${CHROOTDIR}/root/setup"
     echo_debug "## Script execution ############################################################"
- 	chroot ${CHROOTDIR} /bin/bash -c "${CHROOTDIR}/root/setup"
+     chroot ${CHROOTDIR} /bin/bash -c "${CHROOTDIR}/root/setup"
     echo_debug "## End of Script execution #####################################################"
     rm "${CHROOTDIR}/root/setup"
 } || {
-	echo_debug "    SKIPPING: Optional setup script was not found (and will not be executed)."
+    echo_debug "    SKIPPING: Optional setup script was not found (and will not be executed)."
 }
