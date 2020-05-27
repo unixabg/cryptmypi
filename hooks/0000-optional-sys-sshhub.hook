@@ -81,41 +81,47 @@ EOT
     chmod +x ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove
 
 
-    test -e ~/.ssh/config && {
-        sed -i.bak '/# cryptmypi sshhub entry/d' ~/.ssh/config
+    test -e $HOME/.ssh/config && {
+        sed -i.bak '/# cryptmypi sshhub entry/d' $HOME/.ssh/config
     }
 
     echo_debug "Editing ~/.ssh/config"
 
     echo_debug "    Verifying if sshhub hub alias exists ..."
-    if grep -q "^Host hub\s*" ~/.ssh/config
+    if grep -q "^Host hub\s*" $HOME/.ssh/config
     then
         echo_debug "        ... sshhub host definition found."
     else
         echo_debug "        ... sshhub host definition not found: creating it"
-        cat <<EOT >> ~/.ssh/config
+        cat <<EOT >> $HOME/.ssh/config
 
-Host hub    # cryptmypi sshhub entry
-    Hostname sshhub.de    # cryptmypi sshhub entry
-    User ${_SSHHUB_USERNAME}    # cryptmypi sshhub entry
-    IdentityFIle ${_SSHHUB_LOCAL_KEYFILE}    # cryptmypi sshhub entry
+# cryptmypi-sshhub-entry-start
+Host hub
+    Hostname sshhub.de
+    User ${_SSHHUB_USERNAME}
+    IdentityFIle ${_SSHHUB_LOCAL_KEYFILE}
+# cryptmypi-sshhub-entry-end
 EOT
     fi
 
     echo_debug "    Creating/Replacing ${_SSHHUB_REFERENCE}-sys host definition ..."
-    sed -i.bak "/#cryptmypi ${_SSHHUB_REFERENCE}-sys entry/d" ~/.ssh/config
-cat <<EOT >> ~/.ssh/config
+    _ENTRYCOMMENT="# cryptmypi-${_SSHHUB_REFERENCE}-sys-entry"
+    sed -i "/^${_ENTRYCOMMENT}-start/,/^${_ENTRYCOMMENT}-end/{/^${_ENTRYCOMMENT}-start/!{/^${_ENTRYCOMMENT}-end/!d}}" $HOME/.ssh/config
+    sed -i "/${_ENTRYCOMMENT}/d" $HOME/.ssh/config
+cat <<EOT >> $HOME/.ssh/config
 
-Host ${_SSHHUB_REFERENCE}-sys    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
-    HostName ${_SSHHUB_REFERENCE}    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
-    User root    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
-    Port ${_SSHHUB_SSH_PORT}    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
-    IdentityFile ${_SSH_LOCAL_KEYFILE}    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
-    ProxyJump hub    # cryptmypi ${_SSHHUB_REFERENCE}-sys entry
+${_ENTRYCOMMENT}-start
+Host ${_SSHHUB_REFERENCE}-sys
+    HostName ${_SSHHUB_REFERENCE}
+    User root
+    Port ${_SSHHUB_SSH_PORT}
+    IdentityFile ${_SSH_LOCAL_KEYFILE}
+    ProxyJump hub
+${_ENTRYCOMMENT}-end
 EOT
 
     echo_debug "    Removing unecessary empty lines"
-    sed -i 'N;/^\n$/D;P;D;' ~/.ssh/config
+    sed -i 'N;/^\n$/D;P;D;' $HOME/.ssh/config
 
 
     echo_debug " ... sshhub.de channel set up! To connect, use:"
