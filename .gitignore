@@ -1,10 +1,14 @@
-kalimypi.code-workspace
-
+# Build related directories
 build/
 *build*/
 
+# IDE configuration files
 .vscode/
+*.code-workspace
+
+# Personal directories
 personal*/
 
+# Experimental hooks
 hooks/0000-experimental-driver-rtl8188eu.hook
 hooks/0000-experimental-initramfs-v2wifi.hook
