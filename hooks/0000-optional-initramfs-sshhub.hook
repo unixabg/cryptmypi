@@ -32,7 +32,8 @@ else
     assure_box_sshkey "${_HOSTNAME}"
 
 
-    echo_debug "Registering box keyfile to sshhub"
+    _SSHHUB_ADDRESS="sshhub.de"
+    echo_debug "Registering box keyfile to sshhub (${_SSHHUB_ADDRESS})"
     if [ -z "${_SSHHUB_LOCAL_KEYFILE}" ]; then
         ssh "${_SSHHUB_USERNAME}@${_SSHHUB_ADDRESS}" pubkey add $(cat "${_KEYFILE}.pub")
     else
@@ -41,7 +42,6 @@ else
 
 
     echo_debug "Determining sshhub.de IP..."
-    _SSHHUB_ADDRESS="sshhub.de"
     _SSHHUB_IP=$(nslookup "${_SSHHUB_ADDRESS}" | grep Address | tail -n1 | sed 's#^\s*Address:\s*\(.*\)$#\1#')
     if [ -z "${_SSHHUB_IP}" ]; then
         echo_debug "    IP could not be determined. Using '${_SSHHUB_ADDRESS}'"
