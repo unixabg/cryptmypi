@@ -24,7 +24,6 @@ chroot_pkginstall dropbear dropbear-initramfs
 cat << "EOF" > ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys.tmp
 command="export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'; cryptsetup luksOpen /dev/mmcblk0p2 crypt && /scripts/local-top/cryptroot || reboot; killall 'cryptroot'; exit" 
 EOF
-#command="export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'; cryptsetup luksOpen /dev/mmcblk0p2 crypt && /scripts/local-top/cryptroot && kill -9 `ps | grep -m 1 'cryptroot' | cut -d ' ' -f 3` && exit" 
 
 tr -d '\n' < ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys.tmp > ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys
 rm -f ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys.tmp
