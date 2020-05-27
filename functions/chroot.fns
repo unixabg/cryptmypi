@@ -39,7 +39,7 @@ chroot_umount(){
 
     # unmount everything
     echo_debug "Unmounting binds"
-    umount ${CHROOTDIR}/{dev/pts,dev,sys,proc,}
+    umount ${CHROOTDIR}/{dev/pts,dev,sys,proc}
 
     export CHROOTDIR=''
 }
