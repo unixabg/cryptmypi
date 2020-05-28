@@ -82,7 +82,6 @@ EOT
 
 
     echo_debug "Editing ~/.ssh/config"
-    _USER_HOME=$(eval echo ~${SUDO_USER})
 
     echo_debug "    Verifying if sshhub hub alias exists in $_USER_HOME/.ssh/config ..."
     if test -f $_USER_HOME/.ssh/config && grep -q "^Host hub\s*" $_USER_HOME/.ssh/config
