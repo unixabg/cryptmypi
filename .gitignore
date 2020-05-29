@@ -13,6 +13,9 @@ files/cache/
 # Personal directories
 personal*/
 
+# Other genral files
+*.zip
+
 # Experimental hooks
 hooks/0000-experimental-driver-rtl8188eu.hook
 hooks/0000-experimental-initramfs-v2wifi.hook
