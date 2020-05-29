@@ -21,6 +21,7 @@ fi
 
 
 # Variables
+export _USER_HOME=$(eval echo ~${SUDO_USER})
 export _CONFDIRNAME=$1
 export _VER="4.0-beta"
 export _BASEDIR=$(pwd)
