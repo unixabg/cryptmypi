@@ -40,7 +40,7 @@ Optional configuration hooks can be set in any of the stages:
 
 ## Scenarios
 
-Multiple example configurations can be found in the system, each on its own directory `example-...`.
+Example configurations are provided in the the project examples directory.
 
 Each example outlines a possible configurations scenario, from building an standart kali to building an encrypted drop box RPi for remote control.
 
