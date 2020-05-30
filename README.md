@@ -57,10 +57,10 @@ $ `./cryptmypi.sh configuration_profile_directory`
 `configuration_profile_directory` should be an existing configuration directory. Use one of the provided examples or create your own.
 
 ## Explore stage2
-You can decrypt, mount and chroot an SD card by using the `--explore` option:
+You can decrypt, mount and chroot an SD card by using the `explore` pre-configuration:
 
-$ `./cryptmypi.sh --epxlore configuration_profile_directory`
+$ `./cryptmypi.sh examples/explore configuration_profile_directory`
 
-There is an actual `--explore` directory that contains an customized configuration profile. This profile overwrites the default stage1 and stage2 hooks so that no formatting, partitioning, etc is done. It reads another configuration profile and mounts an block device accordingly.
+There is an actual `explore` directory that contains an customized configuration profile. This profile overwrites the default stage1 and stage2 hooks so that no formatting, partitioning, etc is done. It reads another configuration profile and mounts an block device accordingly.
 
-Aditionally, you can use this "hack" configuration for more than chrooting to bash. You may update existing systems by copying --explore directory and changing `stage2_optional_hooks` to execute optional hooks or other commands.
+Aditionally, you can use this "hack" configuration for more than chrooting to bash. You may update existing systems by copying the `examples/explore` directory and changing `stage2_optional_hooks` to execute optional hooks or other commands.
