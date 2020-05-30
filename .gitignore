@@ -6,6 +6,10 @@ build/
 files/images/
 files/cache/
 
+# Keyfiles
+id_rsa
+id_rsa.pub
+
 # IDE configuration files
 .vscode/
 *.code-workspace

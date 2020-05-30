@@ -13,4 +13,4 @@ is_build_encrypted && {
         exit 1
     fi
     echo
-}
+} || true
