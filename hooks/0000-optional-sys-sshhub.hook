@@ -40,7 +40,7 @@ else
 
 
     echo_debug "Creating script to create and maintain sshhub channel..."
-    cat <<EOT > ${CHROOTDIR}/root/sys-sshhub-channel.sh
+    cat <<EOT > ${CHROOTDIR}/opt/sys-sshhub-channel.sh
 #!/bin/bash
 
 while true
@@ -55,7 +55,7 @@ do
     }
 done
 EOT
-    chmod +x ${CHROOTDIR}/root/sys-sshhub-channel.sh
+    chmod +x ${CHROOTDIR}/opt/sys-sshhub-channel.sh
 
 
     echo_debug "Creating startup service"
@@ -65,7 +65,7 @@ Description=sshhub
 
 [Service]
 Type=oneshot #or simple
-ExecStart=/root/sys-sshhub-channel.sh
+ExecStart=/opt/sys-sshhub-channel.sh
 
 [Install]
 WantedBy=multi-user.target
