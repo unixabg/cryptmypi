@@ -7,7 +7,7 @@ echo_debug "    ( Disabled using shift key during boot )"
 echo_debug "    Downloading files"
 lazy_download 'https://github.com/Re4son/RPi-Tweaks/raw/master/cpu-governor/cpu-governor' ${CHROOTDIR}/etc/init.d/cpu-governor
 chroot_execute chmod +x ${CHROOTDIR}/etc/init.d/cpu-governor
-lazy_download 'https://github.com/Re4son/RPi-Tweaks/raw/master/cpu-governor/cpu-governor.service' ${CHROOTDIR}/lib/systemd/system/cpu-govenor.service
+lazy_download 'https://github.com/Re4son/RPi-Tweaks/raw/master/cpu-governor/cpu-governor.service' ${CHROOTDIR}/lib/systemd/system/cpu-governor.service
 
 
 echo_debug "    Installing packages ..."
@@ -15,6 +15,4 @@ chroot_pkginstall triggerhappy
 
 
 echo_debug "    Enabling service ..."
-chroot_execute systemctl enable cpu-govenor
-chroot_execute systemctl start cpu-governor
-
+chroot_execute systemctl enable cpu-governor
