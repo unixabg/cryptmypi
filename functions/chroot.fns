@@ -53,7 +53,9 @@ chroot_update(){
 
     echo_debug "Updating apt-get"
     chroot ${CHROOTDIR} apt-get update
-    #chroot ${CHROOTDIR} apt-get -y upgrade
+
+    echo_debug "Updating sytem packages"
+    # chroot ${CHROOTDIR} apt-get -y upgrade
 }
 
 
