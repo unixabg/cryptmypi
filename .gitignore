@@ -9,13 +9,14 @@ files/cache/
 # Keyfiles
 id_rsa
 id_rsa.pub
+dropbear_*_key
 
 # IDE configuration files
 .vscode/
 *.code-workspace
 
 # Personal directories
-personal*/
+personal/
 
 # Other genral files
 *.zip
