@@ -20,12 +20,23 @@ if [ -z "$1" ]; then
 fi
 
 
+# Determining script directory (absolute path resolving symlinks)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+_SCRIPT_DIRECTORY="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+
+
 # Variables
 export _USER_HOME=$(eval echo ~${SUDO_USER})
 export _CONFDIRNAME=$1
 export _VER="4.0-beta"
-export _BASEDIR=$(pwd)
-export _CONFDIR=${_BASEDIR}/${_CONFDIRNAME}
+export _BASEDIR="${_SCRIPT_DIRECTORY}"
+export _CURRDIR=$(pwd)
+export _CONFDIR=${_CURRDIR}/${_CONFDIRNAME}
 export _BUILDDIR=${_CONFDIR}/build
 export _FILESDIR=${_BASEDIR}/files
 export _IMAGEDIR=${_FILESDIR}/images
