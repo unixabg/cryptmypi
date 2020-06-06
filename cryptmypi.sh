@@ -35,7 +35,9 @@ restore_output(){
 if [ -z "$1" ]; then
     echo "No argument supplied. Desired configuration folder should be supplied."
 fi
-_OUTPUT_TO_FILE="output"
+_OUTPUT_TO_FILE=""
+_STAGE1_CONFIRM=false
+_STAGE2_CONFIRM=false
 
 
 # Parameter/Option Variables
@@ -205,9 +207,11 @@ Cryptmypi will attempt to perform the following operations on the sdcard:
 
 EOF
 
-    read -p "Press enter to continue."
+    local _CONTINUE
+    $_STAGE2_CONFIRM && {
+        read -p "Press enter to continue."
 
-    cat << EOF
+        cat << EOF
 
 ##################### W A R N I N G #####################
 This process can damage your local install if the script
@@ -237,8 +241,14 @@ config directory.
 To continue type in the phrase 'Yes, do as I say!'
 EOF
 
-    echo -n ": "
-    read _CONTINUE
+        echo -n ": "
+        read _CONTINUE
+    } || {
+        echo "STAGE2 confirmation set to FALSE: skipping confirmation"
+        echo "STAGE2 will execute (assuming 'Yes, do as I say!' input) ..."
+        _CONTINUE='Yes, do as I say!'
+    }
+
     redirect_output
     case "${_CONTINUE}" in
         'Yes, do as I say!')
@@ -305,12 +315,20 @@ main(){
     else
         restore_output
         echo "Build directory already exists: ${_BUILDDIR}"
-        echo "Rebuild? (y/N)"
-        read _CONTINUE
-        _CONTINUE=`echo "${_CONTINUE}" | sed -e 's/\(.*\)/\L\1/'`
+
+        local _CONTINUE
+        $_STAGE1_CONFIRM && {
+            echo "Rebuild? (y/N)"
+            read _CONTINUE
+            _CONTINUE=`echo "${_CONTINUE}" | sed -e 's/\(.*\)/\L\1/'`
+        } || {
+            echo "STAGE1 confirmation set to FALSE: skipping confirmation"
+            echo "STAGE1 will be rebuilt ..."
+            _CONTINUE='y'
+        }
+
         redirect_output
         echo ""
-
         case "${_CONTINUE}" in
             'y')
                 echo "Removing current build files..."
