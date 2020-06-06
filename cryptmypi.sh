@@ -31,13 +31,20 @@ restore_output(){
 ############################
 # Verifying input parameters
 ############################
+# Default input variable value
+_OUTPUT_TO_FILE=""
+_STAGE1_CONFIRM=true
+_STAGE2_CONFIRM=true
+_BLKDEV_OVERRIDE=""
+
 # Check if configuration name was provided
 if [ -z "$1" ]; then
     echo "No argument supplied. Desired configuration folder should be supplied."
 fi
 _OUTPUT_TO_FILE=""
-_STAGE1_CONFIRM=false
-_STAGE2_CONFIRM=false
+_STAGE1_CONFIRM=true
+_STAGE2_CONFIRM=true
+_BLKDEV_OVERRIDE=""
 
 
 # Parameter/Option Variables
@@ -91,6 +98,10 @@ fi
 
 # Load configuration file
 . ${_CONFDIR}/cryptmypi.conf
+
+
+# Overriding _BLKDEV if _BLKDEV_OVERRIDE set
+[ -z "${_BLKDEV_OVERRIDE}" ] || _BLKDEV=${_BLKDEV_OVERRIDE}
 
 
 # Configuration dependent variables
