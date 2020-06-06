@@ -12,12 +12,41 @@ EOF
 
 
 ############################
-# Load Desired Configuration
+# Parameter helper functions
+############################
+# Redirects output to file if output filename given
+redirect_output(){
+    [ -z "${_OUTPUT_TO_FILE}" ] || {
+        exec 3>&1 4>&2 >>"${_OUTPUT_TO_FILE}" 2>&1
+    }
+}
+
+# Restores output to stdin and stdout
+restore_output(){
+    [ -z "${_OUTPUT_TO_FILE}" ] || exec 1>&3 2>&4
+}
+
+
+
+############################
+# Verifying input parameters
 ############################
 # Check if configuration name was provided
 if [ -z "$1" ]; then
     echo "No argument supplied. Desired configuration folder should be supplied."
 fi
+_OUTPUT_TO_FILE="output"
+
+
+# Parameter/Option Variables
+############################ Output stdin and stdout to file
+[ -z "${_OUTPUT_TO_FILE}" ] || {
+    echo "Redirecting output (stdin and stdout) to file '${_OUTPUT_TO_FILE}' ..."
+    echo
+    redirect_output
+    echo "\$ $0 ${@} " > "${_OUTPUT_TO_FILE}"
+    echo
+}
 
 
 # Determining script directory (absolute path resolving symlinks)
@@ -43,7 +72,7 @@ export _IMAGEDIR=${_FILESDIR}/images
 export _CACHEDIR=${_FILESDIR}/cache
 
 
-# Directories
+# Creating Directories
 mkdir -p "${_IMAGEDIR}"
 mkdir -p "${_FILESDIR}"
 
@@ -106,6 +135,7 @@ EOF
         stage1_hooks
         echo ""
     } || {
+        restore_output
         while true
         do
             cat << EOF
@@ -118,6 +148,7 @@ EOF
 EOF
 
             read -p "Enter choice [1 - 4] " _SELECTION
+            redirect_output
             echo
             case $_SELECTION in
                 1)  echo "--- Basic SELECTED: No encryption"
@@ -163,6 +194,10 @@ stage2(){
                                ---- Stage 2 ----
 v${_VER}
 ###############################################################################
+EOF
+
+    restore_output
+    cat << EOF
 
 Cryptmypi will attempt to perform the following operations on the sdcard:
     1. Partition and format the sdcard.
@@ -204,6 +239,7 @@ EOF
 
     echo -n ": "
     read _CONTINUE
+    redirect_output
     case "${_CONTINUE}" in
         'Yes, do as I say!')
             function_exists "stage2_hooks" && {
@@ -217,6 +253,7 @@ EOF
             } || myhooks "stage2"
             ;;
         *)
+            restore_output
             echo "Abort."
             exit 1
             ;;
@@ -266,10 +303,12 @@ main(){
     if [ ! -d ${_BUILDDIR} ]; then
         execute "both"
     else
+        restore_output
         echo "Build directory already exists: ${_BUILDDIR}"
         echo "Rebuild? (y/N)"
         read _CONTINUE
         _CONTINUE=`echo "${_CONTINUE}" | sed -e 's/\(.*\)/\L\1/'`
+        redirect_output
         echo ""
 
         case "${_CONTINUE}" in
