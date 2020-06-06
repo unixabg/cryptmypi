@@ -328,28 +328,36 @@ main(){
         echo "Build directory already exists: ${_BUILDDIR}"
 
         local _CONTINUE
-        $_STAGE1_CONFIRM && {
-            echo "Rebuild? (y/N)"
-            read _CONTINUE
-            _CONTINUE=`echo "${_CONTINUE}" | sed -e 's/\(.*\)/\L\1/'`
-        } || {
-            echo "STAGE1 confirmation set to FALSE: skipping confirmation"
-            echo "STAGE1 will be rebuilt ..."
-            _CONTINUE='y'
-        }
+        while true
+        do
+            $_STAGE1_CONFIRM && {
+                echo "Rebuild? (y/N)"
+                read _CONTINUE
+                _CONTINUE=`echo "${_CONTINUE}" | sed -e 's/\(.*\)/\L\1/'`
+            } || {
+                echo "STAGE1 confirmation set to FALSE: skipping confirmation"
+                echo "STAGE1 will be rebuilt ..."
+                _CONTINUE='y'
+            }
 
-        redirect_output
-        echo ""
-        case "${_CONTINUE}" in
-            'y')
-                echo "Removing current build files..."
-                rm -Rf ${_BUILDDIR}
-                execute "both"
-                ;;
-            *)
-                execute "stage2"
-                ;;
-        esac
+            redirect_output
+            echo ""
+            case "${_CONTINUE}" in
+                'y')
+                    echo "Removing current build files..."
+                    rm -Rf ${_BUILDDIR}
+                    execute "both"
+                    break;
+                    ;;
+                'n')
+                    execute "stage2"
+                    break;
+                    ;;
+                *)
+                    echo "Invalid input."
+                    ;;
+            esac
+        done
     fi
 }
 main
