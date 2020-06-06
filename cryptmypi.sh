@@ -14,6 +14,43 @@ EOF
 ############################
 # Parameter helper functions
 ############################
+# Displays help
+display_help(){
+    cat << EOF
+
+Usage: $0 [OPTIONS] configuration_dir
+Assists in the full setup of [encrypted] Raspberry Pis.
+
+OPTIONS:
+
+    -d, --device <device>       Block device to use on stage 2
+                                (overrides _BLKDEV configuration)
+
+    --force-stage1, --rebuild   Overrides previous builds without confirmation
+    --force-stage2              Writes to block device without confirmation
+    --force-both-stages         Executes stage 1 and 2 without confirmation
+
+    -s, --simulate              Simulate execution flow (does not call hooks)
+
+    --options                   Display execution options
+    -h, --help                  Display this help and exit
+    -o,--output <file>          Redirects stdout and stderr to <file>
+
+Examples:
+    $0 examples/kali-unencrypted
+    Executes script using examples/kali-unencrypted/cryptmypi.conf definitions
+
+    $0 --device /dev/sdb /examples/kali-complete
+    Executes script using examples/kali-complete/cryptmypi.conf
+    using /dev/sdb as destination block device
+
+    $0 -o execution.log my/config/path
+    Executes script using my/config/path/cryptmypi.conf
+    outputing stdout and stderr to execution.log
+
+EOF
+}
+
 # Redirects output to file if output filename given
 redirect_output(){
     [ -z "${_OUTPUT_TO_FILE}" ] || {
@@ -21,11 +58,10 @@ redirect_output(){
     }
 }
 
-# Restores output to stdin and stdout
+# Restores output to stdout and stderr
 restore_output(){
     [ -z "${_OUTPUT_TO_FILE}" ] || exec 1>&3 2>&4
 }
-
 
 
 ############################
@@ -36,21 +72,87 @@ _OUTPUT_TO_FILE=""
 _STAGE1_CONFIRM=true
 _STAGE2_CONFIRM=true
 _BLKDEV_OVERRIDE=""
+_SHOW_OPTIONS=false
+_SIMULATE=false
+
+# Pasing input parameters
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+
+    case $key in
+        -h|--help)
+            display_help
+            exit 0
+            ;;
+        -s|--simulate)
+            _SIMULATE=true
+            shift
+            ;;
+        --options)
+            _SHOW_OPTIONS=true
+            shift
+            ;;
+        -o|--output)
+            _OUTPUT_TO_FILE="$2"
+            shift
+            shift
+            ;;
+        --force-stage1|--rebuild)
+            _STAGE1_CONFIRM=false
+            shift
+            ;;
+        --force-stage2)
+            _STAGE2_CONFIRM=false
+            shift
+            ;;
+        --force-both-stages)
+            _STAGE1_CONFIRM=false
+            _STAGE2_CONFIRM=false
+            shift
+            ;;
+        -d|--device)
+            _BLKDEV_OVERRIDE="$2"
+            shift
+            shift
+            ;;
+        *)
+            POSITIONAL+=("$1")
+            shift
+            ;;
+    esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
 
 # Check if configuration name was provided
 if [ -z "$1" ]; then
-    echo "No argument supplied. Desired configuration folder should be supplied."
+    echo "ERROR: Configuration directory was not supplied. "
+    display_help
+    echo "Exiting..."
+    exit 1
+else
+    _CONFDIRNAME=$1
 fi
-_OUTPUT_TO_FILE=""
-_STAGE1_CONFIRM=true
-_STAGE2_CONFIRM=true
-_BLKDEV_OVERRIDE=""
 
+# Display options
+$_SHOW_OPTIONS && {
+cat << EOF
+-- OPTIONS --------------------------------------------------------------------
+   - SIMULATE        = ${_SIMULATE}
+   - OUTPUT FILE     = ${_OUTPUT_TO_FILE:-"none (using stdout and stderr)"}
+   - CONFIRM STAGE 1 = ${_STAGE1_CONFIRM}
+   - CONFIRM STAGE 2 = ${_STAGE2_CONFIRM}
+   - DEVICE OVERRIDE = ${_BLKDEV_OVERRIDE:-"none (using _BLKDEV on cryptmypi.conf)"}
+   - CONFIGURATION   = ${_CONFDIRNAME}
+-------------------------------------------------------------------------------
+EOF
+}
 
 # Parameter/Option Variables
-############################ Output stdin and stdout to file
+############################ Output stdout and stderr to file
 [ -z "${_OUTPUT_TO_FILE}" ] || {
-    echo "Redirecting output (stdin and stdout) to file '${_OUTPUT_TO_FILE}' ..."
+    echo "Redirecting output (stdout and stderr) to file '${_OUTPUT_TO_FILE}' ..."
     echo
     redirect_output
     echo "\$ $0 ${@} " > "${_OUTPUT_TO_FILE}"
@@ -70,7 +172,6 @@ _SCRIPT_DIRECTORY="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 # Variables
 export _USER_HOME=$(eval echo ~${SUDO_USER})
-export _CONFDIRNAME=$1
 export _VER="4.0-beta"
 export _BASEDIR="${_SCRIPT_DIRECTORY}"
 export _CURRDIR=$(pwd)
@@ -88,10 +189,14 @@ mkdir -p "${_FILESDIR}"
 
 # Check if configuration file is present
 if [ ! -f ${_CONFDIR}/cryptmypi.conf ]; then
-    echo "No cryptmypi.conf file found in the config folder!"
-    echo "Exiting ..."
-    echo "You might try copying the default ./cryptmypi.conf file to the ${_CONFDIRNAME}/ directory, then attempt to run again."
-    echo "Remember to edit the ${_CONFDIRNAME}/cryptmypi.conf with your desired settings."
+    cat << EOF
+ERROR: No 'cryptmypi.conf' file found in the config folder!
+
+    You might try copying the default ./cryptmypi.conf file to the ${_CONFDIRNAME}/ directory, then attempt to run again.
+    Remember to edit the ${_CONFDIRNAME}/cryptmypi.conf with your desired settings.
+
+Exiting ...
+EOF
     exit 1
 fi
 
