@@ -7,10 +7,22 @@ mkdir ${_BUILDDIR}/root
 mkdir ${_BUILDDIR}/mount
 
 echo_debug "Extracting image: ${_IMAGENAME} ..."
-xz --decompress --stdout ${_IMAGEDIR}/${_IMAGENAME} > ${_BUILDDIR}/kali.img
+case ${_IMAGENAME} in
+    *.xz)
+        xz --decompress --stdout ${_IMAGEDIR}/${_IMAGENAME} > ${_BUILDDIR}/cryptmypi.img
+        ;;
+    *.zip)
+        unzip -p ${_IMAGEDIR}/${_IMAGENAME} > ${_BUILDDIR}/cryptmypi.img
+        ;;
+    *)
+        echo_error "Unknown extension type on image: ${_IMAGENAME} ! Stopping here."
+        exit 1
+	;;
+esac
+
 
 echo_debug "Mounting loopback ..."
-loopdev=$(losetup -f --show ${_BUILDDIR}/kali.img)
+loopdev=$(losetup -f --show ${_BUILDDIR}/cryptmypi.img)
 partprobe ${loopdev}
 
 
@@ -33,4 +45,4 @@ umount ${_BUILDDIR}/mount
 rmdir ${_BUILDDIR}/mount
 echo_debug "Cleaning loopback ..."
 losetup -d ${loopdev}
-rm ${_BUILDDIR}/kali.img
+rm ${_BUILDDIR}/cryptmypi.img
