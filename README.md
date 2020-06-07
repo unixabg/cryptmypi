@@ -4,7 +4,7 @@ Assists in the full setup of [encrypted] Raspberry Pis. Able to maintain multipl
 
 **Note:** Only tested on:
 - Kali host
-- Kali guest/target
+- Kali and Pi OS guest/target
 - RaspberryPi 2 and 3 64 bit image.
 
 ## How it works
@@ -20,7 +20,7 @@ Optional configuration hooks can be set in any of the stages:
 
 ## Capabilities
 
-1. **FULL DISK ENCRYPTION**: Although the project can be used to setup an unencrypted RPi box, it is currently capable to setup a fully encrypted kali linux.
+1. **FULL DISK ENCRYPTION**: Although the project can be used to setup an unencrypted RPi box, it is currently capable to setup a fully encrypted kali or Pi OS linux.
 
 - unlockable remotely through dropbear's ssh;
 - served through ethernet or wifi;
@@ -42,7 +42,7 @@ Optional configuration hooks can be set in any of the stages:
 
 Example configurations are provided in the the project examples directory.
 
-Each example outlines a possible configurations scenario, from building an standart kali to building an encrypted drop box RPi for remote control.
+Each example outlines a possible configurations scenario, from building a standard kali to building an encrypted drop box RPi for remote control.
 
 ## Installation
 
