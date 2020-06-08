@@ -113,6 +113,7 @@ Host ${_SSHHUB_REFERENCE}-sys
     Port ${_SSHHUB_SSH_PORT}
     IdentityFile ${_SSH_LOCAL_KEYFILE}
     ProxyJump hub
+    ForwardAgent yes
 ${_ENTRYCOMMENT}-end
 EOT
 
