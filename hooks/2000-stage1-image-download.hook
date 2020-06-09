@@ -8,3 +8,19 @@ else
     echo_debug "Downloading ARM image from ${_IMAGEURL} ..."
     wget ${_IMAGEURL} -O ${_IMAGEDIR}/${_IMAGENAME}
 fi
+
+# Validates image
+if [ -z "${_IMAGESHA}" ]; then
+    echo_warn "SKIPPING: Image checksum will not be validated. _IMAGESHA was not defined."
+else
+    echo_debug "Validating image checksum..."
+    echo "${_IMAGESHA} ${_IMAGEDIR}/${_IMAGENAME}" | sha256sum --check --status && {
+        echo_debug "Done: Image is valid!"
+    } || {
+        echo_error "ERROR: ${_IMAGENAME} checksum is not valid ..."
+        echo_error "Removing ${_IMAGENAME} ..."
+        rm ${_IMAGEDIR}/${_IMAGENAME}
+        echo_error "Exiting ..."
+        exit 1
+    }
+fi
