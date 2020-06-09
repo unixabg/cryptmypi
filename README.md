@@ -20,7 +20,7 @@ Optional configuration hooks can be set in any of the stages:
 
 ## Capabilities
 
-1. **FULL DISK ENCRYPTION**: Although the project can be used to setup an unencrypted RPi box, it is currently capable to setup a fully encrypted kali or Pi OS linux.
+1. **FULL DISK ENCRYPTION**: Although the project can be used to setup an unencrypted RPi box, it is currently capable to setup a fully encrypted Kali or Pi OS Linux.
 
 - unlockable remotely through dropbear's ssh;
 - served through ethernet or wifi;
