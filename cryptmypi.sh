@@ -29,8 +29,11 @@ OPTIONS:
     --force-stage1, --rebuild   Overrides previous builds without confirmation
     --force-stage2              Writes to block device without confirmation
     --force-both-stages         Executes stage 1 and 2 without confirmation
+    --skip-stage1, --no-rebuild Skips stage 1 (if a previous build exists)
 
     -s, --simulate              Simulate execution flow (does not call hooks)
+    --keep_build_dir            When rebuilding stage 1, use last build as base
+                                (default cleans up removing old build)
 
     --options                   Display execution options
     -h, --help                  Display this help and exit
@@ -54,13 +57,22 @@ EOF
 # Redirects output to file if output filename given
 redirect_output(){
     [ -z "${_OUTPUT_TO_FILE}" ] || {
-        exec 3>&1 4>&2 >>"${_OUTPUT_TO_FILE}" 2>&1
+        # Alternative 1: Redirects to file
+        #exec 3>&1 4>&2 >>"${_OUTPUT_TO_FILE}" 2>&1
+
+        # Alternative 2: Redirects copy of stdout and stderr to file
+        exec > >(tee -i "${_OUTPUT_TO_FILE}")
+        exec 2>&1
     }
 }
 
 # Restores output to stdout and stderr
 restore_output(){
-    [ -z "${_OUTPUT_TO_FILE}" ] || exec 1>&3 2>&4
+    [ -z "${_OUTPUT_TO_FILE}" ] || {
+        # Alternative 1: Needs deactivation for interactions
+        #exec 1>&3 2>&4
+        echo
+    }
 }
 
 
@@ -74,6 +86,8 @@ _STAGE2_CONFIRM=true
 _BLKDEV_OVERRIDE=""
 _SHOW_OPTIONS=false
 _SIMULATE=false
+_STAGE1_REBUILD=""
+_RMBUILD_ONREBUILD=true
 
 # Pasing input parameters
 POSITIONAL=()
@@ -101,6 +115,16 @@ do
             ;;
         --force-stage1|--rebuild)
             _STAGE1_CONFIRM=false
+            _STAGE1_REBUILD=true
+            shift
+            ;;
+        --keep_build_dir)
+            _RMBUILD_ONREBUILD=false
+            shift
+            ;;
+        --skip-stage1|--no-rebuild)
+            _STAGE1_CONFIRM=false
+            _STAGE1_REBUILD=false
             shift
             ;;
         --force-stage2)
@@ -110,6 +134,7 @@ do
         --force-both-stages)
             _STAGE1_CONFIRM=false
             _STAGE2_CONFIRM=false
+            _STAGE1_REBUILD=true
             shift
             ;;
         -d|--device)
@@ -139,12 +164,14 @@ fi
 $_SHOW_OPTIONS && {
 cat << EOF
 -- OPTIONS --------------------------------------------------------------------
-   - SIMULATE        = ${_SIMULATE}
-   - OUTPUT FILE     = ${_OUTPUT_TO_FILE:-"none (using stdout and stderr)"}
-   - CONFIRM STAGE 1 = ${_STAGE1_CONFIRM}
-   - CONFIRM STAGE 2 = ${_STAGE2_CONFIRM}
-   - DEVICE OVERRIDE = ${_BLKDEV_OVERRIDE:-"none (using _BLKDEV on cryptmypi.conf)"}
-   - CONFIGURATION   = ${_CONFDIRNAME}
+   - SIMULATE               = ${_SIMULATE}
+   - OUTPUT FILE            = ${_OUTPUT_TO_FILE:-"none (using stdout and stderr)"}
+   - CONFIRM STAGE 1        = ${_STAGE1_CONFIRM}
+   - STAGE 1 REBUILD        = ${_STAGE1_REBUILD}
+   - CONFIRM STAGE 2        = ${_STAGE2_CONFIRM}
+   - DEVICE OVERRIDE        = ${_BLKDEV_OVERRIDE:-"none (using _BLKDEV on cryptmypi.conf)"}
+   - CONFIGURATION          = ${_CONFDIRNAME}
+   - RM BUILD ON REBUILD    = ${_RMBUILD_ONREBUILD}
 -------------------------------------------------------------------------------
 EOF
 }
@@ -411,15 +438,15 @@ execute(){
 
 
 # Cleanup EXIT Trap
-cleanup() {
+cleanup(){
     chroot_umount || true
     umount ${_BLKDEV}* || true
     umount /mnt/cryptmypi || {
         umount -l /mnt/cryptmypi || true
-        umount -f /dev/mapper/cryptmypi_root || true
+        umount -f /dev/mapper/crypt || true
     }
     [ -d /mnt/cryptmypi ] && rm -r /mnt/cryptmypi || true
-    cryptsetup luksClose cryptmypi_root || true
+    cryptsetup luksClose crypt || true
 }
 trap cleanup EXIT
 
@@ -441,16 +468,23 @@ main(){
                 _CONTINUE=`echo "${_CONTINUE}" | sed -e 's/\(.*\)/\L\1/'`
             } || {
                 echo "STAGE1 confirmation set to FALSE: skipping confirmation"
-                echo "STAGE1 will be rebuilt ..."
-                _CONTINUE='y'
+                $_STAGE1_REBUILD && {
+                    echo "Default set as REBUILD. STAGE1 will be rebuilt ..."
+                    _CONTINUE='y'
+                } || {
+                    echo "Default set as SKIP REBUILD. Skipping STAGE1 ..."
+                    _CONTINUE='n'
+                }
             }
 
             redirect_output
             echo ""
             case "${_CONTINUE}" in
                 'y')
-                    echo "Removing current build files..."
-                    rm -Rf ${_BUILDDIR}
+                    $_RMBUILD_ONREBUILD && {
+                        echo "Removing current build files..."
+                        rm -Rf ${_BUILDDIR}
+                    } || echo_warn "--keep_build_dir set: Not cleaning old build."
                     execute "both"
                     break;
                     ;;
