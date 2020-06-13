@@ -54,6 +54,9 @@ Examples:
 EOF
 }
 
+
+_REDIRECTING=false
+
 # Redirects output to file if output filename given
 redirect_output(){
     [ -z "${_OUTPUT_TO_FILE}" ] || {
@@ -61,8 +64,12 @@ redirect_output(){
         #exec 3>&1 4>&2 >>"${_OUTPUT_TO_FILE}" 2>&1
 
         # Alternative 2: Redirects copy of stdout and stderr to file
-        exec > >(tee -i "${_OUTPUT_TO_FILE}")
-        exec 2>&1
+	$_REDIRECTING || {
+	        exec > >(tee -i "${_OUTPUT_TO_FILE}")
+        	exec 2>&1
+	}
+
+	_REDIRECTING=true
     }
 }
 
@@ -71,6 +78,7 @@ restore_output(){
     [ -z "${_OUTPUT_TO_FILE}" ] || {
         # Alternative 1: Needs deactivation for interactions
         #exec 1>&3 2>&4
+	#_REDIRECTING=false
         echo
     }
 }
@@ -483,7 +491,7 @@ main(){
                 'y')
                     $_RMBUILD_ONREBUILD && {
                         echo "Removing current build files..."
-                        rm -Rf ${_BUILDDIR}
+                        $_SIMULATE || rm -Rf ${_BUILDDIR}
                     } || echo_warn "--keep_build_dir set: Not cleaning old build."
                     execute "both"
                     break;
