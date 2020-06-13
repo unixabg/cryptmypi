@@ -86,9 +86,10 @@ _SSHHUB_IP="${_SSHHUB_IP}"
 
 while test -f /etc/dropbear-id_rsa
 do
-    /bin/dbclient -i /etc/dropbear-id_rsa ${_SSHHUB_USERNAME}@${_SSHHUB_ADDRESS} -R ${_SSHHUB_REFERENCE}:${_SSHHUB_SSHLUKS_PORT}:127.0.0.1:2222 -N -f -y -y
-    test -f /etc/dropbear-id_rsa && /bin/dbclient -i /etc/dropbear-id_rsa ${_SSHHUB_USERNAME}@${_SSHHUB_IP} -R ${_SSHHUB_REFERENCE}:${_SSHHUB_SSHLUKS_PORT}:127.0.0.1:2222 -N -f -y -y
-    sleep 5
+    /bin/dbclient -i /etc/dropbear-id_rsa ${_SSHHUB_USERNAME}@${_SSHHUB_ADDRESS} -R ${_SSHHUB_REFERENCE}:${_SSHHUB_SSHLUKS_PORT}:127.0.0.1:2222 -N -y -y -o ExitOnForwardFailure=yes
+    test -f /etc/dropbear-id_rsa && /bin/dbclient -i /etc/dropbear-id_rsa ${_SSHHUB_USERNAME}@${_SSHHUB_IP} -R ${_SSHHUB_REFERENCE}:${_SSHHUB_SSHLUKS_PORT}:127.0.0.1:2222 -N -y -y -o ExitOnForwardFailure=yes
+    test -f /etc/dropbear-id_rsa && sleep 60
+    for i in \$(ps aux | grep dbclient | grep -v 'grep' | awk '{print \$1}'); do kill -9 \$i; done
 done
 EOT
     chmod +x "${CHROOTDIR}/etc/initramfs-tools/ssh_tunnel.sh"
@@ -156,8 +157,8 @@ esac
 echo "Killing sshhub so the system takes over later."
 
 rm /etc/dropbear-id_rsa
-killall ssh_tunnel.sh
-killall dbclient
+for i in \$(ps aux | grep 'ssh_tunnel.sh' | grep -v 'grep' | awk '{print \$1}'); do kill -9 \$i; done
+for i in \$(ps aux | grep 'dbclient' | grep -v 'grep' | awk '{print \$1}'); do kill -9 \$i; done
 EOT
     chmod +x "${CHROOTDIR}/etc/initramfs-tools/scripts/local-bottom/kill_sshhub"
 
