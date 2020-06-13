@@ -69,7 +69,19 @@ chroot_pkginstall(){
         for param in "$@"; do
             for pkg in $param; do
                 echo_debug "- Installing ${pkg}"
-                chroot ${CHROOTDIR} apt-get -y install "${pkg}"
+                chroot ${CHROOTDIR} apt-get -y install "${pkg}" || {
+                    echo_warn "apt-get failed: Trying to recover..."
+                    chroot ${CHROOTDIR} /bin/bash -x <<EOF
+                        sleep 5
+                        apt-get update
+                        apt-get -y install "${pkg}" || exit 1
+EOF
+                    status=$?
+                    [ $status -eq 0 ] || {
+                        echo_error "ERROR: Could not install ${pkg} correctly... Exiting.";
+                        exit 1
+                    }
+                }
             done
         done
     fi
