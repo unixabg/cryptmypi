@@ -65,7 +65,7 @@ redirect_output(){
 
         # Alternative 2: Redirects copy of stdout and stderr to file
 	$_REDIRECTING || {
-	        exec > >(tee -i "${_OUTPUT_TO_FILE}")
+	        exec > >(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tee -i "${_OUTPUT_TO_FILE}")
         	exec 2>&1
 	}
 
