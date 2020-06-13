@@ -4,12 +4,12 @@ set -e
 
 is_build_encrypted && {
     # Format LUKS
-    echo_debug "Attempting to format LUKS on /dev/mapper/cryptmypi_root ..."
-    if mkfs.ext4 /dev/mapper/cryptmypi_root
+    echo_debug "Attempting to format LUKS on /dev/mapper/crypt ..."
+    if mkfs.ext4 /dev/mapper/crypt
     then
         echo_debug "- LUKS formatted to ext4."
     else
-        echo_error "- Aborting since we failed to format /dev/mapper/cryptmypi_root to ext4"
+        echo_error "- Aborting since we failed to format /dev/mapper/crypt to ext4"
         exit 1
     fi
     echo

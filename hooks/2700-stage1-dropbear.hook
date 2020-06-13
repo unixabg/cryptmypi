@@ -22,9 +22,9 @@ chroot_pkginstall dropbear dropbear-initramfs
 
 # Adding command to authorized keys
 cat << "EOF" > ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys.tmp
-command="export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'; cryptsetup luksOpen /dev/mmcblk0p2 crypt && /scripts/local-top/cryptroot || reboot; killall 'cryptroot'; exit" 
+command="/etc/unlock.sh; exit" 
 EOF
-
+#command="export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'; cryptsetup luksOpen /dev/mmcblk0p2 crypt && /scripts/local-top/cryptroot || reboot -f;  for i in $(ps aux | grep cryptroot | awk '{print $1}'); do kill -9 $i; done; for i in $(ps aux | grep askpass | awk '{print $1}'); do kill -9 $i; done; exit" 
 tr -d '\n' < ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys.tmp > ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys
 rm -f ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys.tmp
 

@@ -18,27 +18,66 @@ echo_debug "Making the cryptsetup settings ..."
 
 # Update /boot/cmdline.txt to boot crypt
 sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt cryptdevice=/dev/mmcblk0p2:crypt#g' ${_BUILDDIR}/root/boot/cmdline.txt
+sed -i 's#rootfstype=ext3#rootfstype=ext4#g' ${_BUILDDIR}/root/boot/cmdline.txt
 
 # Enable cryptsetup when building initramfs
 echo "CRYPTSETUP=y" >> ${_BUILDDIR}/root/etc/cryptsetup-initramfs/conf-hook
 
 # Update /etc/fstab
 sed -i 's#/dev/mmcblk0p2#/dev/mapper/crypt#g' ${_BUILDDIR}/root/etc/fstab
+sed -i 's#ext3#ext4#g' ${_BUILDDIR}/root/etc/fstab
 
 # Update /etc/crypttab
-echo "crypt    /dev/mmcblk0p2    none    luks" >> ${_BUILDDIR}/root/etc/crypttab
+echo "crypt    /dev/mmcblk0p2    none    luks" > ${_BUILDDIR}/root/etc/crypttab
 
 # Create a hook to include our crypttab in the initramfs
 cat << EOF > ${_BUILDDIR}/root/etc/initramfs-tools/hooks/zz-cryptsetup
-#!/bin/sh
-if [ "\$1" = "prereqs" ]; then exit 0; fi
+# !/bin/sh
+set -e
+
+PREREQ=""
+prereqs()
+{
+    echo "\${PREREQ}"
+}
+
+case "\${1}" in
+    prereqs)
+        prereqs
+        exit 0
+        ;;
+esac
 
 . /usr/share/initramfs-tools/hook-functions
 
 mkdir -p \${DESTDIR}/cryptroot || true
 cat /etc/crypttab >> \${DESTDIR}/cryptroot/crypttab
+cat /etc/fstab >> \${DESTDIR}/cryptroot/fstab
+cat /etc/crypttab >> \${DESTDIR}/etc/crypttab
+cat /etc/fstab >> \${DESTDIR}/etc/fstab
+copy_file config /etc/initramfs-tools/unlock.sh /etc/unlock.sh
 EOF
 chmod 755 ${_BUILDDIR}/root/etc/initramfs-tools/hooks/zz-cryptsetup
+
+# Unlock Script
+cat << EOF > "${CHROOTDIR}/etc/initramfs-tools/unlock.sh"
+#!/bin/sh
+
+export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'
+
+while true
+do
+    test -e /dev/mapper/crypt && break || cryptsetup luksOpen /dev/mmcblk0p2 crypt
+done
+
+/scripts/local-top/cryptroot
+for i in \$(ps aux | grep 'cryptroot' | grep -v 'grep' | awk '{print \$1}'); do kill -9 \$i; done
+for i in \$(ps aux | grep 'askpass' | grep -v 'grep' | awk '{print \$1}'); do kill -9 \$i; done
+for i in \$(ps aux | grep 'ask-for-password' | grep -v 'grep' | awk '{print \$1}'); do kill -9 \$i; done
+for i in \$(ps aux | grep '\\-sh' | grep -v 'grep' | awk '{print \$1}'); do kill -9 \$i; done
+exit 0
+EOF
+chmod +x "${CHROOTDIR}/etc/initramfs-tools/unlock.sh"
 
 # Adding dm_mod to initramfs modules
 echo 'dm_crypt' >> ${_BUILDDIR}/root/etc/initramfs-tools/modules

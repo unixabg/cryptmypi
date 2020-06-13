@@ -6,7 +6,7 @@ echo_debug "Attempt to unmount just to be safe ..."
 umount ${_BLKDEV}* || true
 umount /mnt/cryptmypi || {
     umount -l /mnt/cryptmypi || true
-    umount -f /dev/mapper/cryptmypi_root || true
+    umount -f /dev/mapper/crypt || true
 }
 [ -d /mnt/cryptmypi ] && rm -r /mnt/cryptmypi || true
-cryptsetup luksClose cryptmypi_root || true
+cryptsetup luksClose crypt || true
