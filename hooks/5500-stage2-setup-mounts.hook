@@ -4,11 +4,11 @@ set -e
 
 is_build_encrypted && {
     # Mount ext4 formatted LUKS
-    echo_debug "Attempting to mount /dev/mapper/cryptmypi_root to /mnt/cryptmypi ..."
+    echo_debug "Attempting to mount /dev/mapper/crypt to /mnt/cryptmypi ..."
     mkdir /mnt/cryptmypi
-    if mount /dev/mapper/cryptmypi_root /mnt/cryptmypi
+    if mount /dev/mapper/crypt /mnt/cryptmypi
     then
-        echo_debug "- Mounted /dev/mapper/cryptmypi_root to /mnt/cryptmypi"
+        echo_debug "- Mounted /dev/mapper/crypt to /mnt/cryptmypi"
     else
         echo_error "- Aborting since we failed to mount /dev/mapper/crypt to /mnt/cryptmypi"
         exit 1
