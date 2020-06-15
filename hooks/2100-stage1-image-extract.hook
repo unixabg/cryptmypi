@@ -17,7 +17,7 @@ case ${_IMAGENAME} in
     *)
         echo_error "Unknown extension type on image: ${_IMAGENAME} ! Stopping here."
         exit 1
-	;;
+        ;;
 esac
 
 
