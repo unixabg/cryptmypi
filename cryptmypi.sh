@@ -64,12 +64,12 @@ redirect_output(){
         #exec 3>&1 4>&2 >>"${_OUTPUT_TO_FILE}" 2>&1
 
         # Alternative 2: Redirects copy of stdout and stderr to file
-	$_REDIRECTING || {
-	        exec > >(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tee -i "${_OUTPUT_TO_FILE}")
-        	exec 2>&1
-	}
+        $_REDIRECTING || {
+                exec > >(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | tee -i "${_OUTPUT_TO_FILE}")
+                exec 2>&1
+        }
 
-	_REDIRECTING=true
+        _REDIRECTING=true
     }
 }
 
@@ -78,7 +78,7 @@ restore_output(){
     [ -z "${_OUTPUT_TO_FILE}" ] || {
         # Alternative 1: Needs deactivation for interactions
         #exec 1>&3 2>&4
-	#_REDIRECTING=false
+        #_REDIRECTING=false
         echo
     }
 }
