@@ -28,7 +28,7 @@ sed -i 's#/dev/mmcblk0p2#/dev/mapper/crypt#g' ${_BUILDDIR}/root/etc/fstab
 sed -i 's#ext3#ext4#g' ${_BUILDDIR}/root/etc/fstab
 
 # Update /etc/crypttab
-echo "crypt    /dev/mmcblk0p2    none    luks" > ${_BUILDDIR}/root/etc/crypttab
+echo "crypt    /dev/sda2    none    luks" > ${_BUILDDIR}/root/etc/crypttab
 
 # Create a hook to include our crypttab in the initramfs
 cat << EOF > ${_BUILDDIR}/root/etc/initramfs-tools/hooks/zz-cryptsetup
@@ -67,7 +67,7 @@ export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'
 
 while true
 do
-    test -e /dev/mapper/crypt && break || cryptsetup luksOpen /dev/mmcblk0p2 crypt
+    test -e /dev/mapper/crypt && break || cryptsetup luksOpen /dev/sda2 crypt
 done
 
 /scripts/local-top/cryptroot
