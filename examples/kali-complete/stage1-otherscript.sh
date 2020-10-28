@@ -1,3 +1,3 @@
 #! /bin/bash
 
-echo 'Example of machine specific setup script.'
+echo 'Example of stage1 machine specific setup script.'
