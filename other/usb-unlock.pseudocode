@@ -1,0 +1,22 @@
+## Note that this is more or less pseudocode ...
+
+# First find UUID for USB
+ls -la /dev/disk/by-uuid/
+
+# Then create the "key-file"
+dd if=/dev/(u)random of=./secret.key or of=./cute_puppy.jpg bs=1 count=10000
+# Put the "key-file" on your USB-key
+
+# Stage2
+# This should be run as stage2-hook
+0000-optional-sys-XXXX.hook
+
+# Update /etc/crypttab
+echo "crypt /dev/mmcblk0p2  /dev/disk/by-uuid/<USB-UUID>:/secret.key luks,keyscript=/lib/cryptsetup/scripts/passdev" > ${CHROOTDIR}/etc/crypttab
+
+# Run mkinitramfs
+chroot_execute mkinitramfs -o /boot/initramfs.gz 4.19.118-Re4son-v7+
+
+# Lastly run cryptsetup and add "key-file" to LUKS
+chroot_execute cryptsetup luksAddKey /dev/mmcblk0p2 <key-file> --key-slot 1
+
