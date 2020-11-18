@@ -1,14 +1,20 @@
 #!/bin/bash
 set -e
 
+# If not on Pi4 (less RAM available), reduces the required memory to unlock (128MB)
+if [ _KERNEL_VERSION_FILTER != "l+" ]; then
+    _LUKSEXTRA="--pbkdf-memory 131072"
+else
+    _LUKSEXTRA=""
+fi
 
 is_build_encrypted && {
     # Create LUKS
     echo_debug "Attempting to create LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
     if [ ! -z "${_LUKSPASSWD}" ]; then
-        echo "${_LUKSPASSWD}" | cryptsetup -v --cipher ${_LUKSCIPHER} --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+        echo "${_LUKSPASSWD}" | cryptsetup -v --cipher ${_LUKSCIPHER} --key-size 256 ${_LUKSEXTRA} luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
     else
-        cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size 256 luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+        cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size 256 ${_LUKSEXTRA} luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
     fi
     if [ $? -eq 0 ]; then
         echo_debug "- LUKS created."
