@@ -5,7 +5,8 @@ Assists in the full setup of [encrypted] Raspberry Pis. Able to maintain multipl
 **Note:** Only tested on:
 - Kali host
 - Kali and Pi OS guest/target
-- RaspberryPi 2 and 3 64 bit image.
+- RaspberryPi 2, 3, and 4 64 bit image
+- irc channel freenode/#cryptmypi
 
 ## How it works
 
