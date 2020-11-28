@@ -78,14 +78,14 @@ log_begin_msg "Starting WLAN connection\\n"
 /sbin/wpa_supplicant  -i${_WIFI_INTERFACE} -c/etc/wpa_supplicant.conf -P/run/initram-wpa_supplicant.pid -B -f /tmp/wpa_supplicant.log
 
 # Wait for AUTH_LIMIT seconds, then check the status
-limit=60
+AUTH_LIMIT=60
 
 echo -n "Waiting for connection (max \${AUTH_LIMIT} seconds)"
-while [ \$limit -ge 0 -a \`WPACLI status | grep wpa_state\` != "wpa_state=COMPLETED" ]
+while [ \$AUTH_LIMIT -ge 0 -a \`WPACLI status | grep wpa_state\` != "wpa_state=COMPLETED" ]
 do
     sleep 1
     echo -n "."
-    limit=\`expr \$limit - 1\`
+    AUTH_LIMIT=\`expr \$AUTH_LIMIT - 1\`
 done
 echo ""
 
