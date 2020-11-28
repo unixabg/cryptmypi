@@ -72,15 +72,13 @@ esac
 
 . /scripts/functions
 
-AUTH_LIMIT=60
-INTERFACE="${_WIFI_INTERFACE}"
-alias WPACLI="/sbin/wpa_cli -p/tmp/wpa_supplicant -i\$INTERFACE "
+alias WPACLI="/sbin/wpa_cli -p/tmp/wpa_supplicant -i${_WIFI_INTERFACE} "
 
 log_begin_msg "Starting WLAN connection\\n"
-/sbin/wpa_supplicant  -i\$INTERFACE -c/etc/wpa_supplicant.conf -P/run/initram-wpa_supplicant.pid -B -f /tmp/wpa_supplicant.log
+/sbin/wpa_supplicant  -i${_WIFI_INTERFACE} -c/etc/wpa_supplicant.conf -P/run/initram-wpa_supplicant.pid -B -f /tmp/wpa_supplicant.log
 
 # Wait for AUTH_LIMIT seconds, then check the status
-limit=\${AUTH_LIMIT}
+limit=60
 
 echo -n "Waiting for connection (max \${AUTH_LIMIT} seconds)"
 while [ \$limit -ge 0 -a \`WPACLI status | grep wpa_state\` != "wpa_state=COMPLETED" ]
