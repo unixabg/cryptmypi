@@ -126,7 +126,7 @@ esac
 
 # Adding wifi drivers
 for x in ${_INITRAMFS_WIFI_DRIVERS}; do
-    manual_add_modules ${x}
+    manual_add_modules \${x}
 done
 
 copy_exec /sbin/wpa_supplicant
