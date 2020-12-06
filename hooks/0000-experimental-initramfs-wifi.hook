@@ -40,6 +40,33 @@ echo_debug "Generating PSK for '${_WIFI_SSID}' '${_WIFI_PASS}'"
 _WIFI_PSK=$(wpa_passphrase "${_WIFI_SSID}" "${_WIFI_PASS}" | grep "psk=" | grep -v "#psk")
 
 
+echo_debug "Creating hook to include firmware files for brcmfmac"
+cat << EOF > ${_BUILDDIR}/root/etc/initramfs-tools/hooks/zz-brcm
+# !/bin/sh
+set -e
+
+PREREQ=""
+prereqs()
+{
+    echo "\${PREREQ}"
+}
+
+case "\${1}" in
+    prereqs)
+        prereqs
+        exit 0
+        ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+echo "Copying firmware files for brcm to initramfs"
+cp -r /lib/firmware/brcm \${DESTDIR}/lib/firmware/
+
+EOF
+chmod 755 ${_BUILDDIR}/root/etc/initramfs-tools/hooks/zz-brcm
+
+
 echo_debug "Creating wpa_supplicant file"
 cat <<EOT > ${CHROOTDIR}/etc/initramfs-tools/wpa_supplicant.conf
 ctrl_interface=/tmp/wpa_supplicant
@@ -73,6 +100,10 @@ esac
 . /scripts/functions
 
 alias WPACLI="/sbin/wpa_cli -p/tmp/wpa_supplicant -i${_WIFI_INTERFACE} "
+
+log_begin_msg "Sleeping for 5 seconds to allow WLAN interface to become ready"
+sleep 5
+log_end_msg
 
 log_begin_msg "Starting WLAN connection\\n"
 /sbin/wpa_supplicant  -i${_WIFI_INTERFACE} -c/etc/wpa_supplicant.conf -P/run/initram-wpa_supplicant.pid -B -f /tmp/wpa_supplicant.log
