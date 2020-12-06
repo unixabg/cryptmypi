@@ -105,7 +105,7 @@ log_begin_msg "Sleeping for 5 seconds to allow WLAN interface to become ready"
 sleep 5
 log_end_msg
 
-log_begin_msg "Starting WLAN connection\\n"
+log_begin_msg "Starting WLAN connection"
 /sbin/wpa_supplicant  -i${_WIFI_INTERFACE} -c/etc/wpa_supplicant.conf -P/run/initram-wpa_supplicant.pid -B -f /tmp/wpa_supplicant.log
 
 # Wait for AUTH_LIMIT seconds, then check the status
