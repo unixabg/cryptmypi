@@ -97,7 +97,7 @@ _SIMULATE=false
 _STAGE1_REBUILD=""
 _RMBUILD_ONREBUILD=true
 
-# Pasing input parameters
+# Parsing input parameters
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
