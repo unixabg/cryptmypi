@@ -1,0 +1,221 @@
+#!/bin/bash
+set -e
+
+# REFERENCE:
+#   https://www.quora.com/Debian-GNU-Linux-How-can-I-add-an-SSH-active-client-in-the-initramfs-image-to-get-data-remotely
+#   https://superuser.com/questions/1289564/how-to-make-port-forwarding-in-initramfs-stage/1289835#1289835
+#   https://www.ullright.org/ullWiki/show/initramfs-tools
+#   https://github.com/ceremcem/unlock-luks-partition/blob/master/reverse-tunnel-setup.md
+
+
+echo_debug "Attempting to set ${_SSHJUMP_SERVER} channel to INITRAMFS..."
+
+
+if [ -z "${_SSHJUMP_SERVER}" ]; then
+    echo_warn "SKIPPING sshjump setup: '_SSHJUMP_SERVER' variable was not set."
+elif [ -z "${_SSHJUMP_USERNAME}" ]; then
+    echo_warn "SKIPPING sshjump setup: '_SSHJUMP_USERNAME' variable was not set."
+else
+    if [ -z "${_SSHJUMP_SSHLUKS_PORT}" ]; then
+        _SSHJUMP_SSHLUKS_PORT=2222
+        echo_warn "_SSHJUMP_SSHLUKS_PORT is not set on config: Setting default value ${_SSHJUMP_SSHLUKS_PORT}"
+    fi
+
+    if [ -z "${_SSHJUMP_COMPUTER}" ]; then
+        _SSHJUMP_REFERENCE=${_HOSTNAME}
+        echo_warn "_SSHJUMP_COMPUTER is not set on config: Setting default value ${_HOSTNAME}"
+    else
+        _SSHJUMP_REFERENCE=${_SSHJUMP_COMPUTER}
+    fi
+    echo_debug "Computer reference name: '${_SSHJUMP_REFERENCE}'"
+
+
+    echo_debug "Assuring box keyfile exists"
+    assure_box_sshkey "${_HOSTNAME}"
+
+
+    _SSHJUMP_ADDRESS="${_SSHJUMP_SERVER}"
+    echo_debug "Registering box keyfile to sshjump (${_SSHJUMP_ADDRESS})"
+    if [ -z "${_SSHJUMP_LOCAL_KEYFILE}" ]; then
+        ssh "${_SSHJUMP_USERNAME}@${_SSHJUMP_ADDRESS}" pubkey add $(cat "${_KEYFILE}.pub")
+    else
+        ssh -i "${_SSHJUMP_LOCAL_KEYFILE}" "${_SSHJUMP_USERNAME}@${_SSHJUMP_ADDRESS}" pubkey add $(cat "${_KEYFILE}.pub")
+    fi
+
+
+    #echo_debug "Determining ${_SSHJUMP_SERVER} IP..."
+    #_SSHJUMP_IP=$(nslookup "${_SSHJUMP_ADDRESS}" | grep Address | tail -n1 | sed 's#^\s*Address:\s*\(.*\)$#\1#')
+    #if [ -z "${_SSHJUMP_IP}" ]; then
+    #    echo_debug "    IP could not be determined. Using '${_SSHJUMP_ADDRESS}'"
+    #else
+    #    echo_debug "    IP: ${_SSHJUMP_IP}"
+    #fi
+
+
+    echo_debug "Creating initramfs script sshjump_tunnel"
+    cat <<EOT > ${CHROOTDIR}/etc/initramfs-tools/scripts/local-top/sshjump_tunnel
+#!/bin/sh
+
+PREREQ=""
+prereqs()
+{
+    echo "\$PREREQ"
+}
+
+case \$1 in
+prereqs)
+    prereqs
+    exit 0
+    ;;
+esac
+
+. /scripts/functions
+
+log_begin_msg "Starting SSHJUMP tunnel ..."
+
+/sbin/ifconfig lo up
+/etc/ssh_tunnel.sh &
+EOT
+    chmod +x "${CHROOTDIR}/etc/initramfs-tools/scripts/local-top/sshjump_tunnel"
+
+
+    echo_debug "Creating sshjump_tunnel.sh connection loop"
+    cat <<EOT > ${CHROOTDIR}/etc/initramfs-tools/ssh_tunnel.sh
+# !/bin/sh
+
+# Let everything get ready
+sleep 10
+
+while test -f /etc/dropbear-id_rsa
+do
+    /bin/dbclient -i /etc/dropbear-id_rsa ${_SSHJUMP_USERNAME}@${_SSHJUMP_ADDRESS} -R ${_SSHJUMP_REFERENCE}:${_SSHJUMP_SSHLUKS_PORT}:127.0.0.1:2222 -N -y -y -o ExitOnForwardFailure=yes
+    test -f /etc/dropbear-id_rsa && /bin/dbclient -i /etc/dropbear-id_rsa ${_SSHJUMP_USERNAME}@${_SSHJUMP_ADDRESS} -R ${_SSHJUMP_REFERENCE}:${_SSHJUMP_SSHLUKS_PORT}:127.0.0.1:2222 -N -y -y -o ExitOnForwardFailure=yes
+    test -f /etc/dropbear-id_rsa && sleep 60
+    for i in \$(ps aux | grep dbclient | grep -v 'grep' | awk '{print \$1}'); do kill -9 \$i; done
+done
+EOT
+    chmod +x "${CHROOTDIR}/etc/initramfs-tools/ssh_tunnel.sh"
+
+
+    echo_debug "Creating initramfs hook sshjump_tunnel"
+    cat <<EOT > ${CHROOTDIR}/etc/initramfs-tools/hooks/sshjump_tunnel
+# !/bin/sh
+set -e
+
+PREREQ=""
+prereqs()
+{
+    echo "\${PREREQ}"
+}
+
+case "\${1}" in
+    prereqs)
+        prereqs
+        exit 0
+        ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+
+copy_file config /etc/initramfs-tools/ssh_tunnel.sh /etc/ssh_tunnel.sh
+copy_file config /etc/initramfs-tools/dropbear-id_rsa /etc/dropbear-id_rsa
+copy_exec /usr/bin/dbclient /bin
+
+
+# For DNS functionality
+test -d /lib/aarch64-linux-gnu && LIB=/lib/aarch64-linux-gnu || LIB=/lib/aarch32-linux-gnu
+mkdir -p "\$DESTDIR/\$LIB"
+cp \$LIB/libnss_dns.so.2 \$LIB/libnss_files.so.2 \$LIB/libresolv.so.2 \$LIB/libc.so.6 "\${DESTDIR}/\$LIB"
+echo nameserver ${_DNS1} >  "\${DESTDIR}/etc/resolv.conf"
+echo nameserver ${_DNS2} >> "\${DESTDIR}/etc/resolv.conf"
+EOT
+    chmod +x "${CHROOTDIR}/etc/initramfs-tools/hooks/sshjump_tunnel"
+
+    echo_debug "Converting id_rsa to a dropbear key dropbear-id_rsa"
+    cp "${_KEYFILE}" "${CHROOTDIR}/etc/initramfs-tools/id_rsa.tmp"
+    ssh-keygen -m PEM -p -f "${CHROOTDIR}/etc/initramfs-tools/id_rsa.tmp" -q -N ""
+    chroot ${CHROOTDIR} /bin/bash -c "/usr/lib/dropbear/dropbearconvert openssh dropbear /etc/initramfs-tools/id_rsa.tmp /etc/initramfs-tools/dropbear-id_rsa"
+    rm "${CHROOTDIR}/etc/initramfs-tools/id_rsa.tmp"
+
+
+    echo_debug "Creating initramfs script kill_sshjump"
+    cat <<EOT > ${CHROOTDIR}/etc/initramfs-tools/scripts/local-bottom/kill_sshjump
+#!/bin/sh
+
+PREREQ=""
+prereqs()
+{
+    echo "\$PREREQ"
+}
+
+case \$1 in
+prereqs)
+    prereqs
+    exit 0
+    ;;
+esac
+
+echo "Killing sshjump so the system takes over later."
+
+rm /etc/dropbear-id_rsa
+for i in \$(ps aux | grep 'ssh_tunnel.sh' | grep -v 'grep' | awk '{print \$1}'); do kill -9 \$i; done
+for i in \$(ps aux | grep 'dbclient' | grep -v 'grep' | awk '{print \$1}'); do kill -9 \$i; done
+EOT
+    chmod +x "${CHROOTDIR}/etc/initramfs-tools/scripts/local-bottom/kill_sshjump"
+
+
+    echo_debug "Creating script to removes this key from SSHJUMP: ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove"
+    cat <<EOT > ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove
+#!/bin/bash
+cat ${_KEYFILE}.pub | ssh ${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER} pubkey rm
+EOT
+    chmod +x ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove
+
+
+    echo_debug "Editing ~/.ssh/config"
+
+    echo_debug "    Verifying if sshjump hub alias exists in $_USER_HOME/.ssh/config ..."
+    if test -f $_USER_HOME/.ssh/config && grep -q "^Host hub\s*" $_USER_HOME/.ssh/config
+    then
+        echo_debug "        ... sshjump host definition found."
+    else
+        echo_debug "        ... sshjump host definition not found: creating it"
+        cat <<EOT >> $_USER_HOME/.ssh/config
+
+# cryptmypi-sshjump-entry-start
+Host hub
+    Hostname ${_SSHJUMP_SERVER}
+    User ${_SSHJUMP_USERNAME}
+    IdentityFIle ${_SSHJUMP_LOCAL_KEYFILE}
+# cryptmypi-sshjump-entry-end
+EOT
+    fi
+
+    echo_debug "    Creating/Replacing ${_SSHJUMP_REFERENCE}-boot host definition ..."
+    _ENTRYCOMMENT="# cryptmypi-${_SSHJUMP_REFERENCE}-boot-entry"
+    sed -i "/^${_ENTRYCOMMENT}-start/,/^${_ENTRYCOMMENT}-end/{/^${_ENTRYCOMMENT}-start/!{/^${_ENTRYCOMMENT}-end/!d}}" $_USER_HOME/.ssh/config
+    sed -i "/${_ENTRYCOMMENT}/d" $_USER_HOME/.ssh/config
+cat <<EOT >> $_USER_HOME/.ssh/config
+
+${_ENTRYCOMMENT}-start
+Host ${_SSHJUMP_REFERENCE}-boot
+    HostName ${_SSHJUMP_REFERENCE}
+    User root
+    Port ${_SSHJUMP_SSHLUKS_PORT}
+    IdentityFile ${_SSH_LOCAL_KEYFILE}
+    ProxyJump hub
+${_ENTRYCOMMENT}-end
+EOT
+
+    echo_debug "    Removing unecessary empty lines"
+    sed -i 'N;/^\n$/D;P;D;' $_USER_HOME/.ssh/config
+
+
+    echo_debug " ... ${_SSHJUMP_SERVER} INITRAMFS SSH channel set up! To connect, use:"
+    echo_debug ""
+    echo_debug "   ssh -i \"${_SSH_LOCAL_KEYFILE}\" -J ${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER} root@${_SSHJUMP_REFERENCE} -p ${_SSHJUMP_SSHLUKS_PORT}"
+    echo_debug "   or"
+    echo_debug "   ssh ${_SSHJUMP_REFERENCE}-boot"
+    echo_debug ""
+fi

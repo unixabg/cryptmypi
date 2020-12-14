@@ -1,0 +1,132 @@
+#!/bin/bash
+set -e
+
+
+echo_debug "Attempting to set ${_SSHJUMP_SERVER} channel..."
+
+
+if [ -z "${_SSHJUMP_SERVER}" ]; then
+    echo_warn "SKIPPING sshjump setup: '_SSHJUMP_SERVER' variable was not set."
+elif [ -z "${_SSHJUMP_USERNAME}" ]; then
+    echo_warn "SKIPPING sshjump setup: '_SSHJUMP_USERNAME' variable was not set."
+else
+    if [ -z "${_SSHJUMP_SSH_PORT}" ]; then
+        _SSHJUMP_SSH_PORT=22
+         echo_warn "_SSHJUMP_SSH_PORT is not set on config: Setting default value ${_SSHJUMP_SSH_PORT}"
+   fi
+
+    if [ -z "${_SSHJUMP_COMPUTER}" ]; then
+        _SSHJUMP_REFERENCE=${_HOSTNAME}
+        echo_warn "_SSHJUMP_COMPUTER is not set on config: Setting default value ${_HOSTNAME}"
+    else
+        _SSHJUMP_REFERENCE=${_SSHJUMP_COMPUTER}
+    fi
+    echo_debug "Computer reference name: '${_SSHJUMP_REFERENCE}'"
+
+
+    echo_debug "Assuring box keyfile exists"
+    assure_box_sshkey "${_HOSTNAME}"
+
+
+    echo_debug "Registering box keyfile to sshjump"
+    if [ -z "${_SSHJUMP_LOCAL_KEYFILE}" ]; then
+        ssh "${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER}" pubkey add $(cat "${_KEYFILE}.pub")
+    else
+        ssh -i "${_SSHJUMP_LOCAL_KEYFILE}" "${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER}" pubkey add $(cat "${_KEYFILE}.pub")
+    fi
+
+
+    echo_debug "Adding ${_SSHJUMP_SERVER} pub key to known_hosts..."
+    ssh-keyscan -H ${_SSHJUMP_SERVER} >> ${CHROOTDIR}/root/.ssh/known_hosts
+    chmod 644 ${CHROOTDIR}/root/.ssh/known_hosts
+
+
+    echo_debug "Creating script to create and maintain sshjump channel..."
+    cat <<EOT > ${CHROOTDIR}/opt/sys-sshjump-channel.sh
+#!/bin/bash
+
+while true
+do
+    sleep 30
+    ssh -i /root/.ssh/id_rsa ${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER} info | grep -q "^${_SSHJUMP_REFERENCE}:${_SSHJUMP_SSH_PORT}\$" && {
+        # sshjump's port is already being used, using another port
+        ssh -i /root/.ssh/id_rsa ${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER} -R ${_SSHJUMP_REFERENCE}:${_SSHJUMP_SSH_PORT}2:localhost:22 -N -o ServerAliveInterval=60 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+    } || {
+        # Proceding normally
+        ssh -i /root/.ssh/id_rsa ${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER} -R ${_SSHJUMP_REFERENCE}:${_SSHJUMP_SSH_PORT}:localhost:22 -N -o ServerAliveInterval=60 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+    }
+done
+EOT
+    chmod +x ${CHROOTDIR}/opt/sys-sshjump-channel.sh
+
+
+    echo_debug "Creating startup service"
+    cat <<EOT > ${CHROOTDIR}/etc/systemd/system/sshjump.service
+[Unit]
+Description=sshjump
+
+[Service]
+Type=oneshot #or simple
+ExecStart=/opt/sys-sshjump-channel.sh
+
+[Install]
+WantedBy=multi-user.target
+EOT
+    chroot_execute systemctl enable sshjump.service
+
+
+    echo_debug "Creating script to removes this key from SSHJUMP: ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove"
+    cat <<EOT > ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove
+#!/bin/bash
+cat ${_KEYFILE}.pub | ssh ${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER} pubkey rm
+EOT
+    chmod +x ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove
+
+
+    echo_debug "Editing ~/.ssh/config"
+
+    echo_debug "    Verifying if sshjump hub alias exists in $_USER_HOME/.ssh/config ..."
+    if test -f $_USER_HOME/.ssh/config && grep -q "^Host hub\s*" $_USER_HOME/.ssh/config
+    then
+        echo_debug "        ... sshjump host definition found."
+    else
+        echo_debug "        ... sshjump host definition not found: creating it"
+        cat <<EOT >> $_USER_HOME/.ssh/config
+
+# cryptmypi-sshjump-entry-start
+Host hub
+    Hostname ${_SSHJUMP_SERVER}
+    User ${_SSHJUMP_USERNAME}
+    IdentityFIle ${_SSHJUMP_LOCAL_KEYFILE}
+# cryptmypi-sshjump-entry-end
+EOT
+    fi
+
+    echo_debug "    Creating/Replacing ${_SSHJUMP_REFERENCE}-sys host definition ..."
+    _ENTRYCOMMENT="# cryptmypi-${_SSHJUMP_REFERENCE}-sys-entry"
+    sed -i "/^${_ENTRYCOMMENT}-start/,/^${_ENTRYCOMMENT}-end/{/^${_ENTRYCOMMENT}-start/!{/^${_ENTRYCOMMENT}-end/!d}}" $_USER_HOME/.ssh/config
+    sed -i "/${_ENTRYCOMMENT}/d" $_USER_HOME/.ssh/config
+cat <<EOT >> $_USER_HOME/.ssh/config
+
+${_ENTRYCOMMENT}-start
+Host ${_SSHJUMP_REFERENCE}-sys
+    HostName ${_SSHJUMP_REFERENCE}
+    User root
+    Port ${_SSHJUMP_SSH_PORT}
+    IdentityFile ${_SSH_LOCAL_KEYFILE}
+    ProxyJump hub
+    ForwardAgent yes
+${_ENTRYCOMMENT}-end
+EOT
+
+    echo_debug "    Removing unecessary empty lines"
+    sed -i 'N;/^\n$/D;P;D;' $_USER_HOME/.ssh/config
+
+
+    echo_debug " ... ${_SSHJUMP_SERVER} channel set up! To connect, use:"
+    echo_debug ""
+    echo_debug "   ssh -i \"${_SSH_LOCAL_KEYFILE}\" -J ${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER} root@${_SSHJUMP_REFERENCE} -p ${_SSHJUMP_SSH_PORT}"
+    echo_debug "   or"
+    echo_debug "   ssh ${_SSHJUMP_REFERENCE}-sys"
+    echo_debug ""
+fi
