@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+
+echo_debug "Attempting to remove /etc/initramfs-tools/hooks/zz-cryptsetup hook ..."
+chroot_execute rm -f /etc/initramfs-tools/hooks/zz-cryptsetup
+sync
+echo_debug "... attempted hook removal complete!"
