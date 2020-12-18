@@ -1,6 +1,7 @@
 # Basic STAGE definitions
 
 stage1profile_noencryption(){
+    myhooks "stage1-sanity"
     myhooks "stage1-image-download"
     myhooks "stage1-image-extract"
     myhooks "stage1-setup-chroot"
