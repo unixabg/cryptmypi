@@ -2,9 +2,6 @@
 set -e
 
 
-# Setup qemu emulator for aarch64
-echo_debug "- Copying qemu emulator to chroot ..."
-cp /usr/bin/qemu-aarch64-static ${_BUILDDIR}/root/usr/bin/
 chroot_pkginstall cryptsetup busybox
 
 # Creating symbolic link to e2fsck
