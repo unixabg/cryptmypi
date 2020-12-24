@@ -51,10 +51,10 @@ chroot_update(){
         exit 1
     }
 
-    if [ -f "${CHROOTDIR}/etc/resolv.conf" ]; then
-        echo_debug "${CHROOTDIR}/etc/resolv.conf exists."
+    if [ -f "${CHROOTDIR}/etc/resolv.conf" ] && [ -s "${CHROOTDIR}/etc/resolv.conf" ]; then
+        echo_debug "${CHROOTDIR}/etc/resolv.conf exists and appears to be not empty."
     else
-        echo_warn "${CHROOTDIR}/etc/resolv.conf does not exists."
+        echo_warn "${CHROOTDIR}/etc/resolv.conf does not exists or is empty."
         echo_warn "Setting nameserver to $_DNS1 and $_DNS2 in ${CHROOTDIR}/etc/resolv.conf"
         echo -e "nameserver $_DNS1\nnameserver $_DNS2" > "${CHROOTDIR}/etc/resolv.conf"
     fi
