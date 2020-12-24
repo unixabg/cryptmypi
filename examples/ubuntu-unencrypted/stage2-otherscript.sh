@@ -17,4 +17,4 @@ mv /boot/initramfs.gz /boot/initrd.img
 
 echo "Updating our /boot/initrd.img to /boot/initrd.img-5.8.0-1006-raspi"
 mv /boot/initrd.img-5.8.0-1006-raspi /boot/initrd.img-5.8.0-1006-raspi-oos
-cp /boot/initramfs.gz /boot/initrd.img-5.8.0-1006-raspi
+cp /boot/initrd.img /boot/initrd.img-5.8.0-1006-raspi
