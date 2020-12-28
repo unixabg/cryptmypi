@@ -10,11 +10,9 @@ dosfslabel /dev/sdb1 system-boot
 e2label /dev/sdb2 writable
 
 
-echo "Movinng our /boot/initramfs.gz to /boot/initrd.img"
-mv /boot/initrd.img /boot/initrd.img-oos
-mv /boot/initramfs.gz /boot/initrd.img
-
-
-echo "Updating our /boot/initrd.img to /boot/initrd.img-5.8.0-1006-raspi"
-mv /boot/initrd.img-5.8.0-1006-raspi /boot/initrd.img-5.8.0-1006-raspi-oos
-cp /boot/initrd.img /boot/initrd.img-5.8.0-1006-raspi
+# Move our kernel in place of the targets default kernel
+__UBUNTU_KERNEL="initrd.img-5.8.0-1006-raspi"
+echo "Movinng our /boot/initramfs.gz to /boot/${__UBUNTU_KERNEL}."
+mv "/boot/${__UBUNTU_KERNEL}" "/boot/${__UBUNTU_KERNEL}-oos"
+cp /boot/initramfs.gz /boot/initrd.img
+mv /boot/initramfs.gz "/boot/${__UBUNTU_KERNEL}"
