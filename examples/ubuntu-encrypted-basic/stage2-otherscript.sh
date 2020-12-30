@@ -11,7 +11,7 @@ dosfslabel /dev/sdb1 system-boot
 
 # https://cryptsetup-team.pages.debian.net/cryptsetup/README.initramfs.html#cryptopts-boot-argument
 echo 'Setting up /boot/cmdline.txt for encrypted boot with Ubuntu.'
-sed -i.bak "s#root=LABEL=writable#root=/dev/mapper/crypt cryptopts=target=crypt,source=/dev/mmcblk0p2#g" /boot/cmdline.txt
+sed -i.bak "s#root=LABEL=writable#root=/dev/mapper/crypt#g" /boot/cmdline.txt
 
 
 echo 'Drop the initramfs entry we made in /boot/config.txt'
