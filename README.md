@@ -3,9 +3,9 @@
 Assists in the full setup of [encrypted] Raspberry Pis. Able to maintain multiple setup configurations, for multiple usages, ofers a multitude of modular configurations hooks providing out-of-the-box optinal features for initramfs (while the system in encrypted) and the actual system (after boot).
 
 **Note:** Only tested on:
-- Kali host
-- Kali and Pi OS guest/target
-- RaspberryPi 2, 3, and 4 64 bit image
+- Host OS: Kali
+- Guest OS: Kali,Pi OS, and Ubuntu
+- Guest Hardware: RaspberryPi 2, 3, and 4
 - irc channel freenode/#cryptmypi
 
 ## How it works
@@ -21,11 +21,11 @@ Optional configuration hooks can be set in any of the stages:
 
 ## Capabilities
 
-1. **FULL DISK ENCRYPTION**: Although the project can be used to setup an unencrypted RPi box, it is currently capable to setup a fully encrypted Kali or Pi OS Linux.
+1. **FULL DISK ENCRYPTION**: Although the project can be used to setup an unencrypted RPi box, it is currently capable to setup a fully encrypted Kali, Pi OS, or Ubuntu Linux.
 
 - unlockable remotely through dropbear's ssh;
 - served through ethernet or wifi;
-- exposed to the internet using reverse forwarding: sshhub.de as a jumphost;
+- exposed to the internet using reverse forwarding: sshhub.de (or custom ssh server) as a jumphost;
 - bypass firewalls using IODINE;
 - and a nuke password can be set;
 
