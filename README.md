@@ -3,9 +3,9 @@
 Assists in the full setup of [encrypted] Raspberry Pis. Able to maintain multiple setup configurations, for multiple usages, ofers a multitude of modular configurations hooks providing out-of-the-box optinal features for initramfs (while the system in encrypted) and the actual system (after boot).
 
 **Note:** Only tested on:
-- Host OS: Kali
-- Guest OS: Kali,Pi OS, and Ubuntu
-- Guest Hardware: RaspberryPi 2, 3, and 4
+- Host OS: Debian 10 and Kali
+- Target OS: Kali,Pi OS, and Ubuntu
+- Target Hardware: RaspberryPi 2, 3, and 4
 - irc channel freenode/#cryptmypi
 
 ## How it works
