@@ -10,8 +10,8 @@ dosfslabel /dev/sdb1 RASPIFIRM
 
 
 # https://cryptsetup-team.pages.debian.net/cryptsetup/README.initramfs.html#cryptopts-boot-argument
-echo 'Setting up /boot/cmdline.txt for encrypted boot with Ubuntu.'
-sed -i.bak "s#root=LABEL=RASPIROOT#root=/dev/mapper/crypt cryptdevice=/dev/mmcblk1p2:crypt rootfstype=ext4#g" /boot/cmdline.txt
+echo 'Setting up /boot/cmdline.txt for encrypted boot with Debian.'
+sed -i.bak "s#root=LABEL=RASPIROOT#root=/dev/mapper/crypt rootfstype=ext4#g" /boot/cmdline.txt
 
 
 #echo 'Drop the initramfs entry we made in /boot/config.txt'
