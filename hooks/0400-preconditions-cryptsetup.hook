@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+# Precondition check for cryptsetup availability
+if [ ! -e /sbin/cryptsetup ]; then
+    echo_error "No /sbin/cryptsetup file found!"
+    echo "Exiting ..."
+    echo "On Debian based systems, cryptsetup can be installed with:"
+    echo "  apt install cryptsetup"
+    exit 1
+fi

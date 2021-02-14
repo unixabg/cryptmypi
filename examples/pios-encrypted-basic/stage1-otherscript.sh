@@ -6,7 +6,7 @@
 
 echo 'Modifying /boot/cmdline.txt for encrypted boot.'
 sed -i.bak "s#quiet init=/usr/lib/raspi-config/init_resize.sh##g" /boot/cmdline.txt
-sed -i.bak "s#root=PARTUUID=.*-02#root=/dev/mapper/crypt cryptdevice=/dev/mmcblk0p2:crypt#g" /boot/cmdline.txt
+sed -i.bak "s#root=PARTUUID=.*-02#root=/dev/mapper/crypt#g" /boot/cmdline.txt
 
 
 echo 'Updating partition information in /etc/fstab for enctyped boot.'

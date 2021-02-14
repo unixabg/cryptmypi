@@ -12,6 +12,20 @@ is_build_encrypted && {
     fi
     if [ $? -eq 0 ]; then
         echo_debug "- LUKS created."
+        ## Source in our UUID
+        . ${_BUILDDIR}/root/boot/luksuuid.txt
+        echo_debug "Attempting to set the UUID of ${__LUKSUUID} on ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
+        if [ ! -z "${_LUKSPASSWD}" ]; then
+            echo "${_LUKSPASSWD}" | cryptsetup -v luksUUID --uuid "${__LUKSUUID}" ${_BLKDEV}${__PARTITIONPREFIX}2
+        else
+            cryptsetup -v luksUUID --uuid "${__LUKSUUID}" ${_BLKDEV}${__PARTITIONPREFIX}2
+	fi
+        if [ $? -eq 0 ]; then
+            echo_debug "- LUKS UUID was created."
+        else
+            echo_error "- Aborting since we failed to create LUKS UUID on ${_BLKDEV}${__PARTITIONPREFIX}2"
+            exit 1
+	fi
     else
         echo_error "- Aborting since we failed to create LUKS on ${_BLKDEV}${__PARTITIONPREFIX}2"
         exit 1

@@ -207,7 +207,7 @@ _SCRIPT_DIRECTORY="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 # Variables
 export _USER_HOME=$(eval echo ~${SUDO_USER})
-export _VER="4.5-beta"
+export _VER="4.6-beta"
 export _BASEDIR="${_SCRIPT_DIRECTORY}"
 export _CURRDIR=$(pwd)
 export _CONFDIR=${_CURRDIR}/${_CONFDIRNAME}

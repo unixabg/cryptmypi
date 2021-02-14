@@ -13,8 +13,12 @@ echo "initramfs initramfs.gz followkernel" >> ${_BUILDDIR}/root/boot/config.txt
 # Begin cryptsetup
 echo_debug "Making the cryptsetup settings ..."
 
+# Generate a uuid for luks
+__LUKSUUID=$(cat /proc/sys/kernel/random/uuid)
+echo "__LUKSUUID=${__LUKSUUID}" > ${_BUILDDIR}/root/boot/luksuuid.txt
+
 # Update /boot/cmdline.txt to boot crypt
-sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt cryptdevice=/dev/mmcblk0p2:crypt#g' ${_BUILDDIR}/root/boot/cmdline.txt
+sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt#g' ${_BUILDDIR}/root/boot/cmdline.txt
 sed -i 's#rootfstype=ext3#rootfstype=ext4#g' ${_BUILDDIR}/root/boot/cmdline.txt
 
 # Enable cryptsetup when building initramfs
@@ -25,7 +29,7 @@ sed -i 's#/dev/mmcblk0p2#/dev/mapper/crypt#g' ${_BUILDDIR}/root/etc/fstab
 sed -i 's#ext3#ext4#g' ${_BUILDDIR}/root/etc/fstab
 
 # Update /etc/crypttab
-echo "crypt    /dev/mmcblk0p2    none    luks" > ${_BUILDDIR}/root/etc/crypttab
+echo "crypt    UUID=${__LUKSUUID}    none    luks" > ${_BUILDDIR}/root/etc/crypttab
 
 # Create a hook to include our crypttab in the initramfs
 cat << EOF > ${_BUILDDIR}/root/etc/initramfs-tools/hooks/zz-cryptsetup
@@ -64,7 +68,7 @@ export PATH='/sbin:/bin/:/usr/sbin:/usr/bin'
 
 while true
 do
-    test -e /dev/mapper/crypt && break || cryptsetup luksOpen /dev/mmcblk0p2 crypt
+    test -e /dev/mapper/crypt && break || cryptsetup luksOpen /dev/disk/by-uuid/${__LUKSUUID} crypt
 done
 
 /scripts/local-top/cryptroot
