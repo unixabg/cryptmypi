@@ -19,7 +19,7 @@ sed -i.bak "s#initramfs initramfs.gz followkernel##g" /boot/config.txt
 
 
 ## Move our kernel in place of the targets default kernel
-__DEBIAN_KERNEL="initrd.img-5.10.0-3-arm64"
+__DEBIAN_KERNEL="initrd.img-5.10.0-5-arm64"
 echo "Movinng our /boot/initramfs.gz to /boot/${__DEBIAN_KERNEL}."
 mv "/boot/${__DEBIAN_KERNEL}" "/boot/${__DEBIAN_KERNEL}-oos"
 mv /boot/initramfs.gz "/boot/${__DEBIAN_KERNEL}"
