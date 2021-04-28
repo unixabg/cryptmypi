@@ -57,6 +57,7 @@ chroot_update(){
         echo_warn "${CHROOTDIR}/etc/resolv.conf does not exists or is empty."
         echo_warn "Setting nameserver to $_DNS1 and $_DNS2 in ${CHROOTDIR}/etc/resolv.conf"
         echo -e "nameserver $_DNS1\nnameserver $_DNS2" > "${CHROOTDIR}/etc/resolv.conf"
+        chmod 644 "${CHROOTDIR}/etc/resolv.conf"
     fi
 
     echo_debug "Updating apt-get"
