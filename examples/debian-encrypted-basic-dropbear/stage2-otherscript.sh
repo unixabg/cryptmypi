@@ -6,7 +6,7 @@
 
 # At the time of testing the Debian OS for rpi works on labels, so we attempt to match.
 echo 'Setting up partition labels for Debian OS.'
-dosfslabel /dev/sdb1 RASPIFIRM
+dosfslabel ${_BLKDEV}1 RASPIFIRM
 
 
 # https://cryptsetup-team.pages.debian.net/cryptsetup/README.initramfs.html#cryptopts-boot-argument
