@@ -6,8 +6,8 @@
 
 # At the time of testing the Debian for rpi works on labels, so we attempt to match.
 echo 'Setting up partition labels for Debian.'
-dosfslabel /dev/sdb1 RASPIFIRM
-e2label /dev/sdb2 RASPIROOT
+dosfslabel ${_BLKDEV}1 RASPIFIRM
+e2label ${_BLKDEV}2 RASPIROOT
 
 
 # Move our kernel in place of the targets default kernel
