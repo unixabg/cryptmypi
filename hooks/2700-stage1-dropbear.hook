@@ -19,6 +19,26 @@ fi
 # Installing packages
 chroot_pkginstall dropbear dropbear-initramfs
 
+# Backwards compatibility on dropbear-initramfs
+echo_debug "Attempting dropbear compatibility sanity check with newer versions ..."
+chroot_execute  /bin/bash << "EOF"
+if [ -d "/etc/dropbear/initramfs" ]; then
+    # New path location for drobbear initramfs exists.
+    echo "Found /etc/dropbear/initramfs directory."
+    cd /etc
+    echo "Linking /etc/dropbear/initramfs to /etc/dropbear-initramfs directory."
+    ln -s dropbear/initramfs dropbear-initramfs
+    echo "Linking /etc/dropbear/initramfs/config to /etc/dropbear/initramfs/dropbear.conf."
+    cd /etc/dropbear/initramfs
+    if [ -f "dropbear.conf" ]; then
+        mv dropbear.conf config
+    else
+        echo '#DROPBEAR_OPTIONS=' >> config
+    fi
+    ln -s config dropbear.conf
+    echo $$
+fi
+EOF
 
 # Adding command to authorized keys
 cat << "EOF" > ${CHROOTDIR}/etc/dropbear-initramfs/authorized_keys.tmp
