@@ -11,7 +11,7 @@ e2label ${_BLKDEV}2 writable
 
 
 # Move our kernel in place of the targets default kernel
-__UBUNTU_KERNEL="initrd.img-5.8.0-1006-raspi"
+__UBUNTU_KERNEL="initrd.img-5.11.0-1007-raspi"
 echo "Movinng our /boot/initramfs.gz to /boot/${__UBUNTU_KERNEL}."
 mv "/boot/${__UBUNTU_KERNEL}" "/boot/${__UBUNTU_KERNEL}-oos"
 cp /boot/initramfs.gz /boot/initrd.img
