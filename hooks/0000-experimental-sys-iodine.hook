@@ -11,7 +11,7 @@ echo_debug "Attempting iodine ..."
 if [ -z "$_IODINE_PASSWORD" ] || [ -z "$_IODINE_DOMAIN" ]; then
     echo_warn 'SKIPPING: IODINE will not be configured. _IODINE_PASSWORD and/or _IODINE_DOMAIN are not set.'
 else
-    chroot_pkginstall install iodine
+    chroot_pkginstall iodine
 
     # Create iodine startup script (not initramfs)
     cat << EOF > ${CHROOTDIR}/opt/iodine.sh

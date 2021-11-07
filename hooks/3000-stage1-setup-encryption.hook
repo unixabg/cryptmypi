@@ -2,7 +2,7 @@
 set -e
 
 
-chroot_pkginstall cryptsetup busybox
+chroot_pkginstall cryptsetup cryptsetup-initramfs busybox
 
 # Creating symbolic link to e2fsck
 chroot ${_BUILDDIR}/root /bin/bash -c "test -L /sbin/fsck.luks || ln -s /sbin/e2fsck /sbin/fsck.luks"

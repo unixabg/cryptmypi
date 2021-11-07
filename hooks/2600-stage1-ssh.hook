@@ -34,5 +34,7 @@ sed -i 's/^#*ChallengeResponseAuthentication\s\+.*$/\ChallengeResponseAuthentica
 sed -i 's/^#*PubkeyAuthentication\s\+.*$/\PubkeyAuthentication yes/' "${CHROOTDIR}/etc/ssh/sshd_config"
 sed -i 's|^#*AuthorizedKeysFile\s\+.*$|\AuthorizedKeysFile .ssh/authorized_keys|' "${CHROOTDIR}/etc/ssh/sshd_config"
 
+# Make sure ssh is enabled
+chroot_execute systemctl enable ssh
 
 echo_debug "   ... sshd set up!"
