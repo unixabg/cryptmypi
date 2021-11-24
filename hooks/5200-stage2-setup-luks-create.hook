@@ -19,13 +19,13 @@ is_build_encrypted && {
             echo "${_LUKSPASSWD}" | cryptsetup -v luksUUID --uuid "${__LUKSUUID}" ${_BLKDEV}${__PARTITIONPREFIX}2
         else
             cryptsetup -v luksUUID --uuid "${__LUKSUUID}" ${_BLKDEV}${__PARTITIONPREFIX}2
-	fi
+        fi
         if [ $? -eq 0 ]; then
             echo_debug "- LUKS UUID was created."
         else
             echo_error "- Aborting since we failed to create LUKS UUID on ${_BLKDEV}${__PARTITIONPREFIX}2"
             exit 1
-	fi
+        fi
     else
         echo_error "- Aborting since we failed to create LUKS on ${_BLKDEV}${__PARTITIONPREFIX}2"
         exit 1
