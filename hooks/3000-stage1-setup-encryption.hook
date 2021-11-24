@@ -82,7 +82,3 @@ chmod +x "${CHROOTDIR}/etc/initramfs-tools/unlock.sh"
 
 # Adding dm_mod to initramfs modules
 echo 'dm_crypt' >> ${_BUILDDIR}/root/etc/initramfs-tools/modules
-
-# Disable autoresize
-chroot_execute systemctl disable rpiwiggle
-rm ${_BUILDDIR}/root/root/scripts/rpi-wiggle.sh
