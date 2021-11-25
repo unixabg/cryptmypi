@@ -14,6 +14,14 @@ is_build_encrypted && {
         echo_debug "- LUKS created."
         ## Source in our UUID
         . ${_BUILDDIR}/root/boot/luksuuid.txt
+        ## Test to generate new luks uuid
+        if [ "${_NEWLUKSUUID}" = "yes" ]; then
+            echo_debug "Attempting to regenerate and configure a new luks uuid for deployment ..."
+            __NEWLUKSUUID=$(cat /proc/sys/kernel/random/uuid)
+            echo "__NEWLUKSUUID=${__NEWLUKSUUID}" > ${_BUILDDIR}/root/boot/newluksuuid.txt
+            echo "crypt    UUID=${__NEWLUKSUUID}    none    luks" > ${_BUILDDIR}/root/etc/crypttab
+            __LUKSUUID="${__NEWLUKSUUID}"
+        fi
         echo_debug "Attempting to set the UUID of ${__LUKSUUID} on ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
         if [ ! -z "${_LUKSPASSWD}" ]; then
             echo "${_LUKSPASSWD}" | cryptsetup -v luksUUID --uuid "${__LUKSUUID}" ${_BLKDEV}${__PARTITIONPREFIX}2
