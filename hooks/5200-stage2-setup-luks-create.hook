@@ -20,6 +20,7 @@ is_build_encrypted && {
             __NEWLUKSUUID=$(cat /proc/sys/kernel/random/uuid)
             echo "__NEWLUKSUUID=${__NEWLUKSUUID}" > ${_BUILDDIR}/root/boot/newluksuuid.txt
             echo "crypt    UUID=${__NEWLUKSUUID}    none    luks" > ${_BUILDDIR}/root/etc/crypttab
+            sed -i "s#${__LUKSUUID}#${__NEWLUKSUUID}#g" ${_BUILDDIR}/root/etc/initramfs-tools/unlock.sh
             __LUKSUUID="${__NEWLUKSUUID}"
         fi
         echo_debug "Attempting to set the UUID of ${__LUKSUUID} on ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
