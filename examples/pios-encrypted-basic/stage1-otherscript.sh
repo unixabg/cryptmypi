@@ -14,5 +14,9 @@ sed -i.bak "s#PARTUUID=.*-0#/dev/mmcblk0p#g" /etc/fstab
 sed -i 's#/dev/mmcblk0p2#/dev/mapper/crypt#g' /etc/fstab
 
 
+echo 'Delete PiOS userconfig on first boot.'
+rm -f /usr/lib/systemd/system/userconfig.service
+
+
 echo 'Enabling ssh on boot'
 touch /boot/ssh
