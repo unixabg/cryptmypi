@@ -4,7 +4,7 @@ Assists in the full setup of [encrypted] Raspberry Pis. Able to maintain multipl
 
 **Note:** Only tested on:
 - Host OS: Debian 10 and Kali
-- Target OS: Kali, Pi OS and Ubuntu
+- Target OS: Kali, Raspberry Pi OS and Ubuntu
 - Target Hardware: RaspberryPi 2, 3 and 4
 - irc channel oftc/#cryptmypi
 
@@ -21,7 +21,7 @@ Optional configuration hooks can be set in any of the stages:
 
 ## Capabilities
 
-1. **FULL DISK ENCRYPTION**: Although the project can be used to setup an unencrypted RPi box, it is currently capable to setup a fully encrypted Kali, Pi OS, or Ubuntu Linux.
+1. **FULL DISK ENCRYPTION**: Although the project can be used to setup an unencrypted RPi box, it is currently capable to setup a fully encrypted Kali, Pi OS or Ubuntu Linux.
 
 - unlockable remotely through dropbear's ssh;
 - served through ethernet or wifi;
