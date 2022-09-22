@@ -4,8 +4,8 @@ Assists in the full setup of [encrypted] Raspberry Pis. Able to maintain multipl
 
 **Note:** Only tested on:
 - Host OS: Debian 10 and Kali
-- Target OS: Kali,Pi OS, and Ubuntu
-- Target Hardware: RaspberryPi 2, 3, and 4
+- Target OS: Kali, Raspberry Pi OS, and Ubuntu
+- Target Hardware: Raspberry Pi 2, 3, and 4
 - irc channel oftc/#cryptmypi
 
 ## How it works
