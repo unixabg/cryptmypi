@@ -9,10 +9,14 @@ is_build_encrypted && {
         echo "Using default key size: 256"
         _LUKSKEYSIZE=256
     fi
+    if [ -z "${_LUKSHASH}" ]; then
+        echo "Using default hash algorithm: sha256"
+        _LUKSHASH="sha256"
+    fi
     if [ ! -z "${_LUKSPASSWD}" ]; then
-        echo "${_LUKSPASSWD}" | cryptsetup -v --cipher ${_LUKSCIPHER} --key-size ${_LUKSKEYSIZE} ${_LUKSEXTRA} luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+        echo "${_LUKSPASSWD}" | cryptsetup -v --cipher ${_LUKSCIPHER} --key-size ${_LUKSKEYSIZE} --hash ${_LUKSHASH} ${_LUKSEXTRA} luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
     else
-        cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size ${_LUKSKEYSIZE} ${_LUKSEXTRA} luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+        cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size ${_LUKSKEYSIZE} --hash ${_LUKSHASH} ${_LUKSEXTRA} luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
     fi
     if [ $? -eq 0 ]; then
         echo_debug "- LUKS created."
