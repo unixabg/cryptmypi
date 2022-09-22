@@ -4,8 +4,8 @@ Assists in the full setup of [encrypted] Raspberry Pis. Able to maintain multipl
 
 **Note:** Only tested on:
 - Host OS: Debian 10 and Kali
-- Target OS: Kali,Pi OS, and Ubuntu
-- Target Hardware: RaspberryPi 2, 3, and 4
+- Target OS: Kali, Pi OS and Ubuntu
+- Target Hardware: RaspberryPi 2, 3 and 4
 - irc channel oftc/#cryptmypi
 
 ## How it works
@@ -16,7 +16,7 @@ A configuration profile defines 2 stages:
 2. The build is written to an SD card.
 
 Optional configuration hooks can be set in any of the stages:
-- Configurations applyed on stage 1 will be avaiable to the stage 2. Each time the script runs it will check if a stage 1 build is already present, and will ask if it should be used or if it should be rebuilt.
+- Configurations applyed on stage 1 will be avaiable to the stage 2. Each time the script runs it will check if a stage 1 build is already present and will ask if it should be used or if it should be rebuilt.
 - Stage 2 can be executed as many times as wanted without affecting stage's 1 build. Every configuration applyed in stage 2 will be applyed directly to the SD card.
 
 ## Capabilities
