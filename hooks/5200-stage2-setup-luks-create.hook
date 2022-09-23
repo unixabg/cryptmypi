@@ -5,14 +5,10 @@ set -e
 is_build_encrypted && {
     # Create LUKS
     echo_debug "Attempting to create LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
-    if [ -z "${_LUKSKEYSIZE}" ]; then
-        echo "The _LUKSKEYSIZE variable was not set. Using the default key size of 256"
-        _LUKSKEYSIZE=256
-    fi
     if [ ! -z "${_LUKSPASSWD}" ]; then
-        echo "${_LUKSPASSWD}" | cryptsetup -v --cipher ${_LUKSCIPHER} --key-size ${_LUKSKEYSIZE} ${_LUKSEXTRA} luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+        echo "${_LUKSPASSWD}" | cryptsetup -v --cipher ${_LUKSCIPHER} ${_LUKSEXTRA} luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
     else
-        cryptsetup -v -y --cipher ${_LUKSCIPHER} --key-size ${_LUKSKEYSIZE} ${_LUKSEXTRA} luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
+        cryptsetup -v -y --cipher ${_LUKSCIPHER} ${_LUKSEXTRA} luksFormat ${_BLKDEV}${__PARTITIONPREFIX}2
     fi
     if [ $? -eq 0 ]; then
         echo_debug "- LUKS created."
