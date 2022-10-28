@@ -49,7 +49,7 @@ Examples:
 
     $0 -o execution.log my/config/path
     Executes script using my/config/path/cryptmypi.conf
-    outputing stdout and stderr to execution.log
+    outputting stdout and stderr to execution.log
 
 EOF
 }
