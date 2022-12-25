@@ -13,13 +13,17 @@ dosfslabel ${_BLKDEV}1 RASPIFIRM
 echo 'Setting up /boot/cmdline.txt for encrypted boot with Debian.'
 sed -i.bak "s#root=LABEL=RASPIROOT#root=/dev/mapper/crypt rootfstype=ext4#g" /boot/cmdline.txt
 
+# https://raspberrypi.stackexchange.com/a/136648
+# echo 'Ensure we send unlock prompt to tty0.'
+sed -i.bak2 "s#console=ttyS1,115200##g" /boot/cmdline.txt
+
 
 #echo 'Drop the initramfs entry we made in /boot/config.txt'
 sed -i.bak "s#initramfs initramfs.gz followkernel##g" /boot/config.txt
 
 
 ## Move our kernel in place of the targets default kernel
-__DEBIAN_KERNEL="initrd.img-5.10.0-8-arm64"
+__DEBIAN_KERNEL="initrd.img-5.18.0-3-arm64"
 echo "Movinng our /boot/initramfs.gz to /boot/${__DEBIAN_KERNEL}."
 mv "/boot/${__DEBIAN_KERNEL}" "/boot/${__DEBIAN_KERNEL}-oos"
 mv /boot/initramfs.gz "/boot/${__DEBIAN_KERNEL}"
