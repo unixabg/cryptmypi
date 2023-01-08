@@ -9,18 +9,18 @@ chroot_mount(){
 
     # mount binds
     echo_debug "Mounting '${CHROOTDIR}/dev/' ..."
-    mount --bind /dev ${CHROOTDIR}/dev/ || echo_error "   ... ERROR while mounting '${CHROOTDIR}/dev/'"
+    mount --bind /dev "${CHROOTDIR}"/dev/ || echo_error "   ... ERROR while mounting '${CHROOTDIR}/dev/'"
     echo_debug "Mounting '${CHROOTDIR}/dev/pts' ..."
-    mount --bind /dev/pts ${CHROOTDIR}/dev/pts || echo_error "   ... ERROR while mounting '${CHROOTDIR}/dev/pts'"
+    mount --bind /dev/pts "${CHROOTDIR}"/dev/pts || echo_error "   ... ERROR while mounting '${CHROOTDIR}/dev/pts'"
     echo_debug "Mounting '${CHROOTDIR}/sys/' ..."
-    mount --bind /sys ${CHROOTDIR}/sys/ || echo_error "   ... ERROR while mounting '${CHROOTDIR}/sys/'"
+    mount --bind /sys "${CHROOTDIR}"/sys/ || echo_error "   ... ERROR while mounting '${CHROOTDIR}/sys/'"
     echo_debug "Mounting '${CHROOTDIR}/proc/' ..."
-    mount -t proc /proc ${CHROOTDIR}/proc/ || echo_error "   ... ERROR while mounting '${CHROOTDIR}/proc/'"
+    mount -t proc /proc "${CHROOTDIR}"/proc/ || echo_error "   ... ERROR while mounting '${CHROOTDIR}/proc/'"
 
     # ld.so.preload fix
-    test -e ${CHROOTDIR}/etc/ld.so.preload && {
+    test -e "${CHROOTDIR}"/etc/ld.so.preload && {
         echo_debug "Fixing ld.so.preload"
-        sed -i 's/^/#CHROOT /g' ${CHROOTDIR}/etc/ld.so.preload
+        sed -i 's/^/#CHROOT /g' "${CHROOTDIR}"/etc/ld.so.preload
     } || true
 }
 
@@ -32,14 +32,14 @@ chroot_umount(){
     echo_debug "Tearing down RPi chroot mount structure at '${CHROOTDIR}'."
 
     # revert ld.so.preload fix
-    test -e ${CHROOTDIR}/etc/ld.so.preload && {
+    test -e "${CHROOTDIR}"/etc/ld.so.preload && {
         echo_debug "Reverting ld.so.preload fix"
-        sed -i 's/^#CHROOT //g' ${CHROOTDIR}/etc/ld.so.preload
+        sed -i 's/^#CHROOT //g' "${CHROOTDIR}"/etc/ld.so.preload
     } || true
 
     # unmount everything
     echo_debug "Unmounting binds"
-    umount ${CHROOTDIR}/{dev/pts,dev,sys,proc}
+    umount "${CHROOTDIR}"/{dev/pts,dev,sys,proc}
 
     export CHROOTDIR=''
 }
@@ -61,7 +61,7 @@ chroot_update(){
     fi
 
     echo_debug "Updating apt-get"
-    chroot ${CHROOTDIR} apt-get update
+    chroot "${CHROOTDIR}" apt-get update
 }
 
 
@@ -75,9 +75,9 @@ chroot_pkginstall(){
         for param in "$@"; do
             for pkg in $param; do
                 echo_debug "- Installing ${pkg}"
-                chroot ${CHROOTDIR} apt-get -y install "${pkg}" || {
+                chroot "${CHROOTDIR}" apt-get -y install "${pkg}" || {
                     echo_warn "apt-get failed: Trying to recover..."
-                    chroot ${CHROOTDIR} /bin/bash -x <<EOF
+                    chroot "${CHROOTDIR}" /bin/bash -x <<EOF
                         sleep 5
                         apt-get update
                         apt-get -y install "${pkg}" || exit 1
@@ -104,10 +104,10 @@ chroot_pkgpurge(){
         for param in "$@"; do
             for pkg in $param; do
                 echo_debug "- Purging ${pkg}"
-                chroot ${CHROOTDIR} apt-get -y purge "${pkg}"
+                chroot "${CHROOTDIR}" apt-get -y purge "${pkg}"
             done
         done
-        chroot ${CHROOTDIR} apt-get -y autoremove
+        chroot "${CHROOTDIR}" apt-get -y autoremove
     fi
 }
 
@@ -118,7 +118,7 @@ chroot_execute(){
         exit 1
     }
 
-    chroot ${CHROOTDIR} "$@"
+    chroot "${CHROOTDIR}" "$@"
 }
 
 
@@ -131,13 +131,13 @@ chroot_mkinitramfs(){
     test -e "/dev/mmcblk0p2" || (test -e "/${_BLKDEV}2" && ln -s "/${_BLKDEV}2" "/dev/mmcblk0p2")
 
     # determining the kernel
-    _KERNEL_VERSION=$(ls ${CHROOTDIR}/lib/modules/ | grep "${_KERNEL_VERSION_FILTER}" | tail -n 1)
+    _KERNEL_VERSION=$(ls "${CHROOTDIR}"/lib/modules/ | grep "${_KERNEL_VERSION_FILTER}" | tail -n 1)
     echo_debug "  Using kernel '${_KERNEL_VERSION}'"
 
     # Finally, Create the initramfs
     echo_debug "  Building new initramfs ..."
     #chroot_execute update-initramfs -u # -k ${_KERNEL_VERSION} # TODO Test this + test without it completely
-    chroot_execute mkinitramfs -o /boot/initramfs.gz -v ${_KERNEL_VERSION}
+    chroot_execute mkinitramfs -o /boot/initramfs.gz -v "${_KERNEL_VERSION}"
 
     # cleanup
     echo_debug "  Cleaning up symbolic links"

@@ -4,14 +4,14 @@ myhooks(){
         _HOOKOP="${1}"
         echo ""
         echo_info "Attempting to run ${_HOOKOP} hooks ..."
-        for _HOOK in ${_BASEDIR}/hooks/????-${_HOOKOP}*.hook
+        for _HOOK in "${_BASEDIR}"/hooks/????-"${_HOOKOP}"*.hook
         do
-            if [ -e ${_HOOK} ]; then
-                echo_info "- Calling $(basename ${_HOOK}) ..."
+            if [ -e "${_HOOK}" ]; then
+                echo_info "- Calling $(basename "${_HOOK}") ..."
                 $_SIMULATE && {
                     echo "SKIPPING: Simulation mode active: Hook will not be executed."
-                } || source ${_HOOK}
-                echo_info "    ... $(basename ${_HOOK}) completed!"
+                } || source "${_HOOK}"
+                echo_info "    ... $(basename "${_HOOK}") completed!"
                 echo ""
             fi
         done

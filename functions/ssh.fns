@@ -20,7 +20,7 @@ assure_box_sshkey(){
 
 backup_and_use_sshkey(){
     local _TMP_KEYPATH=$1
-    local _TMP_KEYNAME=$(basename ${_TMP_KEYPATH})
+    local _TMP_KEYNAME=$(basename "${_TMP_KEYPATH}")
 
     test -f "${_CONFDIR}/${_TMP_KEYNAME}" && {
         cp "${_CONFDIR}/${_TMP_KEYNAME}" "${_TMP_KEYPATH}"

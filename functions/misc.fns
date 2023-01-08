@@ -1,5 +1,5 @@
 function_exists(){
-    declare -f -F $1 > /dev/null
+    declare -f -F "$1" > /dev/null
     return $?
 }
 
@@ -10,8 +10,8 @@ function_summary(){
 
 
 is_build_encrypted(){
-    test -e ${_BUILDDIR}/root/etc/cryptsetup-initramfs/conf-hook && {
-        if grep -q "CRYPTSETUP=y" ${_BUILDDIR}/root/etc/cryptsetup-initramfs/conf-hook; then
+    test -e "${_BUILDDIR}"/root/etc/cryptsetup-initramfs/conf-hook && {
+        if grep -q "CRYPTSETUP=y" "${_BUILDDIR}"/root/etc/cryptsetup-initramfs/conf-hook; then
             return 0;
         else
             return 1;
