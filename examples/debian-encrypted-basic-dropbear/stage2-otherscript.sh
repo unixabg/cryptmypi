@@ -4,7 +4,7 @@
 # Debian encrypted stage2-otherscript.sh
 
 
-# At the time of testing the Debian OS for rpi works on labels, so we attempt to match.
+# At the time of testing the Debian OS for RPi works on labels, so we attempt to match.
 echo 'Setting up partition labels for Debian OS.'
 dosfslabel ${_BLKDEV}1 RASPIFIRM
 
@@ -24,6 +24,6 @@ sed -i.bak "s#initramfs initramfs.gz followkernel##g" /boot/config.txt
 
 ## Move our kernel in place of the targets default kernel
 __DEBIAN_KERNEL="initrd.img-5.18.0-3-arm64"
-echo "Movinng our /boot/initramfs.gz to /boot/${__DEBIAN_KERNEL}."
+echo "Moving our /boot/initramfs.gz to /boot/${__DEBIAN_KERNEL}."
 mv "/boot/${__DEBIAN_KERNEL}" "/boot/${__DEBIAN_KERNEL}-oos"
 mv /boot/initramfs.gz "/boot/${__DEBIAN_KERNEL}"
