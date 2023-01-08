@@ -6,8 +6,8 @@
 
 # At the time of testing the Ubuntu for RPi works on labels, so we attempt to match.
 echo 'Setting up partition labels for Ubuntu.'
-dosfslabel ${_BLKDEV}1 system-boot
-e2label ${_BLKDEV}2 writable
+dosfslabel "${_BLKDEV}"1 system-boot
+e2label "${_BLKDEV}"2 writable
 
 
 # Move our kernel in place of the targets default kernel
