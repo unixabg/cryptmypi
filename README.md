@@ -16,12 +16,12 @@ A configuration profile defines 2 stages:
 2. The build is written to an SD card.
 
 Optional configuration hooks can be set in any of the stages:
-- Configurations applyed on stage 1 will be avaiable to the stage 2. Each time the script runs it will check if a stage 1 build is already present, and will ask if it should be used or if it should be rebuilt.
-- Stage 2 can be executed as many times as wanted without affecting stage's 1 build. Every configuration applyed in stage 2 will be applyed directly to the SD card.
+- Configurations applied on stage 1 will be available to the stage 2. Each time the script runs it will check if a stage 1 build is already present, and will ask if it should be used or if it should be rebuilt.
+- Stage 2 can be executed as many times as wanted without affecting stage 1's build. Every configuration applied in stage 2 will be applied directly to the SD card.
 
 ## Capabilities
 
-1. **FULL DISK ENCRYPTION**: Although the project can be used to setup an unencrypted RPi box, it is currently capable to setup a fully encrypted Kali, Pi OS, or Ubuntu Linux.
+1. **FULL DISK ENCRYPTION**: Although the project can be used to set up an unencrypted RPi box, it is currently capable to set up a fully encrypted Kali, Pi OS, or Ubuntu Linux.
 
 - unlockable remotely through dropbear's ssh;
 - served through ethernet or wifi;
@@ -29,7 +29,7 @@ Optional configuration hooks can be set in any of the stages:
 - bypass firewalls using IODINE;
 - and a nuke password can be set;
 
-2. **OPERATIONAL**: System optional hooks can assis in many commonly configurations.
+2. **OPERATIONAL**: System optional hooks can assist in many common configurations.
 
 - setting ondemand cpu governor to reduce battery usage;
 - wireless network / adaptors can be pre-configured;
@@ -41,7 +41,7 @@ Optional configuration hooks can be set in any of the stages:
 
 ## Scenarios
 
-Example configurations are provided in the the project examples directory.
+Example configurations are provided in the project examples directory.
 
 Each example outlines a possible configurations scenario, from building a standard kali to building an encrypted drop box RPi for remote control.
 
@@ -62,6 +62,6 @@ You can decrypt, mount and chroot an SD card by using the `explore` pre-configur
 
 $ `./cryptmypi.sh examples/explore configuration_profile_directory`
 
-There is an actual `explore` directory that contains an customized configuration profile. This profile overwrites the default stage1 and stage2 hooks so that no formatting, partitioning, etc is done. It reads another configuration profile and mounts an block device accordingly.
+There is an actual `explore` directory that contains a customized configuration profile. This profile overwrites the default stage1 and stage2 hooks so that no formatting, partitioning, etc. is done. It reads another configuration profile and mounts a block device accordingly.
 
-Aditionally, you can use this "hack" configuration for more than chrooting to bash. You may update existing systems by copying the `examples/explore` directory and changing `stage2_optional_hooks` to execute optional hooks or other commands.
+Additionally, you can use this "hack" configuration for more than chrooting to bash. You may update existing systems by copying the `examples/explore` directory and changing `stage2_optional_hooks` to execute optional hooks or other commands.

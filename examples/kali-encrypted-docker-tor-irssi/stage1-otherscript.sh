@@ -33,7 +33,7 @@ echo "CREATING IRSSI BASIC CONFIG FILES"
 cd ~
 mkdir -p .irssi
 
-# Place your .irssi config bellow (this is only an minimal example file)
+# Place your .irssi config below (this is only a minimal example file)
 cat <<EOF > ~/.irssi/config
 servers = (
   {
@@ -171,7 +171,7 @@ EOF
 
 
 mkdir -p .irssi/certs
-# Place your certificate bellow (substitute the invalid example)
+# Place your certificate below (substitute the invalid example)
 cat <<'EOF' > ~/.irssi/certs/FreenodeTor.pem
 
             !!!!!!IMPORTANT!!!!!!

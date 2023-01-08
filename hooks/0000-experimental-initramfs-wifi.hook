@@ -18,7 +18,7 @@ if [ -z "${_INITRAMFS_WIFI_INTERFACE}" ]; then
 fi
 
 
-# Checking if WIFI ip kernal param was provided
+# Checking if WIFI ip kernel param was provided
 if [ -z "${_INITRAMFS_WIFI_IP}" ]; then
     _INITRAMFS_WIFI_IP=":::::${_INITRAMFS_WIFI_INTERFACE}:dhcp:${_DNS1}:${_DNS2}"
     echo_warn "_INITRAMFS_WIFI_IP is not set on config: Setting default value ${_INITRAMFS_WIFI_IP}"

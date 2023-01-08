@@ -75,7 +75,7 @@ EOT
     chroot_execute systemctl enable sshjump.service
 
 
-    echo_debug "Creating script to removes this key from SSHJUMP: ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove"
+    echo_debug "Creating script to remove this key from SSHJUMP: ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove"
     cat <<EOT > ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove
 #!/bin/bash
 cat ${_KEYFILE}.pub | ssh ${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER} pubkey rm
@@ -119,7 +119,7 @@ Host ${_SSHJUMP_REFERENCE}-sys
 ${_ENTRYCOMMENT}-end
 EOT
 
-    echo_debug "    Removing unecessary empty lines"
+    echo_debug "    Removing unnecessary empty lines"
     sed -i 'N;/^\n$/D;P;D;' $_USER_HOME/.ssh/config
 
 

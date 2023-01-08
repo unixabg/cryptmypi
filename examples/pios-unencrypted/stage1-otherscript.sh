@@ -20,4 +20,4 @@ touch /boot/ssh
 
 
 # Disable user creation prompt
-systemctl disable userconfig > /dev/null 2&>1
+systemctl disable userconfig > /dev/null 2>&1

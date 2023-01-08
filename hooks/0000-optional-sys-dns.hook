@@ -26,7 +26,7 @@ chmod o+r ${CHROOTDIR}/etc/resolv.conf
 #EOT
 
 
-echo_debug "Uptading /etc/network/interfaces"
+echo_debug "Updating /etc/network/interfaces"
 cat <<EOT >> ${CHROOTDIR}/etc/network/interfaces
 
 # DNS (by optional-sys-dns)
@@ -36,7 +36,7 @@ EOT
 
 
 test -e "${CHROOTDIR}/etc/dhclient.conf" && {
-    echo_debug "Uptading /etc/dhclient.conf"
+    echo_debug "Updating /etc/dhclient.conf"
     cat <<EOT >> ${CHROOTDIR}/etc/dhclient.conf
 
 # DNS (by optional-sys-dns)
@@ -46,7 +46,7 @@ EOT
 
 
 test -e "${CHROOTDIR}/etc/dhpc/dhclient.conf" && {
-    echo_debug "Uptading /etc/dhpc/dhclient.conf"
+    echo_debug "Updating /etc/dhpc/dhclient.conf"
     cat <<EOT >> ${CHROOTDIR}/etc/dhpc/dhclient.conf
 
 # DNS (by optional-sys-dns)

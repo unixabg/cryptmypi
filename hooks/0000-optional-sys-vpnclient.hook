@@ -13,7 +13,7 @@ if [ -f ${_OPENVPN_CONFIG_ZIPPATH} ]; then
     chroot_pkginstall openvpn
     mkdir -p ${CHROOTDIR}/etc/openvpn
 
-    echo_debug "Unzipping provided files into configuraiton dir"
+    echo_debug "Unzipping provided files into configuration dir"
     unzip ${_OPENVPN_CONFIG_ZIPPATH} -d ${CHROOTDIR}/etc/openvpn/
 
     echo_debug "Setting AUTOSTART to ALL on OPENVPN config"
