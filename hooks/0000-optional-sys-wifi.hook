@@ -31,7 +31,7 @@ ${_WIFI_PSK}
 EOT
 
 
-echo_debug "Uptading /etc/network/interfaces file"
+echo_debug "Updating /etc/network/interfaces file"
 cat <<EOT >> ${CHROOTDIR}/etc/network/interfaces
 
 # The buildin wireless interface

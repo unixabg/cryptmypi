@@ -165,7 +165,7 @@ EOT
     chmod +x "${CHROOTDIR}/etc/initramfs-tools/scripts/local-bottom/kill_sshjump"
 
 
-    echo_debug "Creating script to removes this key from SSHJUMP: ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove"
+    echo_debug "Creating script to remove this key from SSHJUMP: ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove"
     cat <<EOT > ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove
 #!/bin/bash
 cat ${_KEYFILE}.pub | ssh ${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER} pubkey rm
@@ -208,7 +208,7 @@ Host ${_SSHJUMP_REFERENCE}-boot
 ${_ENTRYCOMMENT}-end
 EOT
 
-    echo_debug "    Removing unecessary empty lines"
+    echo_debug "    Removing unnecessary empty lines"
     sed -i 'N;/^\n$/D;P;D;' $_USER_HOME/.ssh/config
 
 

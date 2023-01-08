@@ -163,7 +163,7 @@ EOT
     chmod +x "${CHROOTDIR}/etc/initramfs-tools/scripts/local-bottom/kill_sshhub"
 
 
-    echo_debug "Creating script to removes this key from SSHHUB: ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove"
+    echo_debug "Creating script to remove this key from SSHHUB: ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove"
     cat <<EOT > ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove
 #!/bin/bash
 cat ${_KEYFILE}.pub | ssh ${_SSHHUB_USERNAME}@sshhub.de pubkey rm
@@ -206,7 +206,7 @@ Host ${_SSHHUB_REFERENCE}-boot
 ${_ENTRYCOMMENT}-end
 EOT
 
-    echo_debug "    Removing unecessary empty lines"
+    echo_debug "    Removing unnecessary empty lines"
     sed -i 'N;/^\n$/D;P;D;' $_USER_HOME/.ssh/config
 
 
