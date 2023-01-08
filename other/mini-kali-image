@@ -9,29 +9,29 @@ set -e
 #64bit
 ARCH=arm64
 
-mkdir ${_BUILDDIR}/root
+mkdir "${_BUILDDIR}"/root
 
 
 #stage 1 of debootstrap (the part that runs on the host)
-debootstrap --foreign --arch $ARCH --variant=minbase kali-rolling ${_BUILDDIR}/root http://archive.kali.org/kali
+debootstrap --foreign --arch $ARCH --variant=minbase kali-rolling "${_BUILDDIR}"/root http://archive.kali.org/kali
 
 #setup qemu for emulation
-[ "$ARCH" == "armhf" ] && cp /usr/bin/qemu-arm-static ${_BUILDDIR}/root/usr/bin/
-[ "$ARCH" == "arm64" ] && cp /usr/bin/qemu-aarch64-static ${_BUILDDIR}/root/usr/bin/
+[ "$ARCH" == "armhf" ] && cp /usr/bin/qemu-arm-static "${_BUILDDIR}"/root/usr/bin/
+[ "$ARCH" == "arm64" ] && cp /usr/bin/qemu-aarch64-static "${_BUILDDIR}"/root/usr/bin/
 
 #state 2 of debootstrap (the part that is emulated in the chroot)
-LANG=C chroot ${_BUILDDIR}/root /debootstrap/debootstrap --second-stage
+LANG=C chroot "${_BUILDDIR}"/root /debootstrap/debootstrap --second-stage
 
 #get the kali signing key
-wget -q -O - https://archive.kali.org/archive-key.asc | gpg --dearmor > ${_BUILDDIR}/root/etc/apt/trusted.gpg.d/kali-archive-keyring.gpg
+wget -q -O - https://archive.kali.org/archive-key.asc | gpg --dearmor > "${_BUILDDIR}"/root/etc/apt/trusted.gpg.d/kali-archive-keyring.gpg
 
 #add re4son's apt source (for kalipi-* packages and a few others)
-echo "deb http://http.re4son-kernel.com/re4son kali-pi main" > ${_BUILDDIR}/root/etc/apt/sources.list.d/re4son.list
-wget -q -O - https://re4son-kernel.com/keys/http/kali_pi-archive-keyring.gpg > ${_BUILDDIR}/root/etc/apt/trusted.gpg.d/kali_pi-archive-keyring.gpg
+echo "deb http://http.re4son-kernel.com/re4son kali-pi main" > "${_BUILDDIR}"/root/etc/apt/sources.list.d/re4son.list
+wget -q -O - https://re4son-kernel.com/keys/http/kali_pi-archive-keyring.gpg > "${_BUILDDIR}"/root/etc/apt/trusted.gpg.d/kali_pi-archive-keyring.gpg
 
 
 #stage 3 (install some more software)
-cat <<EOF > ${_BUILDDIR}/root/setup.sh
+cat <<EOF > "${_BUILDDIR}"/root/setup.sh
 export DEBIAN_FRONTEND=noninteractive
 #pre answer some questions
 echo "keyboard-configuration keyboard-configuration/layout select English (US)" | debconf-set-selections
@@ -41,18 +41,18 @@ apt -y install initramfs-tools kalipi-kernel kalipi-bootloader kalipi-re4son-fir
 apt -y install binutils ca-certificates console-common console-setup locales libterm-readline-gnu-perl locales-all
 apt -y install ssh network-manager iproute2 iputils-ping nano vim net-tools git wget curl
 EOF
-chmod a+x ${_BUILDDIR}/root/setup.sh
-LANG=C chroot ${_BUILDDIR}/root /setup.sh
+chmod a+x "${_BUILDDIR}"/root/setup.sh
+LANG=C chroot "${_BUILDDIR}"/root /setup.sh
 
 #cmdline.txt
-cat <<EOF > ${_BUILDDIR}/root/boot/cmdline.txt
+cat <<EOF > "${_BUILDDIR}"/root/boot/cmdline.txt
 dwc_otg.fiq_fix_enable=2 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext3 elevator=deadline fsck.repair=yes rootwait net.ifnames=0
 EOF
 
 #config.txt
 if [[ "$ARCH" == "arm64" ]]; then
   # Remove repeat conditional filters [all] in config.txt
-  cat <<EOF >> ${_BUILDDIR}/root/boot/config.txt
+  cat <<EOF >> "${_BUILDDIR}"/root/boot/config.txt
 [pi2]
 # Pi2 is 64-bit only on v1.2+
 # 64-bit kernel for Raspberry Pi 2 is called kernel8 (armv8a)
@@ -74,7 +74,7 @@ EOF
 fi
 
 #fstab
-cat <<EOF > ${_BUILDDIR}/root/etc/fstab
+cat <<EOF > "${_BUILDDIR}"/root/etc/fstab
 # <file system> <mount point>   <type>  <options>       <dump>  <pass>
 proc            /proc           proc    defaults          0       0
 /dev/mmcblk0p1  /boot           vfat    defaults          0       2
