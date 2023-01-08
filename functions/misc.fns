@@ -5,7 +5,7 @@ function_exists(){
 
 
 function_summary(){
-    type $1 | sed '1,3d;$d'
+    type "$1" | sed '1,3d;$d'
 }
 
 
