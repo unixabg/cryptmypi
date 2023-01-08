@@ -206,7 +206,7 @@ _SCRIPT_DIRECTORY="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 
 # Variables
-export _USER_HOME=$(eval echo ~${SUDO_USER})
+export _USER_HOME=$(eval echo ~"${SUDO_USER}")
 export _VER="4.12-next"
 export _BASEDIR="${_SCRIPT_DIRECTORY}"
 export _CURRDIR=$(pwd)
@@ -223,7 +223,7 @@ mkdir -p "${_FILESDIR}"
 
 
 # Check if configuration file is present
-if [ ! -f ${_CONFDIR}/cryptmypi.conf ]; then
+if [ ! -f "${_CONFDIR}"/cryptmypi.conf ]; then
     cat << EOF
 ERROR: No 'cryptmypi.conf' file found in the config folder!
 
@@ -237,7 +237,7 @@ fi
 
 
 # Load configuration file
-. ${_CONFDIR}/cryptmypi.conf
+. "${_CONFDIR}"/cryptmypi.conf
 
 
 # Overriding _BLKDEV if _BLKDEV_OVERRIDE set
@@ -245,19 +245,19 @@ fi
 
 
 # Configuration dependent variables
-export _IMAGENAME=$(basename ${_IMAGEURL})
+export _IMAGENAME=$(basename "${_IMAGEURL}")
 
 
 ############################
 # Load Script Base Functions
 ############################
 echo "Loading functions..."
-for _FN in ${_BASEDIR}/functions/*.fns
+for _FN in "${_BASEDIR}"/functions/*.fns
 do
-    if [ -e ${_FN} ]; then
-        echo "- Loading $(basename ${_FN}) ..."
-        source ${_FN}
-        echo "  ... $(basename ${_FN}) loaded!"
+    if [ -e "${_FN}" ]; then
+        echo "- Loading $(basename "${_FN}") ..."
+        source "${_FN}"
+        echo "  ... $(basename "${_FN}") loaded!"
     fi
 done
 
@@ -332,7 +332,7 @@ EOF
 ############################
 stage2(){
     # Simple check for type of sdcard block device
-    if echo ${_BLKDEV} | grep -qs "mmcblk"
+    if echo "${_BLKDEV}" | grep -qs "mmcblk"
     then
         __PARTITIONPREFIX=p
     else
@@ -427,8 +427,8 @@ EOF
 ############################
 # Logic execution routine
 execute(){
-    mkdir -p ${_BUILDDIR}
-    cd ${_BUILDDIR}
+    mkdir -p "${_BUILDDIR}"
+    cd "${_BUILDDIR}"
     case "$1" in
         'both')
             echo "# Executing both stages #######################################################"
@@ -448,7 +448,7 @@ execute(){
 # Cleanup EXIT Trap
 cleanup(){
     chroot_umount || true
-    umount ${_BLKDEV}* || true
+    umount "${_BLKDEV}"* || true
     umount /mnt/cryptmypi || {
         umount -l /mnt/cryptmypi || true
         umount -f /dev/mapper/crypt || true
@@ -461,7 +461,7 @@ trap cleanup EXIT
 
 # Main logic routine
 main(){
-    if [ ! -d ${_BUILDDIR} ]; then
+    if [ ! -d "${_BUILDDIR}" ]; then
         execute "both"
     else
         restore_output
@@ -473,7 +473,7 @@ main(){
             $_STAGE1_CONFIRM && {
                 echo "Rebuild? (y/N)"
                 read _CONTINUE
-                _CONTINUE=`echo "${_CONTINUE}" | sed -e 's/\(.*\)/\L\1/'`
+                _CONTINUE=$(echo "${_CONTINUE}" | sed -e 's/\(.*\)/\L\1/')
             } || {
                 echo "STAGE1 confirmation set to FALSE: skipping confirmation"
                 $_STAGE1_REBUILD && {
@@ -491,7 +491,7 @@ main(){
                 'y')
                     $_RMBUILD_ONREBUILD && {
                         echo "Removing current build files..."
-                        $_SIMULATE || rm -Rf ${_BUILDDIR}
+                        $_SIMULATE || rm -Rf "${_BUILDDIR}"
                     } || echo_warn "--keep_build_dir set: Not cleaning old build."
                     execute "both"
                     break;
