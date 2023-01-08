@@ -5,9 +5,9 @@ set -e
 echo_debug "Attempting to configure 'ondemand cpu governor'"
 echo_debug "    ( Disabled using shift key during boot )"
 echo_debug "    Downloading files"
-lazy_download 'https://github.com/Re4son/RPi-Tweaks/raw/master/cpu-governor/cpu-governor' ${CHROOTDIR}/etc/init.d/cpu-governor
-chroot_execute chmod +x ${CHROOTDIR}/etc/init.d/cpu-governor
-lazy_download 'https://github.com/Re4son/RPi-Tweaks/raw/master/cpu-governor/cpu-governor.service' ${CHROOTDIR}/lib/systemd/system/cpu-governor.service
+lazy_download 'https://github.com/Re4son/RPi-Tweaks/raw/master/cpu-governor/cpu-governor' "${CHROOTDIR}"/etc/init.d/cpu-governor
+chroot_execute chmod +x "${CHROOTDIR}"/etc/init.d/cpu-governor
+lazy_download 'https://github.com/Re4son/RPi-Tweaks/raw/master/cpu-governor/cpu-governor.service' "${CHROOTDIR}"/lib/systemd/system/cpu-governor.service
 
 
 echo_debug "    Installing packages ..."

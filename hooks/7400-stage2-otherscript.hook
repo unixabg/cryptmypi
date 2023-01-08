@@ -18,7 +18,7 @@ test -f "${_STAGE2_OTHERSCRIPT_PATH}" && {
     cp "${_STAGE2_OTHERSCRIPT_PATH}" "${CHROOTDIR}/root/"
     chmod +x "${CHROOTDIR}/root/${_STAGE2_OTHERSCRIPT}"
     echo_debug "## Script execution ############################################################"
-    chroot ${CHROOTDIR} /bin/bash -c "/root/${_STAGE2_OTHERSCRIPT}"
+    chroot "${CHROOTDIR}" /bin/bash -c "/root/${_STAGE2_OTHERSCRIPT}"
     echo_debug "## End of Script execution #####################################################"
     rm "${CHROOTDIR}/root/${_STAGE2_OTHERSCRIPT}"
 } || {

@@ -18,7 +18,7 @@ is_build_encrypted && {
     # Mount ext4 formatted ROOT
     echo_debug "Attempting to mount ${_BLKDEV}${__PARTITIONPREFIX}2 to /mnt/cryptmypi ..."
     mkdir /mnt/cryptmypi
-    if mount ${_BLKDEV}${__PARTITIONPREFIX}2 /mnt/cryptmypi
+    if mount "${_BLKDEV}""${__PARTITIONPREFIX}"2 /mnt/cryptmypi
     then
         echo_debug "- Mounted ${_BLKDEV}${__PARTITIONPREFIX}2 to /mnt/cryptmypi"
     else
@@ -32,7 +32,7 @@ is_build_encrypted && {
 # Mount boot partition
 echo_debug "Attempting to mount ${_BLKDEV}${__PARTITIONPREFIX}1 to /mnt/cryptmypi/boot ..."
 mkdir /mnt/cryptmypi/boot
-if mount ${_BLKDEV}${__PARTITIONPREFIX}1 /mnt/cryptmypi/boot
+if mount "${_BLKDEV}""${__PARTITIONPREFIX}"1 /mnt/cryptmypi/boot
 then
     echo_debug "- Mounted ${_BLKDEV}${__PARTITIONPREFIX}1 to /mnt/cryptmypi/boot"
 else

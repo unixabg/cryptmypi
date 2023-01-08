@@ -14,7 +14,7 @@ else
     chroot_pkginstall iodine
 
     # Create initramfs hook file for iodine
-    cat << 'EOF2' > ${CHROOTDIR}/etc/initramfs-tools/hooks/zz-iodine
+    cat << 'EOF2' > "${CHROOTDIR}"/etc/initramfs-tools/hooks/zz-iodine
 #!/bin/sh
 if [ "$1" = "prereqs" ]; then exit 0; fi
 . /usr/share/initramfs-tools/hook-functions
@@ -50,14 +50,14 @@ chmod 755 ${DESTDIR}/start_iodine
 
 exit 0
 EOF2
-    chmod 755 ${CHROOTDIR}/etc/initramfs-tools/hooks/zz-iodine
+    chmod 755 "${CHROOTDIR}"/etc/initramfs-tools/hooks/zz-iodine
 
     # Replace variables in iodine hook file
-    sed -i "s#IODINE_PASSWORD#${_IODINE_PASSWORD}#g" ${CHROOTDIR}/etc/initramfs-tools/hooks/zz-iodine
-    sed -i "s#IODINE_DOMAIN#${_IODINE_DOMAIN}#g" ${CHROOTDIR}/etc/initramfs-tools/hooks/zz-iodine
+    sed -i "s#IODINE_PASSWORD#${_IODINE_PASSWORD}#g" "${CHROOTDIR}"/etc/initramfs-tools/hooks/zz-iodine
+    sed -i "s#IODINE_DOMAIN#${_IODINE_DOMAIN}#g" "${CHROOTDIR}"/etc/initramfs-tools/hooks/zz-iodine
 
     # Create initramfs script file for iodine
-    cat << 'EOF' > ${CHROOTDIR}/etc/initramfs-tools/scripts/init-premount/iodine
+    cat << 'EOF' > "${CHROOTDIR}"/etc/initramfs-tools/scripts/init-premount/iodine
 #!/bin/sh
 if [ "$1" = "prereqs" ]; then exit 0; fi
 startIodine(){
@@ -66,7 +66,7 @@ startIodine(){
 startIodine &
 exit 0
 EOF
-    chmod 755 ${CHROOTDIR}/etc/initramfs-tools/scripts/init-premount/iodine
+    chmod 755 "${CHROOTDIR}"/etc/initramfs-tools/scripts/init-premount/iodine
 
     echo_debug "... iodine call completed!"
 fi

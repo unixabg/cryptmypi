@@ -17,7 +17,7 @@ _WIFI_PSK=$(wpa_passphrase "${_WIFI_SSID}" "${_WIFI_PASS}" | grep "psk=" | grep 
 
 
 echo_debug "Creating wpa_supplicant file"
-cat <<EOT > ${CHROOTDIR}/etc/wpa_supplicant.conf
+cat <<EOT > "${CHROOTDIR}"/etc/wpa_supplicant.conf
 ctrl_interface=/var/run/wpa_supplicant
 network={
        ssid="${_WIFI_SSID}"
@@ -32,7 +32,7 @@ EOT
 
 
 echo_debug "Updating /etc/network/interfaces file"
-cat <<EOT >> ${CHROOTDIR}/etc/network/interfaces
+cat <<EOT >> "${CHROOTDIR}"/etc/network/interfaces
 
 # The buildin wireless interface
 auto ${_WIFI_INTERFACE}
@@ -46,7 +46,7 @@ EOT
 
 
 echo_debug "Create connection script /root/sys-wifi-connect.sh"
-cat <<EOT >> ${CHROOTDIR}/root/sys-wifi-connect.sh
+cat <<EOT >> "${CHROOTDIR}"/root/sys-wifi-connect.sh
 #!/bin/bash
 
 # Remove file if exists
@@ -62,7 +62,7 @@ wpa_supplicant -B -Dwext -i ${_WIFI_INTERFACE} -c /etc/wpa_supplicant.conf
 # Get IP from dhcp
 # dhclient ${_WIFI_INTERFACE}
 EOT
-chmod +x ${CHROOTDIR}/root/sys-wifi-connect.sh
+chmod +x "${CHROOTDIR}"/root/sys-wifi-connect.sh
 
 
 #echo_debug "Add to cron to start at boot (before login)"

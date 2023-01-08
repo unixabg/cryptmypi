@@ -28,19 +28,19 @@ else
 
     echo_debug "Registering box keyfile to sshhub"
     if [ -z "${_SSHHUB_LOCAL_KEYFILE}" ]; then
-        ssh "${_SSHHUB_USERNAME}@sshhub.de" pubkey add $(cat "${_KEYFILE}.pub")
+        ssh "${_SSHHUB_USERNAME}@sshhub.de" pubkey add "$(cat "${_KEYFILE}.pub")"
     else
-        ssh -i "${_SSHHUB_LOCAL_KEYFILE}" "${_SSHHUB_USERNAME}@sshhub.de" pubkey add $(cat "${_KEYFILE}.pub")
+        ssh -i "${_SSHHUB_LOCAL_KEYFILE}" "${_SSHHUB_USERNAME}@sshhub.de" pubkey add "$(cat "${_KEYFILE}.pub")"
     fi
 
 
     echo_debug "Adding sshhub.de pub key to known_hosts..."
-    ssh-keyscan -H sshhub.de >> ${CHROOTDIR}/root/.ssh/known_hosts
-    chmod 644 ${CHROOTDIR}/root/.ssh/known_hosts
+    ssh-keyscan -H sshhub.de >> "${CHROOTDIR}"/root/.ssh/known_hosts
+    chmod 644 "${CHROOTDIR}"/root/.ssh/known_hosts
 
 
     echo_debug "Creating script to create and maintain sshhub channel..."
-    cat <<EOT > ${CHROOTDIR}/opt/sys-sshhub-channel.sh
+    cat <<EOT > "${CHROOTDIR}"/opt/sys-sshhub-channel.sh
 #!/bin/bash
 
 while true
@@ -55,11 +55,11 @@ do
     }
 done
 EOT
-    chmod +x ${CHROOTDIR}/opt/sys-sshhub-channel.sh
+    chmod +x "${CHROOTDIR}"/opt/sys-sshhub-channel.sh
 
 
     echo_debug "Creating startup service"
-    cat <<EOT > ${CHROOTDIR}/etc/systemd/system/sshhub.service
+    cat <<EOT > "${CHROOTDIR}"/etc/systemd/system/sshhub.service
 [Unit]
 Description=sshhub
 
@@ -74,22 +74,22 @@ EOT
 
 
     echo_debug "Creating script to remove this key from SSHHUB: ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove"
-    cat <<EOT > ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove
+    cat <<EOT > "${_CONFDIR}"/sshhub_"${_SSHHUB_REFERENCE}"_remove
 #!/bin/bash
 cat ${_KEYFILE}.pub | ssh ${_SSHHUB_USERNAME}@sshhub.de pubkey rm
 EOT
-    chmod +x ${_CONFDIR}/sshhub_${_SSHHUB_REFERENCE}_remove
+    chmod +x "${_CONFDIR}"/sshhub_"${_SSHHUB_REFERENCE}"_remove
 
 
     echo_debug "Editing ~/.ssh/config"
 
     echo_debug "    Verifying if sshhub hub alias exists in $_USER_HOME/.ssh/config ..."
-    if test -f $_USER_HOME/.ssh/config && grep -q "^Host hub\s*" $_USER_HOME/.ssh/config
+    if test -f "$_USER_HOME"/.ssh/config && grep -q "^Host hub\s*" "$_USER_HOME"/.ssh/config
     then
         echo_debug "        ... sshhub host definition found."
     else
         echo_debug "        ... sshhub host definition not found: creating it"
-        cat <<EOT >> $_USER_HOME/.ssh/config
+        cat <<EOT >> "$_USER_HOME"/.ssh/config
 
 # cryptmypi-sshhub-entry-start
 Host hub
@@ -102,9 +102,9 @@ EOT
 
     echo_debug "    Creating/Replacing ${_SSHHUB_REFERENCE}-sys host definition ..."
     _ENTRYCOMMENT="# cryptmypi-${_SSHHUB_REFERENCE}-sys-entry"
-    sed -i "/^${_ENTRYCOMMENT}-start/,/^${_ENTRYCOMMENT}-end/{/^${_ENTRYCOMMENT}-start/!{/^${_ENTRYCOMMENT}-end/!d}}" $_USER_HOME/.ssh/config
-    sed -i "/${_ENTRYCOMMENT}/d" $_USER_HOME/.ssh/config
-cat <<EOT >> $_USER_HOME/.ssh/config
+    sed -i "/^${_ENTRYCOMMENT}-start/,/^${_ENTRYCOMMENT}-end/{/^${_ENTRYCOMMENT}-start/!{/^${_ENTRYCOMMENT}-end/!d}}" "$_USER_HOME"/.ssh/config
+    sed -i "/${_ENTRYCOMMENT}/d" "$_USER_HOME"/.ssh/config
+cat <<EOT >> "$_USER_HOME"/.ssh/config
 
 ${_ENTRYCOMMENT}-start
 Host ${_SSHHUB_REFERENCE}-sys
@@ -118,7 +118,7 @@ ${_ENTRYCOMMENT}-end
 EOT
 
     echo_debug "    Removing unnecessary empty lines"
-    sed -i 'N;/^\n$/D;P;D;' $_USER_HOME/.ssh/config
+    sed -i 'N;/^\n$/D;P;D;' "$_USER_HOME"/.ssh/config
 
 
     echo_debug " ... sshhub.de channel set up! To connect, use:"

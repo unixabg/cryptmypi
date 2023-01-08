@@ -5,34 +5,34 @@ set -e
 chroot_pkginstall cryptsetup cryptsetup-initramfs busybox
 
 # Creating symbolic link to e2fsck
-chroot ${_BUILDDIR}/root /bin/bash -c "test -L /sbin/fsck.luks || ln -s /sbin/e2fsck /sbin/fsck.luks"
+chroot "${_BUILDDIR}"/root /bin/bash -c "test -L /sbin/fsck.luks || ln -s /sbin/e2fsck /sbin/fsck.luks"
 
 # Indicate kernel to use initramfs (facilitates loading drivers)
-echo "initramfs initramfs.gz followkernel" >> ${_BUILDDIR}/root/boot/config.txt
+echo "initramfs initramfs.gz followkernel" >> "${_BUILDDIR}"/root/boot/config.txt
 
 # Begin cryptsetup
 echo_debug "Making the cryptsetup settings ..."
 
 # Generate a uuid for luks
 __LUKSUUID=$(cat /proc/sys/kernel/random/uuid)
-echo "__LUKSUUID=${__LUKSUUID}" > ${_BUILDDIR}/root/boot/luksuuid.txt
+echo "__LUKSUUID=${__LUKSUUID}" > "${_BUILDDIR}"/root/boot/luksuuid.txt
 
 # Update /boot/cmdline.txt to boot crypt
-sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt#g' ${_BUILDDIR}/root/boot/cmdline.txt
-sed -i 's#rootfstype=ext3#rootfstype=ext4#g' ${_BUILDDIR}/root/boot/cmdline.txt
+sed -i 's#root=/dev/mmcblk0p2#root=/dev/mapper/crypt#g' "${_BUILDDIR}"/root/boot/cmdline.txt
+sed -i 's#rootfstype=ext3#rootfstype=ext4#g' "${_BUILDDIR}"/root/boot/cmdline.txt
 
 # Enable cryptsetup when building initramfs
-echo "CRYPTSETUP=y" >> ${_BUILDDIR}/root/etc/cryptsetup-initramfs/conf-hook
+echo "CRYPTSETUP=y" >> "${_BUILDDIR}"/root/etc/cryptsetup-initramfs/conf-hook
 
 # Update /etc/fstab
-sed -i 's#/dev/mmcblk0p2#/dev/mapper/crypt#g' ${_BUILDDIR}/root/etc/fstab
-sed -i 's#ext3#ext4#g' ${_BUILDDIR}/root/etc/fstab
+sed -i 's#/dev/mmcblk0p2#/dev/mapper/crypt#g' "${_BUILDDIR}"/root/etc/fstab
+sed -i 's#ext3#ext4#g' "${_BUILDDIR}"/root/etc/fstab
 
 # Update /etc/crypttab
-echo "crypt    UUID=${__LUKSUUID}    none    luks" > ${_BUILDDIR}/root/etc/crypttab
+echo "crypt    UUID=${__LUKSUUID}    none    luks" > "${_BUILDDIR}"/root/etc/crypttab
 
 # Create a hook to include our crypttab in the initramfs
-cat << EOF > ${_BUILDDIR}/root/etc/initramfs-tools/hooks/zz-cryptsetup
+cat << EOF > "${_BUILDDIR}"/root/etc/initramfs-tools/hooks/zz-cryptsetup
 # !/bin/sh
 set -e
 
@@ -58,7 +58,7 @@ cat /etc/crypttab >> \${DESTDIR}/etc/crypttab
 cat /etc/fstab >> \${DESTDIR}/etc/fstab
 copy_file config /etc/initramfs-tools/unlock.sh /etc/unlock.sh
 EOF
-chmod 755 ${_BUILDDIR}/root/etc/initramfs-tools/hooks/zz-cryptsetup
+chmod 755 "${_BUILDDIR}"/root/etc/initramfs-tools/hooks/zz-cryptsetup
 
 # Unlock Script
 cat << EOF > "${CHROOTDIR}/etc/initramfs-tools/unlock.sh"
@@ -81,4 +81,4 @@ EOF
 chmod +x "${CHROOTDIR}/etc/initramfs-tools/unlock.sh"
 
 # Adding dm_mod to initramfs modules
-echo 'dm_crypt' >> ${_BUILDDIR}/root/etc/initramfs-tools/modules
+echo 'dm_crypt' >> "${_BUILDDIR}"/root/etc/initramfs-tools/modules

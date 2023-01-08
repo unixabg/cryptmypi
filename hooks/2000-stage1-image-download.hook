@@ -2,11 +2,11 @@
 set -e
 
 # Download ARM image if we don't already have it
-if [ -f ${_IMAGEDIR}/${_IMAGENAME} ]; then
+if [ -f "${_IMAGEDIR}"/"${_IMAGENAME}" ]; then
     echo_debug "ARM image ${_IMAGENAME} already exists!"
 else
     echo_debug "Downloading ARM image from ${_IMAGEURL} ..."
-    wget ${_IMAGEURL} -O ${_IMAGEDIR}/${_IMAGENAME}
+    wget "${_IMAGEURL}" -O "${_IMAGEDIR}"/"${_IMAGENAME}"
 fi
 
 # Validates image
@@ -19,7 +19,7 @@ else
     } || {
         echo_error "ERROR: ${_IMAGENAME} checksum is not valid ..."
         echo_error "Removing ${_IMAGENAME} ..."
-        rm ${_IMAGEDIR}/${_IMAGENAME}
+        rm "${_IMAGEDIR}"/"${_IMAGENAME}"
         echo_error "Exiting ..."
         exit 1
     }

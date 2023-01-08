@@ -14,21 +14,21 @@ else
     chroot_pkginstall iodine cron
 
     # Create iodine startup script (not initramfs)
-    cat << EOF > ${CHROOTDIR}/opt/iodine.sh
+    cat << EOF > "${CHROOTDIR}"/opt/iodine.sh
 #!/bin/bash
 while true; do
     iodine -f -r -I1 -L0 -P ${_IODINE_PASSWORD} ${_IODINE_DOMAIN}
     sleep 60
 done
 EOF
-    chmod 755 ${CHROOTDIR}/opt/iodine.sh
+    chmod 755 "${CHROOTDIR}"/opt/iodine.sh
 
-    cat << EOF > ${CHROOTDIR}/crontab_setup
+    cat << EOF > "${CHROOTDIR}"/crontab_setup
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 @reboot /opt/iodine.sh
 EOF
     chroot_execute crontab /crontab_setup
-    rm ${CHROOTDIR}/crontab_setup
+    rm "${CHROOTDIR}"/crontab_setup
 
     echo_debug "... iodine call completed!"
 fi

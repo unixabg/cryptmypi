@@ -3,16 +3,16 @@ set -e
 
 
 # Extract files from image
-mkdir ${_BUILDDIR}/root
-mkdir ${_BUILDDIR}/mount
+mkdir "${_BUILDDIR}"/root
+mkdir "${_BUILDDIR}"/mount
 
 echo_debug "Extracting image: ${_IMAGENAME} ..."
 case ${_IMAGENAME} in
     *.xz)
-        xz --decompress --stdout ${_IMAGEDIR}/${_IMAGENAME} > ${_BUILDDIR}/cryptmypi.img
+        xz --decompress --stdout "${_IMAGEDIR}"/"${_IMAGENAME}" > "${_BUILDDIR}"/cryptmypi.img
         ;;
     *.zip)
-        unzip -p ${_IMAGEDIR}/${_IMAGENAME} > ${_BUILDDIR}/cryptmypi.img
+        unzip -p "${_IMAGEDIR}"/"${_IMAGENAME}" > "${_BUILDDIR}"/cryptmypi.img
         ;;
     *)
         echo_error "Unknown extension type on image: ${_IMAGENAME} ! Stopping here."
@@ -22,27 +22,27 @@ esac
 
 
 echo_debug "Mounting loopback ..."
-loopdev=$(losetup -f --show ${_BUILDDIR}/cryptmypi.img)
-partprobe ${loopdev}
+loopdev=$(losetup -f --show "${_BUILDDIR}"/cryptmypi.img)
+partprobe "${loopdev}"
 
 
 # Extract root partition
-mount ${loopdev}p2 ${_BUILDDIR}/mount
+mount "${loopdev}"p2 "${_BUILDDIR}"/mount
 
 echo_debug "Syncing image/root to ${_BUILDDIR}/root ..."
-rsync -HPavz -q ${_BUILDDIR}/mount/ ${_BUILDDIR}/root/
-umount ${_BUILDDIR}/mount
+rsync -HPavz -q "${_BUILDDIR}"/mount/ "${_BUILDDIR}"/root/
+umount "${_BUILDDIR}"/mount
 
 
 # Extract boot partition
-mount ${loopdev}p1 ${_BUILDDIR}/mount/
+mount "${loopdev}"p1 "${_BUILDDIR}"/mount/
 echo_debug "Syncing image/root/boot to ${_BUILDDIR}/root/boot ..."
-rsync -HPavz -q ${_BUILDDIR}/mount/ ${_BUILDDIR}/root/boot/
-umount ${_BUILDDIR}/mount
+rsync -HPavz -q "${_BUILDDIR}"/mount/ "${_BUILDDIR}"/root/boot/
+umount "${_BUILDDIR}"/mount
 
 
 # Clear loopback
-rmdir ${_BUILDDIR}/mount
+rmdir "${_BUILDDIR}"/mount
 echo_debug "Cleaning loopback ..."
-losetup -d ${loopdev}
-rm ${_BUILDDIR}/cryptmypi.img
+losetup -d "${loopdev}"
+rm "${_BUILDDIR}"/cryptmypi.img

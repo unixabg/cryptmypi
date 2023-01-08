@@ -6,9 +6,9 @@ is_build_encrypted && {
     # Open LUKS
     echo_debug "Attempting to open LUKS ${_BLKDEV}${__PARTITIONPREFIX}2 ..."
     if [ ! -z "${_LUKSPASSWD}" ]; then
-        echo "${_LUKSPASSWD}" | cryptsetup -v luksOpen ${_BLKDEV}${__PARTITIONPREFIX}2 crypt
+        echo "${_LUKSPASSWD}" | cryptsetup -v luksOpen "${_BLKDEV}""${__PARTITIONPREFIX}"2 crypt
     else
-        cryptsetup -v luksOpen ${_BLKDEV}${__PARTITIONPREFIX}2 crypt
+        cryptsetup -v luksOpen "${_BLKDEV}""${__PARTITIONPREFIX}"2 crypt
     fi
     if [ $? -eq 0 ]; then
         echo_debug "- LUKS opened."

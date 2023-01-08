@@ -30,19 +30,19 @@ else
 
     echo_debug "Registering box keyfile to sshjump"
     if [ -z "${_SSHJUMP_LOCAL_KEYFILE}" ]; then
-        ssh "${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER}" pubkey add $(cat "${_KEYFILE}.pub")
+        ssh "${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER}" pubkey add "$(cat "${_KEYFILE}.pub")"
     else
-        ssh -i "${_SSHJUMP_LOCAL_KEYFILE}" "${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER}" pubkey add $(cat "${_KEYFILE}.pub")
+        ssh -i "${_SSHJUMP_LOCAL_KEYFILE}" "${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER}" pubkey add "$(cat "${_KEYFILE}.pub")"
     fi
 
 
     echo_debug "Adding ${_SSHJUMP_SERVER} pub key to known_hosts..."
-    ssh-keyscan -H ${_SSHJUMP_SERVER} >> ${CHROOTDIR}/root/.ssh/known_hosts
-    chmod 644 ${CHROOTDIR}/root/.ssh/known_hosts
+    ssh-keyscan -H "${_SSHJUMP_SERVER}" >> "${CHROOTDIR}"/root/.ssh/known_hosts
+    chmod 644 "${CHROOTDIR}"/root/.ssh/known_hosts
 
 
     echo_debug "Creating script to create and maintain sshjump channel..."
-    cat <<EOT > ${CHROOTDIR}/opt/sys-sshjump-channel.sh
+    cat <<EOT > "${CHROOTDIR}"/opt/sys-sshjump-channel.sh
 #!/bin/bash
 
 while true
@@ -57,11 +57,11 @@ do
     }
 done
 EOT
-    chmod +x ${CHROOTDIR}/opt/sys-sshjump-channel.sh
+    chmod +x "${CHROOTDIR}"/opt/sys-sshjump-channel.sh
 
 
     echo_debug "Creating startup service"
-    cat <<EOT > ${CHROOTDIR}/etc/systemd/system/sshjump.service
+    cat <<EOT > "${CHROOTDIR}"/etc/systemd/system/sshjump.service
 [Unit]
 Description=sshjump
 
@@ -76,22 +76,22 @@ EOT
 
 
     echo_debug "Creating script to remove this key from SSHJUMP: ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove"
-    cat <<EOT > ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove
+    cat <<EOT > "${_CONFDIR}"/sshjump_"${_SSHJUMP_REFERENCE}"_remove
 #!/bin/bash
 cat ${_KEYFILE}.pub | ssh ${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER} pubkey rm
 EOT
-    chmod +x ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_remove
+    chmod +x "${_CONFDIR}"/sshjump_"${_SSHJUMP_REFERENCE}"_remove
 
 
     echo_debug "Editing ~/.ssh/config"
 
     echo_debug "    Verifying if sshjump hub alias exists in $_USER_HOME/.ssh/config ..."
-    if test -f $_USER_HOME/.ssh/config && grep -q "^Host hub\s*" $_USER_HOME/.ssh/config
+    if test -f "$_USER_HOME"/.ssh/config && grep -q "^Host hub\s*" "$_USER_HOME"/.ssh/config
     then
         echo_debug "        ... sshjump host definition found."
     else
         echo_debug "        ... sshjump host definition not found: creating it"
-        cat <<EOT >> $_USER_HOME/.ssh/config
+        cat <<EOT >> "$_USER_HOME"/.ssh/config
 
 # cryptmypi-sshjump-entry-start
 Host hub
@@ -104,9 +104,9 @@ EOT
 
     echo_debug "    Creating/Replacing ${_SSHJUMP_REFERENCE}-sys host definition ..."
     _ENTRYCOMMENT="# cryptmypi-${_SSHJUMP_REFERENCE}-sys-entry"
-    sed -i "/^${_ENTRYCOMMENT}-start/,/^${_ENTRYCOMMENT}-end/{/^${_ENTRYCOMMENT}-start/!{/^${_ENTRYCOMMENT}-end/!d}}" $_USER_HOME/.ssh/config
-    sed -i "/${_ENTRYCOMMENT}/d" $_USER_HOME/.ssh/config
-cat <<EOT >> $_USER_HOME/.ssh/config
+    sed -i "/^${_ENTRYCOMMENT}-start/,/^${_ENTRYCOMMENT}-end/{/^${_ENTRYCOMMENT}-start/!{/^${_ENTRYCOMMENT}-end/!d}}" "$_USER_HOME"/.ssh/config
+    sed -i "/${_ENTRYCOMMENT}/d" "$_USER_HOME"/.ssh/config
+cat <<EOT >> "$_USER_HOME"/.ssh/config
 
 ${_ENTRYCOMMENT}-start
 Host ${_SSHJUMP_REFERENCE}-sys
@@ -120,7 +120,7 @@ ${_ENTRYCOMMENT}-end
 EOT
 
     echo_debug "    Removing unnecessary empty lines"
-    sed -i 'N;/^\n$/D;P;D;' $_USER_HOME/.ssh/config
+    sed -i 'N;/^\n$/D;P;D;' "$_USER_HOME"/.ssh/config
 
 
     echo_debug " ... ${_SSHJUMP_SERVER} channel set up! To connect, use:"

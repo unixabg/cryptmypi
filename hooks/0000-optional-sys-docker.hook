@@ -19,7 +19,7 @@ echo_debug "    Updating /boot/cmdline.txt to enable cgroup ..."
 #       cgroup_enable works on kernel 4.9 upwards
 #       cgroup_memory will be dropped in 4.14, but works on < 4.9
 #       keeping both for now
-sed -i "s#rootwait#cgroup_enable=memory cgroup_memory=1 rootwait#g" ${CHROOTDIR}/boot/cmdline.txt
+sed -i "s#rootwait#cgroup_enable=memory cgroup_memory=1 rootwait#g" "${CHROOTDIR}"/boot/cmdline.txt
 
 
 echo_debug "    Updating iptables ... (issue: default kali iptables was stalling)"

@@ -4,7 +4,7 @@ set -e
 
 # Unmount boot partition
 echo_debug "Attempting to unmount ${_BLKDEV}${__PARTITIONPREFIX}1 ..."
-if umount ${_BLKDEV}${__PARTITIONPREFIX}1
+if umount "${_BLKDEV}""${__PARTITIONPREFIX}"1
 then
     echo_debug "- Unmounted ${_BLKDEV}${__PARTITIONPREFIX}1"
 else

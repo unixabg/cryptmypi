@@ -16,7 +16,7 @@ is_build_encrypted && {
 } || {
     # Format ROOT partition
     echo_debug "Attempting to format root partition ..."
-    if mkfs.ext4 ${_BLKDEV}${__PARTITIONPREFIX}2
+    if mkfs.ext4 "${_BLKDEV}""${__PARTITIONPREFIX}"2
     then
         echo_debug "- Root partition formatted to ext4."
     else
@@ -29,5 +29,5 @@ is_build_encrypted && {
 
 # Format boot partition
 echo_debug "Formatting Boot Partition"
-mkfs.vfat ${_BLKDEV}${__PARTITIONPREFIX}1
+mkfs.vfat "${_BLKDEV}""${__PARTITIONPREFIX}"1
 echo

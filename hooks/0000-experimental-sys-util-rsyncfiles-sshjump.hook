@@ -21,7 +21,7 @@ mkdir -p "${_SYNC_REMOTEDIR}"
 
 
 echo_debug "Generating script at ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_syncfiles"
-cat <<EOT > ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_syncfiles
+cat <<EOT > "${_CONFDIR}"/sshjump_"${_SSHJUMP_REFERENCE}"_syncfiles
 #!/bin/bash
 
 echo "Stage 1: Local -> Remote Sync"
@@ -31,7 +31,7 @@ echo "Stage 2: Local -> Remote Sync"
 rsync -avzru -e 'ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -i "${_SSH_LOCAL_KEYFILE}" -J ${_SSHJUMP_USERNAME}@${_SSHJUMP_SERVER} -p ${_SSHJUMP_SSH_PORT}' --progress root@${_SSHJUMP_REFERENCE}:${_SYNC_REMOTEDIR}/* ${_SYNC_LOCALDIR}
 
 EOT
-chmod +x ${_CONFDIR}/sshjump_${_SSHJUMP_REFERENCE}_syncfiles
+chmod +x "${_CONFDIR}"/sshjump_"${_SSHJUMP_REFERENCE}"_syncfiles
 
 
 echo_debug " ... rsync script created."
